@@ -1,0 +1,286 @@
+fileFormatVersion: 2
+guid: 72146dcd5d72f9d4aa3fd2adcdb1cf0a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3119723963850274709
+    second: Tzompantli001_0
+  - first:
+      213: 4685113104840767617
+    second: Tzompantli001_1
+  - first:
+      213: -4537631398378713508
+    second: Tzompantli001_2
+  - first:
+      213: -5626244387038933990
+    second: Tzompantli001_3
+  - first:
+      213: 1316731576241047614
+    second: Tzompantli001_4
+  - first:
+      213: 8641073918418868767
+    second: Tzompantli001_5
+  - first:
+      213: 2852040699629340157
+    second: Tzompantli001_6
+  - first:
+      213: -6404440042200811639
+    second: Tzompantli001_7
+  - first:
+      213: 6592138115944202684
+    second: Tzompantli001_8
+  - first:
+      213: -6627664736045090735
+    second: Tzompantli001_9
+  - first:
+      213: -5361711954290468690
+    second: Tzompantli001_10
+  - first:
+      213: 1402207069767885251
+    second: Tzompantli001_11
+  - first:
+      213: 1516063376955063143
+    second: Tzompantli001_12
+  - first:
+      213: -2752150432996133253
+    second: Tzompantli001_13
+  - first:
+      213: 4287868647635752369
+    second: Tzompantli001_14
+  - first:
+      213: 8473460981134926759
+    second: Tzompantli001_15
+  - first:
+      213: -8906087735973545714
+    second: Tzompantli001_16
+  - first:
+      213: 6036161842322483931
+    second: Tzompantli001_17
+  - first:
+      213: 1331328040791274722
+    second: Tzompantli001_18
+  - first:
+      213: 2920765554593236193
+    second: Tzompantli001_19
+  - first:
+      213: 1083329822131002635
+    second: Tzompantli001_20
+  - first:
+      213: -5300051083511990166
+    second: Tzompantli001_21
+  - first:
+      213: 1728175930773547480
+    second: Tzompantli001_22
+  - first:
+      213: -158789316253429079
+    second: Tzompantli001_23
+  - first:
+      213: -7149093305508264761
+    second: Tzompantli001_24
+  - first:
+      213: -6340049099150680291
+    second: Tzompantli001_25
+  - first:
+      213: 6104570582172186165
+    second: Tzompantli001_26
+  - first:
+      213: -8313786835608482092
+    second: Tzompantli001_27
+  - first:
+      213: -4328961489408129977
+    second: Tzompantli001_28
+  - first:
+      213: -5854639840525006827
+    second: Tzompantli001_29
+  - first:
+      213: -5561297856993230407
+    second: Tzompantli001_30
+  - first:
+      213: 7000817504723806528
+    second: Tzompantli001_31
+  - first:
+      213: -6425904051226021219
+    second: Tzompantli001_32
+  - first:
+      213: -4285987495969945380
+    second: Tzompantli001_33
+  - first:
+      213: 4546921911748075830
+    second: Tzompantli001_34
+  - first:
+      213: -7669259502512272022
+    second: Tzompantli001_35
+  - first:
+      213: 2050853804073126327
+    second: Tzompantli001_36
+  - first:
+      213: -4031730520607052568
+    second: Tzompantli001_37
+  - first:
+      213: 3685157419078174063
+    second: Tzompantli001_38
+  - first:
+      213: -722492295599024193
+    second: Tzompantli001_39
+  - first:
+      213: 406788531660171936
+    second: Tzompantli001_40
+  - first:
+      213: 3711775893032246001
+    second: Tzompantli001_41
+  - first:
+      213: -4088709864910245137
+    second: Tzompantli001_42
+  - first:
+      213: -4833816839969476413
+    second: Tzompantli001_43
+  - first:
+      213: 622665007748589828
+    second: Tzompantli001_44
+  - first:
+      213: 1066590199610307741
+    second: Tzompantli001_45
+  - first:
+      213: 4326690677610089242
+    second: Tzompantli001_46
+  - first:
+      213: -4693829117902926491
+    second: Tzompantli001_47
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tzompantli001_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 278
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 597b1968a6c7b4b20800000000000000
+      internalID: 3119723963850274709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 91a265ca12559324c8872655fb9a8a90
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":278.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Tzompantli001_0: 3119723963850274709
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

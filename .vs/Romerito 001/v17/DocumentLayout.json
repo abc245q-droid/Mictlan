@@ -1,0 +1,186 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\jmmou\\Romerito 001\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|c:\\users\\jmmou\\romerito 001\\assets\\scripts\\da\u00F1omuerte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\da\u00F1omuerte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\ataqueprueba01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ataqueprueba01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\aluxeskull.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\aluxeskull.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|c:\\users\\jmmou\\romerito 001\\assets\\scripts\\aluxe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\aluxe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\romerito.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\romerito.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\coincollect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\coincollect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\romeritomovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\romeritomovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\fondo001parasimple.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\fondo001parasimple.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\gamedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gamedata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|C:\\Users\\jmmou\\Romerito 001\\assets\\scripts\\checkpoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E9F8B098-EC3A-93D1-9030-1179C062BE77}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\checkpoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RomeritoMovement.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\RomeritoMovement.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoMovement.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\RomeritoMovement.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoMovement.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAA1wFEAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T23:50:16.327Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Aluxe.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Aluxe.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Aluxe.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Aluxe.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Aluxe.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwB4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-06T00:59:30.804Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Da\u00F1oMuerte.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T03:38:57.899Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AluxeSkull.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\AluxeSkull.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\AluxeSkull.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\AluxeSkull.cs",
+              "RelativeToolTip": "Assets\\Scripts\\AluxeSkull.cs",
+              "ViewState": "AgIAACkAAAAAAAAAAAAgwD0AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T03:15:05.369Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Romerito.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Romerito.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Romerito.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Romerito.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Romerito.cs",
+              "ViewState": "AgIAALoAAAAAAAAAAAApwMMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T01:40:37.209Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AtaquePrueba01.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\AtaquePrueba01.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\AtaquePrueba01.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\AtaquePrueba01.cs",
+              "RelativeToolTip": "Assets\\Scripts\\AtaquePrueba01.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwBEAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-20T00:58:37.225Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Fondo001ParaSimple.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Fondo001ParaSimple.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Fondo001ParaSimple.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Fondo001ParaSimple.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Fondo001ParaSimple.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAYwCIAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T20:21:50.874Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GameData.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\GameData.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameData.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\GameData.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-12T22:42:44.307Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CoinCollect.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\CoinCollect.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CoinCollect.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\CoinCollect.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CoinCollect.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-12T22:09:45.544Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Checkpoint.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Checkpoint.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Checkpoint.cs",
+              "ToolTip": "C:\\Users\\jmmou\\Romerito 001\\Assets\\Scripts\\Checkpoint.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Checkpoint.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T22:46:24.22Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

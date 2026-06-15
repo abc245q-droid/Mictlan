@@ -1,0 +1,479 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RomeritoHealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomDoor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RoomDoor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MacahuitlRoomManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\MacahuitlRoomManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoMovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RomeritoMovement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\HeartSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\HeartSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\TonalliSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\TonalliSystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\PlayerData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\PlayerData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\EnemyDummy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\EnemyDummy.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\GameManager01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RomeritoCombat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah2_Sprinter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Mictecah2_Sprinter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\MictecahBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah3_Saltarin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Mictecah3_Saltarin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah1_Patrullero.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Mictecah1_Patrullero.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\AttackVFXController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\AttackVFXController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\DialogueManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\DialogueManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomExit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RoomExit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Da\u00F1oMuerte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Da\u00F1oMuerte.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Aluxe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Aluxe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Romerito.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Romerito.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\GameData.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CoinCollect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\CoinCollect.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\FlyingEnemyAI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\FlyingEnemyAI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CollectibleItem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\CollectibleItem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RomeritoCombat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\MictecahBase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\GameManager01.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\RomeritoHealth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "DialogueManager.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\DialogueManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\DialogueManager.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\DialogueManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\DialogueManager.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAlwG0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-05T23:05:28.745Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RoomDoor.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomDoor.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RoomDoor.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomDoor.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RoomDoor.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAABIAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-13T00:25:43.692Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RomeritoMovement.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoMovement.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoMovement.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoMovement.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoMovement.cs",
+              "ViewState": "AgIAAKsAAAAAAAAAAAAlwLsAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:11:57.187Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RomeritoHealth.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoHealth.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoHealth.cs",
+              "ViewState": "AgIAAKcAAAAAAAAAAAAlwLoAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-12T23:32:06.502Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MacahuitlRoomManager.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MacahuitlRoomManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MacahuitlRoomManager.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MacahuitlRoomManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MacahuitlRoomManager.cs",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAQwNsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T01:13:24.941Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "HeartSystem.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\HeartSystem.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\HeartSystem.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\HeartSystem.cs",
+              "RelativeToolTip": "Assets\\Scripts\\HeartSystem.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAlwB8AAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-12T00:27:14.98Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Mictecah2_Sprinter.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah2_Sprinter.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Mictecah2_Sprinter.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah2_Sprinter.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Mictecah2_Sprinter.cs",
+              "ViewState": "AgIAADIAAAAAAAAAAAAQwGwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-07T00:03:12.909Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RomeritoCombat.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoCombat.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoCombat.cs",
+              "ViewState": "AgIAAOABAAAAAAAAAAAAAOABAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-04T23:43:30.391Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PlayerData.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\PlayerData.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\PlayerData.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\PlayerData.cs",
+              "RelativeToolTip": "Assets\\Scripts\\PlayerData.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAQwAsAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-12T00:02:12.259Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "TonalliSystem.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\TonalliSystem.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\TonalliSystem.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\TonalliSystem.cs",
+              "RelativeToolTip": "Assets\\Scripts\\TonalliSystem.cs",
+              "ViewState": "AgIAANIAAAAAAAAAAAAQwN0AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-12T00:21:53.036Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "RomeritoHealth.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoHealth.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoHealth.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoHealth.cs",
+              "ViewState": "AgIAAKIBAAAAAAAAAAAQwLsBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-10T21:13:20.871Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "EnemyDummy.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\EnemyDummy.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\EnemyDummy.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\EnemyDummy.cs",
+              "RelativeToolTip": "Assets\\Scripts\\EnemyDummy.cs",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAQwHMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T21:35:20.036Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "MictecahBase.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MictecahBase.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MictecahBase.cs",
+              "ViewState": "AgIAAIYBAAAAAAAAAAAQwJABAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-10T22:42:12.005Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GameManager01.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager01.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameManager01.cs",
+              "ViewState": "AgIAAIUAAAAAAAAAAAAQwKQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-12T00:00:06.867Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "GameManager01.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager01.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameManager01.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameManager01.cs",
+              "ViewState": "AgIAAIcAAAAAAAAAAAAQwJoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-10T20:09:01.988Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "MictecahBase.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MictecahBase.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\MictecahBase.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MictecahBase.cs",
+              "ViewState": "AgIAADIBAAAAAAAAAAAAAAkAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T21:38:49.822Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Mictecah3_Saltarin.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah3_Saltarin.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Mictecah3_Saltarin.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah3_Saltarin.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Mictecah3_Saltarin.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAlwEYAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-07T00:36:26.305Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Mictecah1_Patrullero.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah1_Patrullero.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Mictecah1_Patrullero.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Mictecah1_Patrullero.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Mictecah1_Patrullero.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAQwAcAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T23:06:38.473Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AttackVFXController.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\AttackVFXController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\AttackVFXController.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\AttackVFXController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\AttackVFXController.cs",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAQwJMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T21:01:53.238Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Romerito.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Romerito.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Romerito.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Romerito.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Romerito.cs",
+              "ViewState": "AgIAALoAAAAAAAAAAAApwMMAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:12:00.842Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "RoomExit.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomExit.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RoomExit.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RoomExit.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RoomExit.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-04T23:09:09.122Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Da\u00F1oMuerte.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Da\u00F1oMuerte.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:12:00.807Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Aluxe.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Aluxe.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Aluxe.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\Aluxe.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Aluxe.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwB4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:12:00.798Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "GameData.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameData.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\GameData.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\GameData.cs",
+              "RelativeToolTip": "Assets\\Scripts\\GameData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:12:00.851Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "CoinCollect.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CoinCollect.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CoinCollect.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CoinCollect.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CoinCollect.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T03:12:00.853Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "FlyingEnemyAI.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\FlyingEnemyAI.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\FlyingEnemyAI.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\FlyingEnemyAI.cs",
+              "RelativeToolTip": "Assets\\Scripts\\FlyingEnemyAI.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAPkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T22:10:18.805Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "CollectibleItem.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CollectibleItem.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CollectibleItem.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\CollectibleItem.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CollectibleItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-11T00:08:59.619Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "RomeritoCombat.cs",
+              "DocumentMoniker": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\RomeritoCombat.cs",
+              "ToolTip": "C:\\Users\\jmmou\\OneDrive\\Desktop\\Romerito 001\\Assets\\Scripts\\RomeritoCombat.cs",
+              "RelativeToolTip": "Assets\\Scripts\\RomeritoCombat.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOoBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-06T20:14:31.868Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
