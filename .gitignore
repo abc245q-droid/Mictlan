@@ -1,0 +1,48 @@
+﻿## ============================
+## .gitignore para proyectos Unity
+## ============================
+
+# Carpetas generadas por Unity (se reconstruyen solas al abrir el proyecto)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Uu]serSettings/
+
+# Carpetas de Visual Studio / Rider / VS Code (cachés de IDE, no del proyecto)
+.vs/
+.vscode/
+.idea/
+*.userprefs
+
+# Archivos de proyecto auto-generados (Unity los recrea al abrir)
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userosscache
+*.sln.docstates
+
+# Archivos de compilacion/crash
+sysinfo.txt
+*.stackdump
+
+# Builds exportados
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics generado
+crashlytics-build.properties
+
+# Archivos especificos de macOS
+.DS_Store
+
+# Archivos especificos de Windows
+Thumbs.db
