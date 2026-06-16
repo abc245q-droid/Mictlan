@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Tlacua_DonDeTonalli
+  m_EditorClassIdentifier: Assembly-CSharp::Conversation
+  descripcion: "Tlacua otorga el don del Tonalli \u2014 Chicunamictlan, Sala Tlacua"
+  nodes:
+  - nodeName: Don de Tlacua
+    lines:
+    - speaker: Tlacua
+      text: Ajolote
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "Llevas rato aqu\xED sin saber lo que tienes. Tu tonalli sigue prendido.
+        D\xE9bil, pero prendido."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "Los que caen cerca de ti dejan algo atr\xE1s. No lo ves. Yo s\xED. Siempre
+        lo veo \u2014 es lo que hago."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "Podr\xEDa ense\xF1arte a atraparlo. A guardarlo aqu\xED, donde todav\xEDa
+        tienes calor."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "No es gratis. Los braseros del Chicunamictlan se apagaron. Sin braseros,
+        las almas no saben ad\xF3nde ir. Se dispersan. Se pierden del todo."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "T\xFA los enciendes. Yo te ense\xF1o a usar lo que ya es tuyo. \xBFParejo?"
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: 
+      text: "Romerito asiente. Tlacua extiende una mano peque\xF1a y sucia. Un calor
+        dorado recorre el pecho del ajolote \u2014 algo que siempre estuvo ah\xED,
+        pero que ahora reconoce."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 1
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: Bien. Desde ahora, lo que caiga cerca tuyo te deja algo.
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: "Y cuando necesites un latido de m\xE1s \u2014 ya sabes c\xF3mo pedirlo."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Tlacua
+      text: Los braseros, ajolote. No se te olvide.
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    choices: []
+    nextNode: -1

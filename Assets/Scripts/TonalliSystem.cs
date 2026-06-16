@@ -55,6 +55,9 @@ public class TonalliSystem : MonoBehaviour
              "se calculan como porcentaje de este valor.")]
     public float maxTonalliBase = 300f;
 
+    [Tooltip("El GameObject PanelTonalli del HUD. Se oculta hasta recibir el Don de Tlacua.")]
+    public GameObject panelTonalli;
+
     [Header("Referencias UI")]
     [Tooltip("Image con Type=Filled, Fill Method=Horizontal. Representa el Tonalli actual.")]
     public Image barraFill;
@@ -114,6 +117,12 @@ public class TonalliSystem : MonoBehaviour
     /// <param name="tonalliInicial">Tonalli con el que arranca (normalmente 0).</param>
     public void Inicializar(float bonusCapacidadPct, float tonalliInicial = 0f)
     {
+        // Mostrar u ocultar según si tiene el Don de Tlacua
+        bool tieneDon = GameManager01.instance != null &&
+                    GameManager01.instance.currentData.tieneDonDeTlacua;
+        if (panelTonalli != null) panelTonalli.SetActive(tieneDon);
+
+
         _bonusCapacidadPct = Mathf.Max(0f, bonusCapacidadPct);
         _currentTonalli = Mathf.Clamp(tonalliInicial, 0f, MaxTonalli);
         ActualizarUI(instantaneo: true);

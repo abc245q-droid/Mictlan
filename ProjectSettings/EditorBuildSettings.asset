@@ -4,6 +4,12 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Chicunamictlan_001.unity
+    guid: 103b89336ae990a46aed10abb179daa2
+  - enabled: 1
+    path: Assets/Scenes/Atlein_01.unity
+    guid: e4132a863ac503a4385eed40fe4c487f
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

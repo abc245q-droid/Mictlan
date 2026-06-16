@@ -439,8 +439,10 @@
 "Assets/Scripts/DialogueData.cs"
 "Assets/Scripts/DialogueManager.cs"
 "Assets/Scripts/DialogueTrigger.cs"
+"Assets/Scripts/DonDeTlacua.cs"
 "Assets/Scripts/EnemyAI1.cs"
 "Assets/Scripts/EnemyDummy.cs"
+"Assets/Scripts/EntradaVertical.cs"
 "Assets/Scripts/FallingTrap.cs"
 "Assets/Scripts/FlyingEnemyAI.cs"
 "Assets/Scripts/GameManager01.cs"
@@ -468,9 +470,11 @@
 "Assets/Scripts/RoomConfiner.cs"
 "Assets/Scripts/RoomDoor.cs"
 "Assets/Scripts/RoomExit.cs"
+"Assets/Scripts/SalidaVertical.cs"
 "Assets/Scripts/SceneEntrance.cs"
 "Assets/Scripts/SceneExit.cs"
 "Assets/Scripts/TonalliSystem.cs"
+"Assets/Scripts/Trampa.cs"
 "Assets/Scripts/Wavespawner.cs"
 -langversion:9.0
 /deterministic

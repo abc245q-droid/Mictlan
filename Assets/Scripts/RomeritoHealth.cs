@@ -94,16 +94,23 @@ public class RomeritoHealth : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         movement = GetComponent<RomeritoMovement>();
         allColliders = GetComponents<Collider2D>();
-        allCollidersDeep = GetComponentsInChildren<Collider2D>(true); // [FIX-2] incluye hijos
+        allCollidersDeep = GetComponentsInChildren<Collider2D>(true);
 
         if (combatScript == null)
             combatScript = GetComponent<RomeritoCombat>();
 
+        // Auto-buscar en escena si no están asignados en el Inspector
+        if (heartSystem == null)
+            heartSystem = FindObjectOfType<HeartSystem>(true); // true = busca también inactivos
+        if (tonalliSystem == null)
+            tonalliSystem = FindObjectOfType<TonalliSystem>(true);
+
+        Debug.Log($"[RomeritoHealth] HeartSystem: {(heartSystem != null ? "ENCONTRADO" : "NULL")}");
+        Debug.Log($"[RomeritoHealth] TonalliSystem: {(tonalliSystem != null ? "ENCONTRADO" : "NULL")}");
+
         if (heartSystem != null)
             heartSystem.InitHearts(maxHealth);
 
-        // Inicializar Tonalli con la ampliación de capacidad guardada en PlayerData.
-        // Si no hay datos de guardado, usará capacidad base (sin bonus).
         if (tonalliSystem != null)
         {
             float bonus = GameManager01.instance != null
@@ -122,6 +129,39 @@ public class RomeritoHealth : MonoBehaviour
         DiagnosticarLayersEnemigas();
     }
 
+    void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene,
+                       UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        // Re-buscar referencias UI de la nueva escena
+        heartSystem = FindObjectOfType<HeartSystem>(true);
+        tonalliSystem = FindObjectOfType<TonalliSystem>(true);
+
+        if (heartSystem != null)
+            heartSystem.InitHearts(maxHealth);
+
+        if (tonalliSystem != null)
+        {
+            float bonus = GameManager01.instance != null
+                ? GameManager01.instance.currentData.bonusCapacidadTonalli
+                : 0f;
+            tonalliSystem.Inicializar(bonus, 0f);
+        }
+
+        Debug.Log($"[RomeritoHealth] Escena cargada: {scene.name} | " +
+                  $"HeartSystem: {(heartSystem != null ? "OK" : "NULL")} | " +
+                  $"TonalliSystem: {(tonalliSystem != null ? "OK" : "NULL")}");
+    }
+
     // ── Input de curación ────────────────────────────────────
     // El botón "Curar" debe estar configurado en el Input Manager:
     //   Positive Button: joystick button 3  (Xbox Y / PS Triangle)
@@ -131,7 +171,11 @@ public class RomeritoHealth : MonoBehaviour
         if (isDead || isInvulnerable) return;
         if (DialogueManager.IsActive) return;
 
-        if (Input.GetButtonDown("Curar"))
+        // Solo puede curar si tiene el Don de Tlacua
+        bool tieneDon = GameManager01.instance != null &&
+                        GameManager01.instance.currentData.tieneDonDeTlacua;
+
+        if (tieneDon && Input.GetButtonDown("Curar"))
             Curar();
     }
 
@@ -254,9 +298,28 @@ public class RomeritoHealth : MonoBehaviour
     {
         if (isInvulnerable || isDead) return;
 
-        if (currentHealth - 1 <= 0) { TakeDamage(1); return; }
+        // Si es el último corazón → muerte normal (DieRoutine)
+        if (currentHealth - 1 <= 0)
+        {
+            TakeDamage(1);
+            return;
+        }
+
+        // Quitar 1 vida (activa i-frames automáticamente via TakeDamage)
         TakeDamage(1);
+
+        // Teletransportar a posición segura
         transform.position = safePos;
+
+        // Resetear velocidad para que no siga cayendo al reaparecer
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+
+        Debug.Log($"[TakeHazardDamage] Romerito respawneó en {safePos}. " +
+                  $"Vida restante: {currentHealth}");
     }
 
     // ── Corrutina principal de muerte ─────────────────────────

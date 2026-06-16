@@ -321,6 +321,14 @@ public class DialogueManager : MonoBehaviour
                 choiceButtons[i].gameObject.SetActive(false);
             }
         }
+
+        // Seleccionar el primer botón activo para navegación con mando
+        if (choiceButtons.Length > 0 && choiceButtons[0] != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(
+                choiceButtons[0].gameObject);
+        }
     }
 
     private void ChequearTeclasNumericas()
@@ -386,6 +394,10 @@ public class DialogueManager : MonoBehaviour
     private bool AvancePresionado()
     {
         if (Input.GetKeyDown(teclaAvanzar)) return true;
+
+        // Botón A de Xbox (joystick button 0) para avanzar diálogo
+        if (Input.GetKeyDown(KeyCode.JoystickButton0)) return true;
+
         if (permitirEspacioEnterClic)
         {
             if (Input.GetKeyDown(KeyCode.Space)) return true;

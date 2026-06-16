@@ -60,13 +60,13 @@ public class EnemyDummy : MonoBehaviour
         currentHealth -= damage;
         StartCoroutine(FlashWhite());
 
-        // ★ Avisar a la IA ANTES de comprobar la muerte
-        //   (si murió, ya no importa el retroceso porque se destruye)
         if (currentHealth > 0)
         {
             OnHurt?.Invoke();
-            // Romerito gana Tonalli al golpear sin matar
-            TonalliSystem.Instance?.GanarTonalli(tonalliPorGolpe);
+
+            // Solo transferir Tonalli si Romerito tiene el don de Tlacua
+            if (TieneDonDeTlacua())
+                TonalliSystem.Instance?.GanarTonalli(tonalliPorGolpe);
         }
 
         if (currentHealth <= 0)
@@ -75,13 +75,12 @@ public class EnemyDummy : MonoBehaviour
 
     void Die()
     {
-        // Romerito gana Tonalli mayor al matar al enemigo
-        TonalliSystem.Instance?.GanarTonalli(tonalliPorMatar);
+        // Solo transferir Tonalli si Romerito tiene el don de Tlacua
+        if (TieneDonDeTlacua())
+            TonalliSystem.Instance?.GanarTonalli(tonalliPorMatar);
 
-        // Notificar al WaveSpawner ANTES de destruir el objeto
         OnDeath?.Invoke();
 
-        // --- Loot (cacao) ---
         if (lootDrop != null)
         {
             float randomValue = Random.Range(0f, 100f);
@@ -97,11 +96,16 @@ public class EnemyDummy : MonoBehaviour
             }
         }
 
-        // Efecto de muerte
         if (deathEffect != null)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
         Destroy(gameObject);
+    }
+
+    private bool TieneDonDeTlacua()
+    {
+        return GameManager01.instance != null &&
+               GameManager01.instance.currentData.tieneDonDeTlacua;
     }
 
     System.Collections.IEnumerator FlashWhite()

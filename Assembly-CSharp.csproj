@@ -60,12 +60,15 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.6f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Trampa.cs" />
     <Compile Include="Assets\Scripts\SceneExit.cs" />
     <Compile Include="Assets\Scripts\RomeritoCombat.cs" />
+    <Compile Include="Assets\Scripts\SalidaVertical.cs" />
     <Compile Include="Assets\Scripts\RoomConfiner.cs" />
     <Compile Include="Assets\Scripts\GameManager01.cs" />
     <Compile Include="Assets\Scripts\RoomExit.cs" />
     <Compile Include="Assets\Scripts\PlayerData.cs" />
+    <Compile Include="Assets\Scripts\EntradaVertical.cs" />
     <Compile Include="Assets\Scripts\EnemyDummy.cs" />
     <Compile Include="Assets\Scripts\Wavespawner.cs" />
     <Compile Include="Assets\Scripts\PlataformaInestable.cs" />
@@ -75,6 +78,7 @@
     <Compile Include="Assets\Scripts\CollectibleItem.cs" />
     <Compile Include="Assets\Scripts\TonalliSystem.cs" />
     <Compile Include="Assets\Scripts\Mictecah1_Patrullero.cs" />
+    <Compile Include="Assets\Scripts\DonDeTlacua.cs" />
     <Compile Include="Assets\Scripts\RomeritoHealth.cs" />
     <Compile Include="Assets\Scripts\Hazard.cs" />
     <Compile Include="Assets\Scripts\AttackVFXController.cs" />

@@ -14,6 +14,7 @@ public class PlayerData
     public bool unlockWallClimb;
     public bool unlockWallJump;
     public bool unlockDash;
+    public bool tieneDonDeTlacua = false;
 
     // --- COMBATE ---
     // ── Favores de los Dioses ──────────────────
