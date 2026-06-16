@@ -1,14 +1,14 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class CollectibleItem : MonoBehaviour
 {
     public enum CurrencyType { Cacao, Tajadera }
 
-    [Header("Configuración del Item")]
+    [Header("Configuraciï¿½n del Item")]
     public CurrencyType type;
     public int value = 1;
 
-    [Header("Física de Caída")]
+    [Header("Fï¿½sica de Caï¿½da")]
     public float initialJumpForce = 5f;
 
     [Header("Efectos Visuales")]
@@ -17,16 +17,24 @@ public class CollectibleItem : MonoBehaviour
     public float hoverHeight = 0.3f; // <--- NUEVO: Altura base para que no toque el piso
     public GameObject pickupEffect;
 
+    [Header("Colliders (FIX Pendiente #2)")]
+    [Tooltip("Collider Sï¿½LIDO: solo debe colisionar con el suelo. " +
+             "En el Inspector, en la secciï¿½n 'Layer Overrides' de este collider, " +
+             "configura 'Exclude Layers' = capa del Jugador (Default). " +
+             "Asï¿½ nunca empuja a Romerito, ni en el aire ni en el suelo.")]
+    public Collider2D groundCollider;
+    [Tooltip("Collider TRIGGER: detecta al jugador para recolectar el ï¿½tem, " +
+             "tanto en el aire como ya aterrizado. No necesita Layer Overrides.")]
+    public Collider2D pickupTrigger;
+
     // Variables internas
     private Vector3 startPos;
     private bool isGrounded = false;
     private Rigidbody2D rb;
-    private Collider2D col;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<Collider2D>();
 
         // Impulso inicial
         float randomX = Random.Range(-1f, 1f);
@@ -37,7 +45,7 @@ public class CollectibleItem : MonoBehaviour
     {
         if (isGrounded)
         {
-            // FÓRMULA CORREGIDA:
+            // Fï¿½RMULA CORREGIDA:
             // Base (Suelo) + Altura de Seguridad + Onda Senoidal
             float newY = startPos.y + hoverHeight + (Mathf.Sin(Time.time * floatSpeed) * floatAmplitude);
 
@@ -45,17 +53,13 @@ public class CollectibleItem : MonoBehaviour
         }
     }
 
-    // CASO 1: La moneda está cayendo (es SÓLIDA)
-    // Detecta el suelo Y al jugador si la atrapa en el aire
+    // FIX: este callback ya SOLO puede dispararse contra el suelo.
+    //   groundCollider tiene excluida la capa del Jugador (Exclude Layers),
+    //   asï¿½ que Romerito nunca genera respuesta fï¿½sica aquï¿½,
+    //   sin importar si la semilla estï¿½ cayendo o ya aterrizï¿½.
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // Si choca con Romerito en el aire
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Collect(collision.gameObject);
-        }
-        // Si choca con el suelo
-        else if (!isGrounded)
+        if (!isGrounded)
         {
             // Verificamos que el choque sea desde abajo (suelo) y no una pared
             if (collision.contacts[0].normal.y > 0.5f)
@@ -65,8 +69,8 @@ public class CollectibleItem : MonoBehaviour
         }
     }
 
-    // CASO 2: La moneda ya aterrizó (es TRIGGER/FANTASMA)
-    // Detecta a Romerito cuando pasa caminando sobre ella
+    // FIX: pickupTrigger es SIEMPRE trigger (en el aire y en el suelo),
+    //   asï¿½ que la recolecciï¿½n nunca genera impulso fï¿½sico sobre Romerito.
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
@@ -83,7 +87,8 @@ public class CollectibleItem : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
-        col.isTrigger = true;
+        // Ya no se cambia isTrigger aquï¿½: groundCollider nunca interactï¿½a
+        // con el Jugador (Exclude Layers) y pickupTrigger siempre fue trigger.
     }
 
     void Collect(GameObject player)

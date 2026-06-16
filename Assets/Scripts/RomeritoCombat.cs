@@ -415,7 +415,18 @@ public class RomeritoCombat : MonoBehaviour
                 if (knockbackForce > 0)
                 {
                     Rigidbody2D enemyRb = obj.GetComponent<Rigidbody2D>();
-                    if (enemyRb != null)
+
+                    // ★ FIX (Saltarín gira/se traba a medio salto): si el enemigo
+                    // tiene su propio MictecahBase, su knockback YA se aplica
+                    // automáticamente vía EnemyDummy.OnHurt → RecibirGolpe()
+                    // (tunable por enemigo: knockbackForce/knockbackUp en el
+                    // Inspector). Aplicar este AddForce ENCIMA hacía que dos
+                    // sistemas de física pelearan por el mismo Rigidbody2D en
+                    // el mismo golpe. Solo lo usamos para enemigos "dummy"
+                    // sin IA propia (que no tienen knockback por su cuenta).
+                    bool tieneKnockbackPropio = obj.GetComponent<MictecahBase>() != null;
+
+                    if (enemyRb != null && !tieneKnockbackPropio)
                     {
                         Vector2 direction = (obj.transform.position - transform.position).normalized;
                         direction += Vector2.up * 0.5f;

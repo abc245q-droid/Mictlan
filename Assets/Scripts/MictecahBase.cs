@@ -258,6 +258,14 @@ public abstract class MictecahBase : MonoBehaviour
         hurtTimer -= Time.deltaTime;
         if (hurtTimer <= 0f)
         {
+            // ★ FIX (Saltarín se traba a medio salto): si el knockback lo dejó
+            // todavía en el aire, NO devolvemos el control a la IA todavía.
+            // Antes, esto frenaba en seco la velocidad horizontal a mitad de
+            // una caída y lo dejaba "pasmado" hasta tocar el suelo. Ahora
+            // simplemente dejamos que la física termine la caída con la
+            // velocidad del knockback intacta, y reevaluamos cada frame.
+            if (!EstaEnSuelo) return;
+
             controlVelocidad = true;
             targetVelocity = Vector2.zero;
             estado = Estado.Patrullando;     // re-evalúa percepción en el siguiente frame
