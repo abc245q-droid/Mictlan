@@ -1,15 +1,18 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using System.Collections;
-using Unity.Cinemachine; // Aseg˙rate de usar el namespace correcto seg˙n tu versiÛn
+using Unity.Cinemachine; // Aseg√∫rate de usar el namespace correcto seg√∫n tu versi√≥n
 
 public class RoomConfiner : MonoBehaviour
 {
-    [Header("ConfiguraciÛn")]
+    [Header("Configuraci√≥n")]
     public CinemachineCamera virtualCamera;
     public float transitionDelay = 0.0f; // Tiempo de espera antes de cambiar (ej: 0.5 seg)
 
+    [Tooltip("ID de esta sala para el mapa. Convenci√≥n: 'L{nivel}_{nombre}'. Ej: 'L0_entrada'.")]
+    public string mapRoomId = "";
+
     [Header("Opcional: Estilo Retro")]
-    public bool stopPlayerDuringTransition = false; // øCongelar a Romerito?
+    public bool stopPlayerDuringTransition = false; // ¬øCongelar a Romerito?
 
     private Collider2D myRoomCollider;
     private CinemachineConfiner2D confinerExtension;
@@ -19,7 +22,7 @@ public class RoomConfiner : MonoBehaviour
     {
         myRoomCollider = GetComponent<Collider2D>();
 
-        // Buscamos la extensiÛn autom·ticamente si tenemos la c·mara
+        // Buscamos la extensi√≥n autom√°ticamente si tenemos la c√°mara
         if (virtualCamera != null)
         {
             confinerExtension = virtualCamera.GetComponent<CinemachineConfiner2D>();
@@ -30,7 +33,9 @@ public class RoomConfiner : MonoBehaviour
     {
         if (other.CompareTag("Player") && !other.isTrigger)
         {
-            // Detenemos cualquier transiciÛn previa para evitar conflictos
+            MapManager.OnRoomEntered(mapRoomId);   // ‚Üê A√ëADIR: registra el Borrador al entrar
+
+            // Detenemos cualquier transici√≥n previa para evitar conflictos
             if (transitionCoroutine != null) StopCoroutine(transitionCoroutine);
 
             // Iniciamos la nueva rutina de cambio
@@ -59,7 +64,7 @@ public class RoomConfiner : MonoBehaviour
         // 2. LA PAUSA: Esperamos el tiempo definido
         yield return new WaitForSeconds(transitionDelay);
 
-        // 3. CAMBIO DE JAULA: Aplicamos los nuevos lÌmites
+        // 3. CAMBIO DE JAULA: Aplicamos los nuevos l√≠mites
         if (confinerExtension != null && myRoomCollider != null)
         {
             confinerExtension.BoundingShape2D = myRoomCollider;

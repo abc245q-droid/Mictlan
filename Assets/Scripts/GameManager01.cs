@@ -197,6 +197,30 @@ public class GameManager01 : MonoBehaviour
         Debug.Log("[Dev] Save borrado. Próximo Play empieza desde cero.");
     }
 
+    [ContextMenu("DEV: Dar Estuche de Tlacuilo")]
+    void DevDarEstuche()
+    {
+        MapManager.DarEstucheDeTlacuilo();
+        SaveGame();
+        Debug.Log("[DEV] Estuche otorgado. Camina entre salas para generar Borrador.");
+    }
+
+    [ContextMenu("DEV: Comprar papel Nivel 0")]
+    void DevComprarPapelN0()
+    {
+        MapManager.ComprarPapel(0);
+        SaveGame();
+        Debug.Log("[DEV] Amate del Nivel 0 comprado.");
+    }
+
+    [ContextMenu("DEV: Comprar papel Nivel 1")]
+    void DevComprarPapelN1()
+    {
+        MapManager.ComprarPapel(1);
+        SaveGame();
+        Debug.Log("[DEV] Amate del Nivel 1 comprado.");
+    }
+
     public void SetNextDoor(string doorID)
     {
         nextDoorID = doorID;

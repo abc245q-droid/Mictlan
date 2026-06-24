@@ -34,6 +34,24 @@ public class PlayerData
     public int cacao;
     public int tajaderas;
 
+
+    // --- CÓDICE / MAPA (El Códice de Romerito) ---
+    // Herramientas y pigmentos: banderas de una sola vez para todo el juego.
+    public bool tienePincel = false;     // Estuche de Tlacuilo: enciende la capacidad de mapear
+    public bool tieneRojo = false;       // nocheztli  → Cihuacallis + viaje rápido
+    public bool tieneAmarillo = false;   // zacatlaxcalli → tesoros y coleccionables
+    public bool tieneAzul = false;       // azul maya  → puertas selladas
+    public bool tieneVerde = false;      // matlalin   → Pochtecah y altares de dioses
+
+    // Papel (amate): una compra por nivel. Guardamos los levelId con papel.
+    public List<int> papelComprado = new List<int>();
+
+    // Estado de las salas (roomId con prefijo "L{n}_").
+    public List<string> salasVisitadas = new List<string>();  // Estado 2: Borrador de Tonalli
+    public List<string> salasAsentadas = new List<string>();  // Estado 3: asentadas al fuego
+
+
+
     // --- MUNDO (Para objetos únicos destruidos o recogidos) ---
     // Guardaremos los IDs (nombres) de los objetos que ya no deben aparecer
     public List<string> collectedItems = new List<string>();

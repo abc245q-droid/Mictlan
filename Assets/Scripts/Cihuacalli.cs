@@ -40,6 +40,11 @@ public class Cihuacalli : MonoBehaviour
     public static event System.Action OnEstadoCambiado;
 
     [Header("Identidad")]
+
+    [Tooltip("Nivel al que pertenece este Cihuacali (0 = Atlein, 1 = Chicunamictlan...). " +
+             "Define qué salas se asientan al sentarse al fuego.")]
+    public int nivelId = 0;
+
     [Tooltip("ID único para el guardado. Ej: 'cihuacalli_atlein_01'. NO repetir entre escenas.")]
     public string cihuacalliID = "cihuacalli_sin_id";
 
@@ -150,6 +155,8 @@ public class Cihuacalli : MonoBehaviour
         // Pasa a ser el ÚNICO encendido + fija el respawn + guarda.
         if (GameManager01.instance != null)
             GameManager01.instance.ActivarCihuacalli(cihuacalliID, transform.position);
+
+        MapManager.OnCihuacaliRest();   // ← AÑADIR: asienta el Borrador del nivel
 
         // Notifica a todos para que el anterior se apague y este se encienda.
         OnEstadoCambiado?.Invoke();
