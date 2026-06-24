@@ -61,13 +61,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Trampa.cs" />
+    <Compile Include="Assets\Scripts\Brasero.cs" />
     <Compile Include="Assets\Scripts\SceneExit.cs" />
+    <Compile Include="Assets\Scripts\Cihuacalli.cs" />
     <Compile Include="Assets\Scripts\RomeritoCombat.cs" />
     <Compile Include="Assets\Scripts\SalidaVertical.cs" />
     <Compile Include="Assets\Scripts\RoomConfiner.cs" />
     <Compile Include="Assets\Scripts\GameManager01.cs" />
     <Compile Include="Assets\Scripts\RoomExit.cs" />
     <Compile Include="Assets\Scripts\PlayerData.cs" />
+    <Compile Include="Assets\Scripts\CargaTonalliVFX.cs" />
     <Compile Include="Assets\Scripts\EntradaVertical.cs" />
     <Compile Include="Assets\Scripts\EnemyDummy.cs" />
     <Compile Include="Assets\Scripts\Wavespawner.cs" />
@@ -83,13 +86,16 @@
     <Compile Include="Assets\Scripts\Hazard.cs" />
     <Compile Include="Assets\Scripts\AttackVFXController.cs" />
     <Compile Include="Assets\Scripts\ObjetoDestruible.cs" />
-    <Compile Include="Assets\Scripts\Checkpoint.cs" />
     <Compile Include="Assets\Scripts\SceneEntrance.cs" />
+    <Compile Include="Assets\Scripts\Conversation1.cs" />
     <Compile Include="Assets\Scripts\Personaje.cs" />
+    <Compile Include="Assets\Scripts\Conversation.cs" />
     <Compile Include="Assets\Scripts\CameraFinder.cs" />
+    <Compile Include="Assets\Scripts\BraseroGrupo.cs" />
     <Compile Include="Assets\Scripts\CameraLookControl.cs" />
     <Compile Include="Assets\Scripts\PlataformaMovilPro.cs" />
     <Compile Include="Assets\Scripts\ParallaxBackground.cs" />
+    <Compile Include="Assets\Scripts\CihuacalliGlow.cs" />
     <Compile Include="Assets\Scripts\FallingTrap.cs" />
     <Compile Include="Assets\Scripts\FlyingEnemyAI.cs" />
     <Compile Include="Assets\Scripts\TonalliOrb.cs" />

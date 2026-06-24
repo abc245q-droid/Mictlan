@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cc74ef59e49a8940b2c14507691cd06, type: 3}
+  m_Name: Conversacion_Chantico
+  m_EditorClassIdentifier: Assembly-CSharp::Conversation
+  descripcion: Chantico otorga el permiso de usar las Cihuacalli (primer checkpoint).
+  nodes:
+  - nodeName: Chantico - Permiso Cihuacalli
+    lines:
+    - speaker: 
+      text: "El fuego dormido del Cihuacalli se agita. De las brasas fr\xEDas brota
+        la silueta de una mujer coronada de espinas, envuelta en una serpiente roja."
+      speakerColor: {r: 0.6, g: 0.65, b: 0.7, a: 1}
+      esAcotacion: 1
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Detente, peque\xF1o portador. Hueles a sol... a algo c\xE1lido en este
+        reino de huesos y silencio."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Pocos descienden con fuego propio. T\xFA lo guardas en el pecho como
+        una brasa que se niega a rendirse."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Soy Chantico, la que mora en la casa, se\xF1ora del fog\xF3n y del fuego
+        que no se apaga. Velo por lo que mi viejo Huehuet\xE9otl encendi\xF3 antes
+        de que el mundo tuviera nombre."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Has honrado su calor aqu\xED abajo, en la oscuridad. Eso no pasa inadvertido
+        para quien cuida la lumbre."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: 
+      text: "La serpiente roja se desliza hacia el Cihuacalli, y la piedra fr\xEDa
+        empieza a respirar un rescoldo anaranjado."
+      speakerColor: {r: 0.6, g: 0.65, b: 0.7, a: 1}
+      esAcotacion: 1
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Escucha bien. Estas son las Cihuacalli, las casas donde el tonalli disperso
+        puede reunirse de nuevo. Sin mi permiso, no son m\xE1s que piedra muerta."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Te lo concedo. Donde encuentres una de estas casas y la enciendas, tu
+        tonalli tendr\xE1 ad\xF3nde volver si la muerte te deshace."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "No es perd\xF3n, ni descanso eterno, ax\xF3lotl. Es una tregua. \xDAsala
+        con cabeza."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: 
+      text: Chantico se repliega entre las brasas. El Cihuacalli queda encendido,
+        latiendo con un calor tenue y constante.
+      speakerColor: {r: 0.6, g: 0.65, b: 0.7, a: 1}
+      esAcotacion: 1
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: CHANTICO
+      text: "Anda. El fuego que llevas todav\xEDa tiene camino por recorrer."
+      speakerColor: {r: 0.95, g: 0.45, b: 0.15, a: 1}
+      esAcotacion: 0
+      personaje: {fileID: 0}
+      expresion: 
+      limpiarRetratos: 0
+    choices: []
+    nextNode: -1

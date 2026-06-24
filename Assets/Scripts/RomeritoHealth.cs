@@ -55,9 +55,24 @@ public class RomeritoHealth : MonoBehaviour
              "100 representa un tercio de la barra (3 curaciones desde llena).")]
     public float costoTonalliCurar = 100f;
 
+    [Header("Curación — Hold (canal continuo)")]
+    [Tooltip("Segundos que hay que mantener Y para recuperar cada corazón.")]
+    public float tiempoCarga = 1.5f;
+
+    [Tooltip("VFX de carga sobre el cuerpo de Romerito. Si se deja vacío, se busca " +
+             "un CargaTonalliVFX en este mismo GameObject.")]
+    public CargaTonalliVFX cargaVFX;
+
+    [Tooltip("Zona muerta del stick: por debajo de esto se considera 'quieto'.")]
+    public float deadzoneMovimiento = 0.2f;
+
     // ── Estado interno ───────────────────────────────────────
     private bool isInvulnerable = false;
     private bool isDead = false;
+
+    // Estado del hold de curación (canal continuo)
+    private bool estaCargando = false;
+    private float cargaTimer = 0f;
 
     // [FIX-2] Máscara de layer enemiga (puede ser 0 si la layer no existe;
     // en ese caso la defensa B sigue funcionando igual).
@@ -104,6 +119,9 @@ public class RomeritoHealth : MonoBehaviour
             heartSystem = FindObjectOfType<HeartSystem>(true); // true = busca también inactivos
         if (tonalliSystem == null)
             tonalliSystem = FindObjectOfType<TonalliSystem>(true);
+
+        if (cargaVFX == null)
+            cargaVFX = GetComponent<CargaTonalliVFX>();
 
         Debug.Log($"[RomeritoHealth] HeartSystem: {(heartSystem != null ? "ENCONTRADO" : "NULL")}");
         Debug.Log($"[RomeritoHealth] TonalliSystem: {(tonalliSystem != null ? "ENCONTRADO" : "NULL")}");
@@ -168,15 +186,63 @@ public class RomeritoHealth : MonoBehaviour
     //   Alt Positive Button: f  (teclado — para probar)
     void Update()
     {
-        if (isDead || isInvulnerable) return;
-        if (DialogueManager.IsActive) return;
+        if (isDead) { CancelarCarga(); return; }
+        if (DialogueManager.IsActive) { CancelarCarga(); return; }
 
-        // Solo puede curar si tiene el Don de Tlacua
+        ManejarCargaCuracion();
+    }
+
+    // ── Curación con hold (canal continuo) ───────────────────
+    // Mantener Y, quieto y en el suelo, recupera 1 corazón cada
+    // 'tiempoCarga' segundos mientras haya Tonalli y falte vida.
+    // Recibir daño (i-frames), moverse, saltar o soltar Y la cancela.
+    private void ManejarCargaCuracion()
+    {
         bool tieneDon = GameManager01.instance != null &&
                         GameManager01.instance.currentData.tieneDonDeTlacua;
 
-        if (tieneDon && Input.GetButtonDown("Curar"))
-            Curar();
+        bool puedeCargar =
+            tieneDon &&
+            !isInvulnerable &&                                   // recibir daño cancela
+            Input.GetButton("Curar") &&                          // Y mantenida
+            movement != null && movement.isGrounded &&           // en el suelo
+            Mathf.Abs(Input.GetAxisRaw("Horizontal")) < deadzoneMovimiento && // quieto
+            currentHealth < maxHealth &&                         // falta vida
+            tonalliSystem != null &&
+            tonalliSystem.TieneSuficiente(costoTonalliCurar);    // hay Tonalli
+
+        if (!puedeCargar)
+        {
+            CancelarCarga();
+            return;
+        }
+
+        if (!estaCargando)
+        {
+            estaCargando = true;
+            cargaTimer = 0f;
+        }
+
+        cargaTimer += Time.deltaTime;
+
+        if (cargaVFX != null)
+            cargaVFX.SetProgreso(Mathf.Clamp01(cargaTimer / tiempoCarga));
+
+        if (cargaTimer >= tiempoCarga)
+        {
+            Curar();                       // +1 corazón, gasta Tonalli
+            if (cargaVFX != null) cargaVFX.Destello();
+            cargaTimer = 0f;               // canal continuo: reinicia el ciclo
+            // La siguiente iteración revalida vida<max y Tonalli suficiente.
+        }
+    }
+
+    private void CancelarCarga()
+    {
+        if (!estaCargando) return;
+        estaCargando = false;
+        cargaTimer = 0f;
+        if (cargaVFX != null) cargaVFX.Apagar();
     }
 
     /// <summary>

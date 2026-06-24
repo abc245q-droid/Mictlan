@@ -67,14 +67,14 @@ public class GameManager01 : MonoBehaviour
 
     // --- PUENTES ENTRE JUGADOR Y MANAGER ---
 
-    // Llamamos a esto justo antes de guardar para asegurar que tenemos lo �ltimo
+    // Llamamos a esto justo antes de guardar para asegurar que tenemos lo último
     void GatherDataFromPlayer()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            // Guardar Posici�n
-            // (Ojo: Generalmente guardamos la del �ltimo Checkpoint, no la actual exacta, 
+            // Guardar Posición
+            // (Ojo: Generalmente guardamos la del último Checkpoint, no la actual exacta, 
             // pero si quieres guardar exacto usa player.transform.position)
             currentData.positionX = lastCheckPointPos.x;
             currentData.positionY = lastCheckPointPos.y;
@@ -101,7 +101,7 @@ public class GameManager01 : MonoBehaviour
                 currentData.unlockTepeyollotl = combat.unlockTepeyollotl;
             }
 
-            // Guardar Econom�a
+            // Guardar Economía
             Monedero monedero = player.GetComponent<Monedero>();
             if (monedero != null)
             {
@@ -118,7 +118,46 @@ public class GameManager01 : MonoBehaviour
     public void UpdateCheckPoint(Vector2 pos)
     {
         lastCheckPointPos = pos;
-        SaveGame(); // �Guardado Autom�tico al tocar Checkpoint!
+        SaveGame(); // ¡Guardado Automático al tocar Checkpoint!
+    }
+
+
+    // ── CIHUACALLIS (Checkpoints) ────────────────────────────
+    // Solo uno encendido a la vez: el que coincide con cihuacalliActivoID.
+
+    public string CihuacalliActivoID =>
+        currentData != null ? currentData.cihuacalliActivoID : "";
+
+    public bool EsCihuacalliActivo(string id) =>
+        currentData != null &&
+        !string.IsNullOrEmpty(id) &&
+        currentData.cihuacalliActivoID == id;
+
+    /// <summary>
+    /// Hace de este Cihuacalli el checkpoint actual: pasa a ser el ÚNICO
+    /// encendido, fija el punto de reaparición y guarda (UpdateCheckPoint
+    /// ya hace el SaveGame). El Cihuacalli anterior queda apagado.
+    /// </summary>
+    public void ActivarCihuacalli(string id, Vector2 pos)
+    {
+        if (currentData != null)
+            currentData.cihuacalliActivoID = id;
+        UpdateCheckPoint(pos);
+    }
+
+    // ── BRASEROS DE HUEHUETÉOTL ───────────────────────────────
+    // A diferencia de los Cihuacallis, varios pueden estar encendidos
+    // a la vez y, una vez encendidos, se quedan así de forma permanente.
+
+    public bool BraseroEncendido(string id) =>
+        currentData != null && currentData.braserosEncendidos.Contains(id);
+
+    /// <summary>Marca un brasero como encendido (permanente) y guarda.</summary>
+    public void EncenderBrasero(string id)
+    {
+        if (currentData != null)
+            currentData.RegistrarID(currentData.braserosEncendidos, id);
+        SaveGame();
     }
 
 
@@ -127,7 +166,7 @@ public class GameManager01 : MonoBehaviour
     {
         string path = Application.persistentDataPath + "/romerito_save.json";
 
-        // 1. Borrar el archivo f�sico si existe
+        // 1. Borrar el archivo físico si existe
         if (File.Exists(path))
         {
             File.Delete(path);
@@ -138,14 +177,14 @@ public class GameManager01 : MonoBehaviour
         currentData = new PlayerData(); // Crea una hoja en blanco
 
         // 3. Resetear valores temporales del Manager
-        lastCheckPointPos = Vector2.zero; // O la posici�n inicial que prefieras
+        lastCheckPointPos = Vector2.zero; // O la posición inicial que prefieras
         nextDoorID = "";
 
         // 4. Recargar la escena para que Romerito se reinicie
-        // (Aseg�rate de tener "using UnityEngine.SceneManagement;" arriba)
+        // (Asegúrate de tener "using UnityEngine.SceneManagement;" arriba)
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        // O si tienes una escena espec�fica de inicio:
+        // O si tienes una escena específica de inicio:
         // SceneManager.LoadScene("Nivel_1_Mictlan");
     }
 
@@ -155,7 +194,7 @@ public class GameManager01 : MonoBehaviour
         string path = Application.persistentDataPath + "/romerito_save.json";
         if (File.Exists(path)) File.Delete(path);
         currentData = new PlayerData();
-        Debug.Log("[Dev] Save borrado. Pr�ximo Play empieza desde cero.");
+        Debug.Log("[Dev] Save borrado. Próximo Play empieza desde cero.");
     }
 
     public void SetNextDoor(string doorID)

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 // ============================================================
 //  DialogueData — Estructuras de datos del sistema de Lore
@@ -76,15 +76,4 @@ public class DialogueNode
 
     [Tooltip("Solo se usa si NO hay choices. Índice del siguiente nodo. -1 = fin.")]
     public int nextNode = -1;
-}
-
-[CreateAssetMenu(fileName = "NuevaConversacion", menuName = "Mictlan/Conversación de Lore")]
-public class Conversation : ScriptableObject
-{
-    [TextArea(1, 3)]
-    [Tooltip("Nota para ti: a quién pertenece y dónde ocurre. No se muestra al jugador.")]
-    public string descripcion;
-
-    [Tooltip("Lista de nodos. El nodo en la posición 0 es SIEMPRE el inicio.")]
-    public DialogueNode[] nodes;
 }

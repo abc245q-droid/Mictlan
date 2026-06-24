@@ -15,6 +15,7 @@ public class PlayerData
     public bool unlockWallJump;
     public bool unlockDash;
     public bool tieneDonDeTlacua = false;
+    public bool tieneXolo = false;            // Compañero Xolo (gate de agua, Nivel 2)
 
     // --- COMBATE ---
     // ── Favores de los Dioses ──────────────────
@@ -36,6 +37,26 @@ public class PlayerData
     // --- MUNDO (Para objetos únicos destruidos o recogidos) ---
     // Guardaremos los IDs (nombres) de los objetos que ya no deben aparecer
     public List<string> collectedItems = new List<string>();
+
+    // --- PROGRESO DEL MUNDO (Cihuacallis, Braseros, etc.) ---
+    // Solo UN Cihuacalli está encendido a la vez: el checkpoint actual.
+    // Guardamos su ID; al activar otro, el anterior se apaga.
+    // Vacío ("") = ningún Cihuacalli encendido todavía.
+    public string cihuacalliActivoID = "";
+
+    // Preparado para la próxima sesión de Braseros (estos sí son varios a la vez).
+    public List<string> braserosEncendidos = new List<string>();
+
+    // Registra un ID en una lista de progreso del mundo.
+    // Devuelve true SOLO si el ID era nuevo (se acaba de añadir) —
+    // útil para disparar el evento de "sala completada" una sola vez.
+    public bool RegistrarID(List<string> lista, string id)
+    {
+        if (lista == null || string.IsNullOrEmpty(id)) return false;
+        if (lista.Contains(id)) return false;
+        lista.Add(id);
+        return true;
+    }
 
     // Constructor vacío
     public PlayerData() { }
