@@ -27,11 +27,16 @@ public enum EstadoSala { NoVisitada, Borrador, Asentada }
 
 public enum Pigmento { Rojo, Amarillo, Azul, Verde }
 
+
+
 public static class MapManager
 {
     /// <summary>Se dispara cuando cambia algo del mapa (sala nueva, commit,
     /// compra de papel). La UI del códice se suscribe para refrescarse.</summary>
     public static event System.Action OnMapaActualizado;
+
+    /// <summary>Última sala en la que entró Romerito (para resaltarla en el mapa).</summary>
+    public static string SalaActual { get; private set; }
 
     // Atajo a los datos vivos. Null-safe: si no hay GameManager, no hace nada.
     private static PlayerData D =>
@@ -43,6 +48,7 @@ public static class MapManager
     {
         var d = D;
         if (d == null || string.IsNullOrEmpty(roomId)) return;
+        SalaActual = roomId;
 
         // Filosofía Atlein (GDD §08): sin el Estuche de Tlacuilo, la memoria
         // está apagada. Ni siquiera se genera Borrador hasta tener el pincel.

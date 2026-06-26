@@ -155,14 +155,39 @@ public class PochtecahShopUI : MonoBehaviour
         {
             switch (r)
             {
-                case PochtecahShop.ResultadoCompra.Exito:      mensajeLabel.text = "El Pochtecah asiente."; break;
-                case PochtecahShop.ResultadoCompra.SinFondos:  mensajeLabel.text = "No tienes suficiente cacao."; break;
+                case PochtecahShop.ResultadoCompra.Exito: mensajeLabel.text = "El Pochtecah asiente."; break;
+                case PochtecahShop.ResultadoCompra.SinFondos: mensajeLabel.text = "No tienes suficiente cacao."; break;
                 case PochtecahShop.ResultadoCompra.YaLoTienes: mensajeLabel.text = "Ya lo llevas contigo."; break;
                 default: mensajeLabel.text = ""; break;
             }
         }
+
         Refrescar();
-        MostrarDetalle(entrada); // refresca el precio del detalle (ahora "Asentado")
+        ReenfocarTrasCompra(entrada);
+    }
+
+    // Tras comprar, la fila adquirida queda no-interactable y el EventSystem
+    // pierde el foco. Sin foco no se puede seguir navegando ni comprando.
+    // Reanclamos el foco a una fila aún comprable para no tener que reabrir.
+    private void ReenfocarTrasCompra(EntradaCatalogo entradaComprada)
+    {
+        if (EventSystem.current == null) return;
+        EventSystem.current.SetSelectedGameObject(null);
+
+        PochtecahShopRow siguiente = null;
+        foreach (var f in filas)
+            if (f.boton != null && f.boton.interactable) { siguiente = f; break; }
+
+        if (siguiente != null)
+        {
+            EventSystem.current.SetSelectedGameObject(siguiente.boton.gameObject);
+            MostrarDetalle(siguiente.Entrada);
+        }
+        else
+        {
+            // Ya no queda nada por comprar: deja el detalle en lo recién adquirido.
+            MostrarDetalle(entradaComprada);
+        }
     }
 
     // ── Panel de detalle ──────────────────────────────────

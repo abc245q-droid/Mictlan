@@ -96,10 +96,12 @@
     <Compile Include="Assets\Scripts\CameraLookControl.cs" />
     <Compile Include="Assets\Scripts\PlataformaMovilPro.cs" />
     <Compile Include="Assets\Scripts\ParallaxBackground.cs" />
+    <Compile Include="Assets\Scripts\MapShape.cs" />
     <Compile Include="Assets\Scripts\CihuacalliGlow.cs" />
     <Compile Include="Assets\Scripts\FallingTrap.cs" />
     <Compile Include="Assets\Scripts\PochtecahShopRow.cs" />
     <Compile Include="Assets\Scripts\FlyingEnemyAI.cs" />
+    <Compile Include="Assets\Scripts\UIPolygon.cs" />
     <Compile Include="Assets\Scripts\TonalliOrb.cs" />
     <Compile Include="Assets\Scripts\DialogueManager.cs" />
     <Compile Include="Assets\Scripts\PersistentPlayer.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="Assets\Scripts\Mictecah3_Saltarin.cs" />
     <Compile Include="Assets\Scripts\Monedero.cs" />
     <Compile Include="Assets\Scripts\ItemHabilidad.cs" />
+    <Compile Include="Assets\Scripts\MapScreenUI.cs" />
     <Compile Include="Assets\Scripts\MacahuitlRoomManager.cs" />
     <Compile Include="Assets\Scripts\HeartSystem.cs" />
   </ItemGroup>
