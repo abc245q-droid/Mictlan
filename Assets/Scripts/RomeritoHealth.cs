@@ -68,6 +68,18 @@ public class RomeritoHealth : MonoBehaviour
 
     // ── Estado interno ───────────────────────────────────────
     private bool isInvulnerable = false;
+
+    // [COPAL] Invulnerabilidad EXTERNA (Barrera de Copal, futuros escudos).
+    // Separada de isInvulnerable (I-frames) para que ninguna rutina interna
+    // la apague por accidente. Solo BarreraCopal (u otro sistema externo)
+    // la enciende y la apaga vía SetInvulnerabilidadExterna().
+    private bool invulnerableExterno = false;
+
+    /// <summary>Activa/desactiva la invulnerabilidad externa (Barrera de Copal).</summary>
+    public void SetInvulnerabilidadExterna(bool valor)
+    {
+        invulnerableExterno = valor;
+    }
     private bool isDead = false;
 
     // Estado del hold de curación (canal continuo)
@@ -345,7 +357,7 @@ public class RomeritoHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (isInvulnerable || isDead) return;
+        if (isInvulnerable || invulnerableExterno || isDead) return;
 
         currentHealth -= damage;
         if (heartSystem != null) heartSystem.UpdateHearts(currentHealth);
@@ -362,7 +374,7 @@ public class RomeritoHealth : MonoBehaviour
 
     public void TakeHazardDamage(Vector2 safePos)
     {
-        if (isInvulnerable || isDead) return;
+        if (isInvulnerable || invulnerableExterno || isDead) return;
 
         // Si es el último corazón → muerte normal (DieRoutine)
         if (currentHealth - 1 <= 0)

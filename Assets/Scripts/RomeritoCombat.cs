@@ -24,6 +24,19 @@ public class RomeritoCombat : MonoBehaviour
     [Tooltip("Layer 'Destructible' — para puertas y paredes rompibles con el Macahuitl")]
     public LayerMask destructibleLayer;
 
+    [Header("Pasivas del Favor de Huehueteotl")]
+    // [FAVOR-PASIVA] Con el favor de Huehueteotl SELECCIONADO:
+    //   +10% de daño de ataque general  (golpe lateral, superior y pogo)
+    //   +10% de altura de rebote al hacer pogo
+    // Cada dios tendrá sus propias pasivas — por ahora, solo el Dios Viejo.
+    [Tooltip("Bono de daño con Huehueteotl activo. 0.10 = +10%. " +
+             "OJO: el daño es entero y se redondea — con attackDamage bajo " +
+             "(1–4) un +10% redondea al mismo valor. Cobra sentido cuando " +
+             "el daño base crece con las mejoras del Macahuitl.")]
+    public float bonusDanoHuehueteotl = 0.10f;
+    [Tooltip("Bono de altura del rebote de pogo con Huehueteotl activo. 0.10 = +10%.")]
+    public float bonusPogoHuehueteotl = 0.10f;
+
     [Header("Estadísticas Base")]
     public float attackRange = 0.5f;
     public int attackDamage = 1;     // Daño base del arma normal
@@ -190,7 +203,7 @@ public class RomeritoCombat : MonoBehaviour
             EnemyDummy enemigo = col.GetComponent<EnemyDummy>();
             if (enemigo != null)
             {
-                enemigo.TakeDamage(attackDamage);
+                enemigo.TakeDamage(DanoConPasiva(attackDamage)); // [FAVOR-PASIVA]
                 rebotar = true;
             }
 
@@ -198,7 +211,7 @@ public class RomeritoCombat : MonoBehaviour
             ObjetoDestruible destruible = col.GetComponent<ObjetoDestruible>();
             if (destruible != null)
             {
-                destruible.RecibirGolpe(attackDamage, currentFavor);
+                destruible.RecibirGolpe(DanoConPasiva(attackDamage), currentFavor); // [FAVOR-PASIVA]
                 rebotar = true;
             }
         }
@@ -231,7 +244,7 @@ public class RomeritoCombat : MonoBehaviour
                     GameObject fx = Instantiate(fireEffect, pogoPoint.position, Quaternion.identity);
                     Destroy(fx, 1f);
                 }
-                _movement.ApplyPogoBounce(pogoFuerza * 1.3f);  // Rebote un 30% más alto
+                _movement.ApplyPogoBounce(PogoConPasiva(pogoFuerza));  // [FAVOR-PASIVA] +10%
                 break;
 
             case GodFavor.Tlaloc:                               // ← AÑADIR
@@ -255,6 +268,25 @@ public class RomeritoCombat : MonoBehaviour
         Debug.Log($"[Pogo] ¡Rebote! Favor: {currentFavor} | Impactados: {impactados.Length}");
     }
 
+
+    // ────────────────────────────────────────────────────────────
+    //  PASIVAS DE FAVOR
+    // ────────────────────────────────────────────────────────────
+
+    // [FAVOR-PASIVA] Daño con el bono del favor activo aplicado.
+    // Redondeo al entero más cercano, nunca por debajo del daño base.
+    public int DanoConPasiva(int danoBase)
+    {
+        if (currentFavor != GodFavor.Huehueteotl) return danoBase;
+        return Mathf.Max(danoBase, Mathf.RoundToInt(danoBase * (1f + bonusDanoHuehueteotl)));
+    }
+
+    // [FAVOR-PASIVA] Fuerza de pogo con el bono del favor activo.
+    public float PogoConPasiva(float fuerzaBase)
+    {
+        if (currentFavor != GodFavor.Huehueteotl) return fuerzaBase;
+        return fuerzaBase * (1f + bonusPogoHuehueteotl);
+    }
 
     // --- NUEVO: Lógica de Cambio de Favor ---
     void CheckWeaponSwitch()
@@ -314,7 +346,7 @@ public class RomeritoCombat : MonoBehaviour
                 // --- ATAQUE DE FUEGO ---
                 // Más daño + Partículas
                 if (fireEffect) Instantiate(fireEffect, attackPoint.position, Quaternion.identity);
-                ApplyDamageArea(attackDamage + 1, 0f);
+                ApplyDamageArea(DanoConPasiva(attackDamage), 0f); // [FAVOR-PASIVA] +10%
                 break;
 
             case GodFavor.Tlaloc:
@@ -369,7 +401,7 @@ public class RomeritoCombat : MonoBehaviour
 
             case GodFavor.Huehueteotl:
                 if (fireEffect) Instantiate(fireEffect, attackPointUp.position, Quaternion.identity);
-                ApplyDamageAreaDesde(attackPointUp.position, attackDamage + 1, 0f);
+                ApplyDamageAreaDesde(attackPointUp.position, DanoConPasiva(attackDamage), 0f); // [FAVOR-PASIVA]
                 break;
 
             case GodFavor.Tlaloc:
@@ -424,7 +456,7 @@ public class RomeritoCombat : MonoBehaviour
                     // sistemas de física pelearan por el mismo Rigidbody2D en
                     // el mismo golpe. Solo lo usamos para enemigos "dummy"
                     // sin IA propia (que no tienen knockback por su cuenta).
-                    bool tieneKnockbackPropio = obj.GetComponent<MictecahBase>() != null;
+                    bool tieneKnockbackPropio = obj.GetComponent<IEnemigoConKnockbackPropio>() != null;
 
                     if (enemyRb != null && !tieneKnockbackPropio)
                     {

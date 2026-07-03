@@ -1,81 +1,93 @@
-using UnityEngine;
-using Unity.Cinemachine; // O 'using Cinemachine;' si usas la versi髇 2.x
+锘縰sing UnityEngine;
+using Unity.Cinemachine; // Cinemachine 3.x (Unity 6)
 
+/// <summary>
+/// Control de "peek" vertical de c谩mara (estilo Hollow Knight):
+/// al mantener arriba/abajo estando quieto, desplaza el encuadre para
+/// revelar m谩s terreno en esa direcci贸n. Trabaja sobre el
+/// CinemachinePositionComposer de la CinemachineCamera.
+/// </summary>
 public class CameraLookControl : MonoBehaviour
 {
     [Header("Referencias")]
- 
     public CinemachineCamera virtualCamera;
-    
 
-    [Header("Configuraci髇")]
-    public float lookOffsetAmount = 0.3f; // Cu醤to desplazar (0.3 es un 30% de pantalla)
-    public float timeToTrigger = 0.25f;    // Tiempo manteniendo bot髇 para activar
-    public float smoothTime = 2f;         // Velocidad del desplazamiento
+    [Header("Configuraci贸n")]
+    [Tooltip("Cu谩nto se desplaza el encuadre (fracci贸n de pantalla).")]
+    public float lookOffsetAmount = 0.3f;
 
-    private CinemachinePositionComposer framingTransposer; 
+    [Tooltip("Segundos manteniendo la direcci贸n antes de activar el peek.")]
+    public float timeToTrigger = 0.25f;
+
+    [Tooltip("Nitidez del suavizado (mayor = m谩s r谩pido). Ahora es independiente de los FPS.")]
+    public float smoothTime = 2f;
+
+    [Tooltip("Zona muerta del stick para ignorar el drift anal贸gico del mando.")]
+    public float deadzone = 0.2f;
+
+    [Tooltip("Invertir el eje vertical del peek. false = comportamiento actual; " +
+             "true = convenci贸n Hollow Knight (arriba revela arriba).")]
+    public bool invertVertical = false;
+
+    private CinemachinePositionComposer composer;
     private float defaultScreenY;
     private float targetScreenY;
     private float timer;
 
-    // Inputs
-    private float yInput;
-    private float xInput;
-
     void Start()
     {
-        if (virtualCamera != null)
-        {
-          
-            framingTransposer = virtualCamera.GetComponent<CinemachinePositionComposer>();
+        if (virtualCamera == null) return;
 
-            if (framingTransposer != null)
-            {
-                defaultScreenY = framingTransposer.Composition.ScreenPosition.y; // Guardamos el valor inicial (usualmente 0.5)
-                targetScreenY = defaultScreenY;
-            }
+        composer = virtualCamera.GetComponent<CinemachinePositionComposer>();
+        if (composer != null)
+        {
+            // Guardamos el encuadre base real (robusto ante cualquier convenci贸n).
+            defaultScreenY = composer.Composition.ScreenPosition.y;
+            targetScreenY = defaultScreenY;
         }
     }
 
     void Update()
     {
-        if (framingTransposer == null) return;
+        if (composer == null) return;
 
-        xInput = Input.GetAxisRaw("Horizontal");
-        yInput = Input.GetAxisRaw("Vertical");
+        float xInput = Input.GetAxisRaw("Horizontal");
+        float yInput = Input.GetAxisRaw("Vertical");
 
-        // 1. Detectar si estamos quietos y presionando arriba/abajo
-        if (xInput == 0 && yInput != 0)
+        // Umbrales con zona muerta en vez de igualdad exacta (fix del mando).
+        bool horizontalIdle = Mathf.Abs(xInput) < deadzone;
+        bool pressingUp = yInput > deadzone;
+        bool pressingDown = yInput < -deadzone;
+
+        if (horizontalIdle && (pressingUp || pressingDown))
         {
             timer += Time.deltaTime;
 
             if (timer >= timeToTrigger)
             {
-                // MIRAR ARRIBA: El personaje baja en la pantalla (ScreenY disminuye)
-                if (yInput < 0)
-                {
-                    targetScreenY = defaultScreenY - lookOffsetAmount;
-                }
-                // MIRAR ABAJO: El personaje sube en la pantalla (ScreenY aumenta)
-                else if (yInput > 0)
-                {
-                    targetScreenY = defaultScreenY + lookOffsetAmount;
-                }
+                // Por defecto (comportamiento actual): ARRIBA revela abajo, ABAJO revela arriba.
+                // invertVertical = true -> convenci贸n Hollow Knight.
+                float dir = (pressingUp ? 1f : -1f) * (invertVertical ? -1f : 1f);
+                targetScreenY = defaultScreenY + dir * lookOffsetAmount;
             }
         }
         else
         {
-            // Resetear si nos movemos o soltamos
-            timer = 0;
+            // Al movernos horizontalmente o soltar, volvemos al encuadre base.
+            timer = 0f;
             targetScreenY = defaultScreenY;
         }
 
-        // 2. Aplicar el cambio suavemente
-        // Accedemos a Composition.ScreenPosition en Cinemachine 3.x
-        Vector2 currentPos = framingTransposer.Composition.ScreenPosition;
+        // Suavizado exponencial independiente del framerate.
+        float k = 1f - Mathf.Exp(-smoothTime * Time.deltaTime);
 
-        currentPos.y = Mathf.Lerp(currentPos.y, targetScreenY, smoothTime * Time.deltaTime);
+        Vector2 pos = composer.Composition.ScreenPosition;
+        pos.y = Mathf.Lerp(pos.y, targetScreenY, k);
 
-        framingTransposer.Composition.ScreenPosition = currentPos;
+        // Anclamos al llegar para no reescribir micro-valores eternamente.
+        if (Mathf.Abs(pos.y - targetScreenY) < 0.0005f)
+            pos.y = targetScreenY;
+
+        composer.Composition.ScreenPosition = pos;
     }
 }

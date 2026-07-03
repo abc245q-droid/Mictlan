@@ -56,6 +56,15 @@ public class EnemyDummy : MonoBehaviour
     public GameObject deathEffect;
     private SpriteRenderer sr;
 
+    // ★ NUEVO [NEXHUALLI]: Invulnerabilidad temporal.
+    //   La Tlahuelpuchi (y futuros enemigos con fases) la activan durante
+    //   su forma inmune. TakeDamage se ignora por completo mientras esté
+    //   activa: sin daño, sin OnHurt, sin Tonalli. El Pogo de Romerito
+    //   sigue rebotando (eso lo decide RomeritoCombat, no este script).
+    private bool esInvulnerable = false;
+    public bool EsInvulnerable => esInvulnerable;
+    public void SetInvulnerable(bool valor) { esInvulnerable = valor; }
+
     // ★ Evento para el WaveSpawner (descontar enemigos vivos)
     public event System.Action OnDeath;
 
@@ -71,6 +80,11 @@ public class EnemyDummy : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // ★ [NEXHUALLI] Forma inmune: el golpe no hace NADA (ni flash, ni
+        //   knockback, ni Tonalli). El feedback de "golpe inútil" queda a
+        //   cargo del enemigo (VFX propios) si se desea.
+        if (esInvulnerable) return;
+
         currentHealth -= damage;
         StartCoroutine(FlashWhite());
 

@@ -36,7 +36,7 @@
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(EnemyDummy))]
-public abstract class MictecahBase : MonoBehaviour
+public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
 {
     // ── Estados ──────────────────────────────────────────────
     protected enum Estado { Patrullando, Esperando, Persiguiendo, Herido }

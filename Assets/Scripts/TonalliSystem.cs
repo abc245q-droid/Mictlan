@@ -97,6 +97,13 @@ public class TonalliSystem : MonoBehaviour
 
     private Coroutine _pulsoRoutine;
 
+    // [FAVOR] Override de color por Favor activo (FavorManager).
+    // Con Huehueteotl seleccionado la barra arde en rojo-fuego — el único
+    // calor cromático del Mictlán. La advertencia de Tonalli bajo SIEMPRE
+    // gana sobre el color del favor (información > estética).
+    private bool _favorColorActivo = false;
+    private Color _colorFavor;
+
     // ─────────────────────────────────────────────────────────────────────
     //  PROPIEDADES
     // ─────────────────────────────────────────────────────────────────────
@@ -161,6 +168,28 @@ public class TonalliSystem : MonoBehaviour
     public bool TieneSuficiente(float cantidad) => _currentTonalli >= cantidad;
 
     /// <summary>
+    /// Tiñe la barra con el color del Favor activo (llamado por FavorManager).
+    /// </summary>
+    public void SetColorFavor(Color color)
+    {
+        _colorFavor = color;
+        _favorColorActivo = true;
+    }
+
+    /// <summary>Regresa la barra al ámbar base (favor Neutro).</summary>
+    public void ResetColorFavor()
+    {
+        _favorColorActivo = false;
+    }
+
+    // Color de reposo actual: advertencia de bajo > color de favor > ámbar base.
+    private Color ColorBaseActual(float proporcion)
+    {
+        if (proporcion <= tonalliBajoUmbral) return colorTonalliBajo;
+        return _favorColorActivo ? _colorFavor : colorTonalli;
+    }
+
+    /// <summary>
     /// Amplía la capacidad máxima permanentemente (recompensa del Fragmento de Turquesa).
     /// El Tonalli actual se preserva (en valor absoluto, no en proporción).
     /// </summary>
@@ -213,10 +242,11 @@ public class TonalliSystem : MonoBehaviour
                 barraFill.fillAmount, targetFill, velocidadSuavizado * Time.deltaTime);
         }
 
-        // Color de advertencia cuando el Tonalli está bajo (no afecta durante el pulso)
+        // Color de reposo (no afecta durante el pulso):
+        // advertencia de bajo > color del favor activo > ámbar base.
         if (_pulsoRoutine == null)
         {
-            barraFill.color = targetFill <= tonalliBajoUmbral ? colorTonalliBajo : colorTonalli;
+            barraFill.color = ColorBaseActual(targetFill);
         }
     }
 
@@ -233,8 +263,7 @@ public class TonalliSystem : MonoBehaviour
 
     private IEnumerator PulsoRoutine()
     {
-        Color colorBase = (_currentTonalli / MaxTonalli) <= tonalliBajoUmbral
-            ? colorTonalliBajo : colorTonalli;
+        Color colorBase = ColorBaseActual(_currentTonalli / MaxTonalli);
 
         // Flash rápido de blanco → color base
         barraFill.color = Color.white;
