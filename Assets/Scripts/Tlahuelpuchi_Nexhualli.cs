@@ -79,6 +79,26 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
     [Tooltip("Frecuencia del jitter. Más alto = vibración más nerviosa.")]
     public float frecuenciaTemblor = 6f;
 
+    // ★ NUEVO [FLOTE]: Sin esto, la lumbre persigue el CENTRO de Romerito.
+    //   Como Romerito está casi siempre pegado al piso, la bola termina
+    //   raspando el suelo → se lee como "rebote", no como "flote".
+    //   Solución: durante el temblor persigue un punto ELEVADO sobre él y,
+    //   además, respeta una distancia mínima al suelo (clamp) para no bajar
+    //   demasiado. La sacudida y el ataque final SÍ pueden romper este
+    //   clamp — así conserva su capacidad de bajar a tocar y dañar a Romerito
+    //   (prioridad de Chema: flota, pero sigue siendo peligrosa).
+    [Header("── Flote (altura sobre Romerito) ──")]
+    [Tooltip("Altura a la que flota SOBRE Romerito durante el temblor. " +
+             "La lumbre apunta a este punto elevado en vez de a su centro.")]
+    public float alturaFlotacion = 1.4f;
+    [Tooltip("Distancia MÍNIMA al suelo que respeta durante el temblor. " +
+             "Debe ser menor que alturaFlotacion. Pequeña, para que la " +
+             "SACUDIDA todavía pueda bajar a golpear a Romerito.")]
+    public float alturaMinimaSobreSuelo = 0.7f;
+    [Tooltip("Suavidad del empuje que la mantiene por encima del suelo. " +
+             "Más alto = corrige más rápido (pero más brusco).")]
+    public float fuerzaCorreccionAltura = 8f;
+
     [Header("── Sacudida (mini-sprint aéreo) ──")]
     [Tooltip("Velocidad de la sacudida hacia la posición de Romerito.")]
     public float velocidadSacudida = 9f;
@@ -247,24 +267,56 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
     {
         MirarHacia(DireccionAlJugador());
 
-        // Deriva lenta hacia Romerito…
-        Vector2 haciaJugador = Vector2.zero;
+        // Deriva lenta hacia un punto ELEVADO sobre Romerito (no su centro).
+        // Así la lumbre se acomoda a la altura de flote y no persigue el piso.
+        Vector2 haciaObjetivo = Vector2.zero;
         if (player != null)
-            haciaJugador = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        {
+            Vector2 objetivo = (Vector2)player.position + Vector2.up * alturaFlotacion;
+            haciaObjetivo = (objetivo - (Vector2)transform.position).normalized;
+        }
 
         // …más un jitter Perlin en ambos ejes (el "temblor" del diagrama).
         float t = Time.time * frecuenciaTemblor;
         float jx = (Mathf.PerlinNoise(t + semillaX, 0f) - 0.5f) * 2f;
         float jy = (Mathf.PerlinNoise(0f, t + semillaY) - 0.5f) * 2f;
 
-        rb.linearVelocity = haciaJugador * velocidadDeriva
-                          + new Vector2(jx, jy) * amplitudTemblor;
+        Vector2 vel = haciaObjetivo * velocidadDeriva
+                    + new Vector2(jx, jy) * amplitudTemblor;
+
+        // Clamp de suelo: si está por debajo de la altura mínima, se le
+        // inyecta un empuje hacia arriba proporcional a lo hundida que está.
+        // Solo empuja hacia ARRIBA (nunca la fuerza a bajar), así el jitter
+        // sigue viéndose natural en la parte alta.
+        float alturaSuelo = AlturaDelSueloDebajo();
+        if (alturaSuelo > float.NegativeInfinity)
+        {
+            float alturaActual = transform.position.y - alturaSuelo;
+            if (alturaActual < alturaMinimaSobreSuelo)
+            {
+                float deficit = alturaMinimaSobreSuelo - alturaActual;
+                vel.y = Mathf.Max(vel.y, deficit * fuerzaCorreccionAltura);
+            }
+        }
+
+        rb.linearVelocity = vel;
 
         if (faseTimer <= 0f)
         {
             if (tiempoEnVuelo >= maxTiempoVuelo) { IniciarRegreso(); return; }
             IniciarSacudida();
         }
+    }
+
+    // ★ NUEVO [FLOTE]: Devuelve la Y del suelo directamente debajo de la
+    //   lumbre, o NegativeInfinity si no hay suelo cerca (abismo → no
+    //   aplicamos clamp y la dejamos volar libre). Usa el mismo groundLayer
+    //   que la base, así respeta exactamente qué cuenta como "suelo".
+    private float AlturaDelSueloDebajo()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position, Vector2.down, 20f, groundLayer);
+        return hit.collider != null ? hit.point.y : float.NegativeInfinity;
     }
 
     // ── FASE: Sacudida (mini-sprint comprometido) ────────────
@@ -441,5 +493,12 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
         // Rango del ataque final (rojo-anaranjado)
         Gizmos.color = new Color(1f, 0.4f, 0f);
         Gizmos.DrawWireSphere(transform.position, rangoAtaqueFinal);
+
+        // [FLOTE] Banda de altura: línea de flote (cian) y mínima al suelo (roja).
+        // Ayuda a afinar en el editor que el clamp deje espacio para bajar a golpear.
+        Vector3 p = transform.position;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(p + Vector3.left * 0.6f + Vector3.up * alturaMinimaSobreSuelo,
+                        p + Vector3.right * 0.6f + Vector3.up * alturaMinimaSobreSuelo);
     }
 }

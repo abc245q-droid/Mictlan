@@ -101,6 +101,7 @@
     <Compile Include="Assets\Scripts\ParallaxBackground.cs" />
     <Compile Include="Assets\Scripts\MapShape.cs" />
     <Compile Include="Assets\Scripts\CihuacalliGlow.cs" />
+    <Compile Include="Assets\Scripts\MictecahLanzaCraneos.cs" />
     <Compile Include="Assets\Scripts\FallingTrap.cs" />
     <Compile Include="Assets\Scripts\PochtecahShopRow.cs" />
     <Compile Include="Assets\Scripts\Tlahuelpuchi_Nexhualli.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Assets\Scripts\MapManager.cs" />
     <Compile Include="Assets\Scripts\PauseMenu.cs" />
     <Compile Include="Assets\Scripts\RomeritoMovement.cs" />
+    <Compile Include="Assets\Scripts\CraneoProyectil.cs" />
     <Compile Include="Assets\Scripts\Mictecah3_Saltarin.cs" />
     <Compile Include="Assets\Scripts\Monedero.cs" />
     <Compile Include="Assets\Scripts\ItemHabilidad.cs" />

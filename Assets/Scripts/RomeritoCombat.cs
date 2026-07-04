@@ -49,6 +49,21 @@ public class RomeritoCombat : MonoBehaviour
     public float pogoCooldown = 0.15f;
     private float nextPogoTime = 0f;
 
+    // ★ FIX [INPUT-DIAGONAL]: Umbral de intención direccional del stick.
+    //   ANTES el código usaba umbral 0: CUALQUIER inclinación negativa del
+    //   stick contaba como "abajo". En el suelo, una diagonal ligera hacia
+    //   abajo (natural al correr con joystick) bloqueaba el ataque lateral:
+    //   la rama del pogo fallaba (no está en el aire), la de arriba fallaba,
+    //   y la lateral exigía stick neutro → NINGUNA rama se ejecutaba y el
+    //   botón se perdía. Este umbral exige inclinación DELIBERADA (≥0.5)
+    //   para pogo/ataque-arriba; todo lo demás cae al lateral por defecto.
+    [Tooltip("Inclinación mínima del stick para que cuente como intención " +
+             "de pogo (abajo) o ataque hacia arriba. Por debajo de esto, " +
+             "el ataque es LATERAL. 0.5 = medio recorrido del stick. " +
+             "Súbelo si aún se cuelan pogos/ataques-arriba accidentales.")]
+    [Range(0.2f, 0.9f)]
+    public float umbralInputVertical = 0.5f;
+
     // [RECOIL-FIX] Flag: ApplyDamageAreaDesde lo activa cuando impacta algo.
     // Solo se aplica recoil si el golpe conectó — no en ataques al aire.
     private bool _golpeConectado = false;
@@ -137,8 +152,11 @@ public class RomeritoCombat : MonoBehaviour
             bool enElAire = (_movement != null && !_movement.isGrounded)
                             || (pogoAireTimer > 0f);
             float verticalInput = Input.GetAxisRaw("Vertical");
-            bool presionaAbajo = (verticalInput < 0f);
-            bool presionaArriba = (verticalInput > 0f);
+
+            // ★ FIX [INPUT-DIAGONAL]: intención deliberada, no roce analógico.
+            // Con teclado (W/S = ±1) el comportamiento es idéntico al anterior.
+            bool presionaAbajo  = (verticalInput <= -umbralInputVertical);
+            bool presionaArriba = (verticalInput >=  umbralInputVertical);
 
             if (enElAire && presionaAbajo && Time.time >= nextPogoTime)
             {
@@ -152,7 +170,12 @@ public class RomeritoCombat : MonoBehaviour
                 PerformAttackUp();
                 nextAttackTime = Time.time + 1f / attackRate;
             }
-            else if (!presionaAbajo && !presionaArriba && Time.time >= nextAttackTime)
+            // ★ FIX [INPUT-DIAGONAL]: el lateral es el CASO POR DEFECTO.
+            // Antes exigía stick perfectamente neutro (!abajo && !arriba),
+            // lo que se comía el botón con diagonales suaves. Ahora,
+            // presionar atacar SIEMPRE produce un ataque: si no hay
+            // intención clara de pogo/arriba, sale el golpe lateral.
+            else if (Time.time >= nextAttackTime)
             {
                 PerformAttack();
                 nextAttackTime = Time.time + 1f / attackRate;
@@ -199,6 +222,17 @@ public class RomeritoCombat : MonoBehaviour
 
         foreach (Collider2D col in impactados)
         {
+            // Caso 0 — Cráneo en vuelo (HOME RUN hacia abajo)
+            // El pogo lo clava hacia el suelo (aterriza antes) y aun así
+            // Romerito rebota, como con cualquier enemigo pogoable.
+            CraneoProyectil craneoVuelo = col.GetComponent<CraneoProyectil>();
+            if (craneoVuelo != null && craneoVuelo.EstaVolando)
+            {
+                craneoVuelo.Redirigir(Vector2.down);
+                rebotar = true;
+                continue;   // sin daño: fue bateado, no golpeado
+            }
+
             // Caso A — Enemigo
             EnemyDummy enemigo = col.GetComponent<EnemyDummy>();
             if (enemigo != null)
@@ -426,6 +460,26 @@ public class RomeritoCombat : MonoBehaviour
     }
 
     // Función base: recibe el origen del hitbox como parámetro.
+    // ── HOME RUN: dirección en la que Romerito batea un cráneo ──
+    //   Combina la intención del jugador:
+    //     • Ataque SUPERIOR (origen == attackPointUp) → batea hacia ARRIBA,
+    //       con un poco de sesgo en la dirección en que mira.
+    //     • Ataque normal → batea horizontal en la dirección en que mira,
+    //       con una leve alza (para que el cráneo trace un arco nuevo).
+    //   Como respaldo, si algo falla, usa la posición relativa cráneo-Romerito.
+    private Vector2 CalcularDireccionBateo(Vector2 origen, Vector2 posCraneo)
+    {
+        float facing = (transform.localScale.x >= 0f) ? 1f : -1f;
+
+        bool esAtaqueSuperior = (attackPointUp != null) &&
+            (Vector2.Distance(origen, (Vector2)attackPointUp.position) < 0.01f);
+
+        if (esAtaqueSuperior)
+            return new Vector2(facing * 0.35f, 1f).normalized;   // predominante hacia arriba
+
+        return new Vector2(facing, 0.35f).normalized;            // horizontal + leve alza
+    }
+
     // Usada por el ataque normal (attackPoint) y el superior (attackPointUp).
     void ApplyDamageAreaDesde(Vector2 origen, int dmg, float knockbackForce, float customRange = -1)
     {
@@ -436,6 +490,19 @@ public class RomeritoCombat : MonoBehaviour
 
         foreach (Collider2D obj in hitObjects)
         {
+            // --- CASO 0: CRÁNEO EN VUELO (HOME RUN) ---
+            // Si el objeto es un cráneo del Lanza Cráneos y está VOLANDO,
+            // no le hacemos daño: lo BATEAMOS en la dirección del ataque.
+            // (Ya aterrizado, es un patrullero normal y cae en el CASO A.)
+            CraneoProyectil craneo = obj.GetComponent<CraneoProyectil>();
+            if (craneo != null && craneo.EstaVolando)
+            {
+                Vector2 dirBateo = CalcularDireccionBateo(origen, obj.transform.position);
+                craneo.Redirigir(dirBateo);
+                _golpeConectado = true; // [RECOIL-FIX] cuenta como golpe conectado
+                continue;               // no aplicar daño ni knockback normal
+            }
+
             // --- CASO A: ENEMIGOS ---
             EnemyDummy enemyScript = obj.GetComponent<EnemyDummy>();
             if (enemyScript != null)
