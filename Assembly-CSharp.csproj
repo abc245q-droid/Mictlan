@@ -97,6 +97,7 @@
     <Compile Include="Assets\Scripts\CameraFinder.cs" />
     <Compile Include="Assets\Scripts\BraseroGrupo.cs" />
     <Compile Include="Assets\Scripts\CameraLookControl.cs" />
+    <Compile Include="Assets\Scripts\HUDCanvas.cs" />
     <Compile Include="Assets\Scripts\PlataformaMovilPro.cs" />
     <Compile Include="Assets\Scripts\ParallaxBackground.cs" />
     <Compile Include="Assets\Scripts\MapShape.cs" />

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -98,6 +99,21 @@ public class MapScreenUI : MonoBehaviour
         if (panel != null) panel.SetActive(true);
         if (hudJuego != null) hudJuego.SetActive(false);
 
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — BUG: si Construir() corre en el mismo frame en que se
+        //  activa el panel, contenedorSalas.rect.size aún no está
+        //  resuelto (el Canvas no ha rebuildeado) y devuelve 0×0. La
+        //  proyección degenera (areaUI negativo con márgenes) y el mapa
+        //  aparece VACÍO. Solución: esperar un frame + forzar rebuild
+        //  del Canvas antes de dibujar.
+        // ══════════════════════════════════════════════════════════════
+        StartCoroutine(ConstruirDelayed());
+    }
+
+    private IEnumerator ConstruirDelayed()
+    {
+        yield return null;              // el Canvas resuelve layout en el siguiente frame
+        Canvas.ForceUpdateCanvases();   // seguro adicional si el frame no bastó
         Construir();
     }
 
@@ -150,19 +166,26 @@ public class MapScreenUI : MonoBehaviour
             return;
         }
 
-        Vector2 mundoMin = total.min;
         Vector2 mundoTam = total.size;
         if (mundoTam.x <= 0f) mundoTam.x = 1f;
         if (mundoTam.y <= 0f) mundoTam.y = 1f;
         Vector2 areaUI = contenedorSalas.rect.size - new Vector2(margen * 2f, margen * 2f);
+        if (areaUI.x < 1f) areaUI.x = 1f;
+        if (areaUI.y < 1f) areaUI.y = 1f;
+
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — BUG: escalar X e Y por factores independientes
+        //  (areaUI.x/mundoTam.x, areaUI.y/mundoTam.y) rompía el aspect
+        //  ratio y "aplastaba" las siluetas cuando el nivel era ancho y
+        //  bajo (típico Metroidvania). Ahora usamos un ÚNICO factor —
+        //  el más restrictivo — para preservar la geometría real y
+        //  centrar el mapa en el rect (letterbox).
+        // ══════════════════════════════════════════════════════════════
+        float escala = Mathf.Min(areaUI.x / mundoTam.x, areaUI.y / mundoTam.y);
+        Vector2 centroMundo = (Vector2)total.center;
 
         // Proyección mundo → UI (origen en el centro del contenedor).
-        Vector2 Proyectar(Vector2 mundo)
-        {
-            Vector2 n = mundo - mundoMin;
-            n.x /= mundoTam.x; n.y /= mundoTam.y;
-            return (n - new Vector2(0.5f, 0.5f)) * areaUI;
-        }
+        Vector2 Proyectar(Vector2 mundo) => (mundo - centroMundo) * escala;
 
         Color ColorDeEstado(string id)
         {
@@ -198,7 +221,9 @@ public class MapScreenUI : MonoBehaviour
             if (col == null) continue;
 
             Vector2 pos = Proyectar(new Vector2(col.bounds.center.x, col.bounds.center.y));
-            Vector2 tam = new Vector2(col.bounds.size.x / mundoTam.x, col.bounds.size.y / mundoTam.y) * areaUI * factorCelda;
+            // FIX (aspect ratio uniforme): usar el mismo 'escala' que Proyectar
+            // para que el rectángulo fallback herede el mismo aspecto del mundo.
+            Vector2 tam = (Vector2)col.bounds.size * escala * factorCelda;
             tam.x = Mathf.Max(tam.x, 6f); tam.y = Mathf.Max(tam.y, 6f);
             CrearCelda("Sala_" + rc.mapRoomId, pos, tam, ColorDeEstado(rc.mapRoomId));
         }

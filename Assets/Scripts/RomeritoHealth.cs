@@ -485,13 +485,39 @@ public class RomeritoHealth : MonoBehaviour
         // 6. Reactivar movimiento
         if (movement != null) movement.enabled = true;
 
-        // 7. Quitar el Macahuitl y apagar su sprite hijo
+        // 7. Estado del Macahuitl en el respawn.
+        //
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — BUG: Romerito perdía el Macahuitl al morir tras el
+        //  primer Cihuacalli. El strip incondicional aquí abajo se
+        //  diseñó para la SALA DEL ALTAR (MacahuitlRoomManager restaura
+        //  el arma en el altar y hay que recogerla de nuevo). Fuera de
+        //  esa sala, el arma debe conservarse muerte tras muerte.
+        //
+        //  Discriminador: solo la sala del altar inyecta un
+        //  resetRoutineFactory vía RomeritoHealth.SetResetRoutine().
+        //  MacahuitlRoomManager.OnTriggerExit2D (salida legítima) y
+        //  OnDestroy (cambio de escena) lo limpian. Por tanto:
+        //    • resetRoutineFactory != null  → estamos en la sala del altar
+        //    • resetRoutineFactory == null  → estamos en cualquier otro lado
+        // ══════════════════════════════════════════════════════════════
         if (combatScript != null)
         {
-            combatScript.tieneMacuahuitl = false;
-            combatScript.currentFavor = RomeritoCombat.GodFavor.Neutro;
-            if (combatScript.macahuitlSprite != null)
-                combatScript.macahuitlSprite.enabled = false;
+            if (resetRoutineFactory != null)
+            {
+                // En la sala del altar: perder el arma para volver a recogerla.
+                combatScript.tieneMacuahuitl = false;
+                combatScript.currentFavor = RomeritoCombat.GodFavor.Neutro;
+                if (combatScript.macahuitlSprite != null)
+                    combatScript.macahuitlSprite.enabled = false;
+            }
+            else if (combatScript.macahuitlSprite != null)
+            {
+                // Fuera de la sala del altar: conservar el arma y sincronizar
+                // el sprite hijo con el estado real (se quedó apagado en el
+                // bucle de sprites de arriba porque tiene tag "WeaponSprite").
+                combatScript.macahuitlSprite.enabled = combatScript.tieneMacuahuitl;
+            }
         }
 
         // 8. Resetear animación

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro; // <--- IMPORTANTE: Necesario para usar textos modernos
 
 public class Monedero : MonoBehaviour
@@ -8,7 +9,14 @@ public class Monedero : MonoBehaviour
     public int tajaderas = 0;    // Moneda rara (Valen por 20 cacaos o son para items especiales)
 
     [Header("Interfaz (UI)")]
-    // Aquí arrastraremos los textos que creaste en el Canvas
+    // ══════════════════════════════════════════════════════════════
+    //  FIX — BUG: al cambiar de escena el HUD anterior se destruye y
+    //  estas referencias quedaban "missing", así el contador se veía
+    //  en 0 aunque cacaoSeeds internamente fuera correcto.
+    //  Ahora se re-buscan automáticamente vía HUDCanvas en cada
+    //  sceneLoaded. Asignarlas en el inspector es opcional: sirve
+    //  como fallback para la escena inicial antes del primer load.
+    // ══════════════════════════════════════════════════════════════
     public TextMeshProUGUI cacaoText;
     public TextMeshProUGUI tajaderaText;
 
@@ -19,7 +27,45 @@ public class Monedero : MonoBehaviour
             cacaoSeeds = GameManager01.instance.currentData.cacao;
             tajaderas = GameManager01.instance.currentData.tajaderas;
         }
+        ReencontrarUI();
         UpdateUI();
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    // Al cargar una nueva escena, el HUD anterior murió con ella.
+    // Re-enganchamos el Monedero al HUD nuevo y refrescamos la pantalla.
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ReencontrarUI();
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Busca el HUDCanvas de la escena activa y toma sus refs de TMP.
+    /// Si no hay HUDCanvas, conserva lo que ya estuviera asignado
+    /// (útil para escenas de test sin HUD).
+    /// </summary>
+    void ReencontrarUI()
+    {
+        HUDCanvas hud = FindObjectOfType<HUDCanvas>(true); // true: incluye inactivos
+        if (hud == null)
+        {
+            Debug.LogWarning("[Monedero] No hay HUDCanvas en la escena. " +
+                             "El contador de cacao/tajaderas no se actualizará visualmente.");
+            return;
+        }
+
+        if (hud.cacaoText != null) cacaoText = hud.cacaoText;
+        if (hud.tajaderaText != null) tajaderaText = hud.tajaderaText;
     }
 
     // Función para añadir Cacao
