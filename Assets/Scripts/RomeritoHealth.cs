@@ -473,52 +473,42 @@ public class RomeritoHealth : MonoBehaviour
         foreach (var col in allColliders)
             col.enabled = true;
 
-        // 5. Hacer visibles todos los sprites (raíz e hijos)
-        // Los sprites con tag "WeaponSprite" los controla RomeritoCombat
+        // 5. Hacer visibles todos los sprites (raíz e hijos).
+        //
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — Sprite del Macahuitl invisible tras revivir.
+        //
+        //  ANTES: este bucle salteaba con `continue` cualquier sprite
+        //  con tag "WeaponSprite", y una sección posterior tocaba SOLO
+        //  `combatScript.macahuitlSprite`. Si esa ref no estaba cableada
+        //  o si el jugador tenía MÁS de un SpriteRenderer con tag
+        //  WeaponSprite (variantes por favor), el arma quedaba invisible
+        //  aunque `tieneMacuahuitl` fuera true.
+        //
+        //  AHORA: reactivamos TODOS los sprites (raíz e hijos). Para los
+        //  con tag "WeaponSprite" el estado depende de si el jugador
+        //  conserva el arma. Ya no hay una única ref que pueda mentir.
+        // ══════════════════════════════════════════════════════════════
+        bool armaVisible = (combatScript != null) && combatScript.tieneMacuahuitl;
         foreach (var sr in allSprites)
         {
-            if (sr.CompareTag("WeaponSprite")) continue;
-            sr.enabled = true;
+            if (sr.CompareTag("WeaponSprite"))
+                sr.enabled = armaVisible;
+            else
+                sr.enabled = true;
         }
         if (spriteRend != null) spriteRend.enabled = true;
 
         // 6. Reactivar movimiento
         if (movement != null) movement.enabled = true;
 
-        // 7. Estado del Macahuitl en el respawn.
-        //
-        // ══════════════════════════════════════════════════════════════
-        //  FIX — BUG: Romerito perdía el Macahuitl al morir tras el
-        //  primer Cihuacalli. El strip incondicional aquí abajo se
-        //  diseñó para la SALA DEL ALTAR (MacahuitlRoomManager restaura
-        //  el arma en el altar y hay que recogerla de nuevo). Fuera de
-        //  esa sala, el arma debe conservarse muerte tras muerte.
-        //
-        //  Discriminador: solo la sala del altar inyecta un
-        //  resetRoutineFactory vía RomeritoHealth.SetResetRoutine().
-        //  MacahuitlRoomManager.OnTriggerExit2D (salida legítima) y
-        //  OnDestroy (cambio de escena) lo limpian. Por tanto:
-        //    • resetRoutineFactory != null  → estamos en la sala del altar
-        //    • resetRoutineFactory == null  → estamos en cualquier otro lado
-        // ══════════════════════════════════════════════════════════════
-        if (combatScript != null)
-        {
-            if (resetRoutineFactory != null)
-            {
-                // En la sala del altar: perder el arma para volver a recogerla.
-                combatScript.tieneMacuahuitl = false;
-                combatScript.currentFavor = RomeritoCombat.GodFavor.Neutro;
-                if (combatScript.macahuitlSprite != null)
-                    combatScript.macahuitlSprite.enabled = false;
-            }
-            else if (combatScript.macahuitlSprite != null)
-            {
-                // Fuera de la sala del altar: conservar el arma y sincronizar
-                // el sprite hijo con el estado real (se quedó apagado en el
-                // bucle de sprites de arriba porque tiene tag "WeaponSprite").
-                combatScript.macahuitlSprite.enabled = combatScript.tieneMacuahuitl;
-            }
-        }
+        // 7. Redundancia de seguridad: si el Inspector tiene una ref
+        //    explícita a `macahuitlSprite` (aunque NO tenga tag
+        //    "WeaponSprite" — típico si vive fuera de la jerarquía del
+        //    player), la sincronizamos igual. Sin efecto si ya la
+        //    cubrió el bucle de arriba.
+        if (combatScript != null && combatScript.macahuitlSprite != null)
+            combatScript.macahuitlSprite.enabled = armaVisible;
 
         // 8. Resetear animación
         if (anim != null) anim.Rebind();

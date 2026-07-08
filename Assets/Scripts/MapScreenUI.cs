@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -112,8 +112,48 @@ public class MapScreenUI : MonoBehaviour
 
     private IEnumerator ConstruirDelayed()
     {
-        yield return null;              // el Canvas resuelve layout en el siguiente frame
-        Canvas.ForceUpdateCanvases();   // seguro adicional si el frame no bastó
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — Antes usábamos Canvas.ForceUpdateCanvases(), que
+        //  fuerza rebuild de gráficos pero NO de layout. Si
+        //  contenedorSalas está dentro de un Layout Group (o si su
+        //  tamaño no se resolvió a tiempo), su .rect.size sigue en
+        //  (0,0), el clamp lo lleva a (1,1), la escala sale diminuta y
+        //  las salas colapsan al mínimo (6×6) sobre el centro del rect.
+        //  LayoutRebuilder.ForceRebuildLayoutImmediate SÍ recalcula
+        //  layouts de forma síncrona antes de que Construir() lea el
+        //  rect.size.
+        // ══════════════════════════════════════════════════════════════
+
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — REAPERTURA ENCOGIDA: si quedaron hijos de la
+        //  construcción anterior dentro de contenedorSalas, el rebuild
+        //  de layout los toma en cuenta y puede colapsar el rect
+        //  (Images sin sprite y UIPolygons stretch reportan preferred
+        //  size 0 ante cualquier fitter). Limpiamos AQUÍ, antes del
+        //  yield: el Destroy diferido completa al final de este frame,
+        //  así el rebuild del siguiente frame ve el contenedor vacío
+        //  y cada apertura es geométricamente idéntica a la primera.
+        // ══════════════════════════════════════════════════════════════
+        Limpiar();
+
+        // Un frame para que el SetActive(true) del panel se aplique
+        // (y para que el Destroy diferido de Limpiar() complete).
+        yield return null;
+
+        // Forzar layout desde el ancestro más útil disponible (panel > contenedor).
+        if (panel != null)
+        {
+            var rtPanel = panel.transform as RectTransform;
+            if (rtPanel != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rtPanel);
+        }
+        if (contenedorSalas != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contenedorSalas);
+
+        // Canvas.ForceUpdateCanvases para completar cualquier pendiente
+        // de dibujo antes de leer tamaños definitivos.
+        Canvas.ForceUpdateCanvases();
+
         Construir();
     }
 
@@ -121,6 +161,12 @@ public class MapScreenUI : MonoBehaviour
     {
         if (!IsOpen) return;
         IsOpen = false;
+
+        // FIX — REAPERTURA ENCOGIDA: no dejar hijos viejos dentro de
+        // contenedorSalas al dormir el panel. Si sobreviven, el
+        // rebuild de layout de la próxima apertura los cuenta y puede
+        // colapsar el rect del contenedor (ver ConstruirDelayed).
+        Limpiar();
 
         if (panel != null) panel.SetActive(false);
         if (hudJuego != null) hudJuego.SetActive(true);
@@ -140,6 +186,40 @@ public class MapScreenUI : MonoBehaviour
             if (!string.IsNullOrEmpty(ms.mapRoomId)) idsConShape.Add(ms.mapRoomId);
 
         var confiners = FindObjectsByType<RoomConfiner>(FindObjectsSortMode.None);
+
+        // ══════════════════════════════════════════════════════════════
+        //  DIAGNÓSTICO — permite ver desde consola por qué el mapa
+        //  aparece vacío. Cubre las tres causas plausibles:
+        //   (a) contenedorSalas.rect.size en (0,0) — layout no resuelto.
+        //   (b) sin MapShape/RoomConfiner con mapRoomId cableado.
+        //   (c) sin Estuche de Tlacuilo o sin amate del nivel comprado.
+        // ══════════════════════════════════════════════════════════════
+        {
+            var d = GameManager01.instance != null ? GameManager01.instance.currentData : null;
+            string tienePincel = d != null ? d.tienePincel.ToString() : "sin-data";
+            int nVisitadas = d != null ? d.salasVisitadas.Count : -1;
+            int nAsentadas = d != null ? d.salasAsentadas.Count : -1;
+            string papelComprado = d != null ? string.Join(",", d.papelComprado) : "sin-data";
+
+            Vector2 rectSize = contenedorSalas.rect.size;
+            Debug.Log(
+                "[Mapa][Diag] contenedorSalas.rect.size=" + rectSize +
+                " | shapes=" + shapes.Length +
+                " | confiners=" + confiners.Length +
+                " | idsConShape=" + idsConShape.Count +
+                " | tienePincel=" + tienePincel +
+                " | papelComprado=[" + papelComprado + "]" +
+                " | visitadas=" + nVisitadas +
+                " | asentadas=" + nAsentadas +
+                " | SalaActual=" + (MapManager.SalaActual ?? "null"));
+
+            // Confiners sin mapRoomId → sin dibujo posible: gritalo.
+            int confinersSinId = 0;
+            foreach (var rc in confiners) if (string.IsNullOrEmpty(rc.mapRoomId)) confinersSinId++;
+            if (confinersSinId > 0)
+                Debug.LogWarning("[Mapa][Diag] " + confinersSinId +
+                                 " RoomConfiner(s) sin mapRoomId — no se dibujarán.");
+        }
 
         // 2) Bounds combinados: siluetas + confiners que NO tengan silueta (fallback).
         bool hayBounds = false;
@@ -170,6 +250,21 @@ public class MapScreenUI : MonoBehaviour
         if (mundoTam.x <= 0f) mundoTam.x = 1f;
         if (mundoTam.y <= 0f) mundoTam.y = 1f;
         Vector2 areaUI = contenedorSalas.rect.size - new Vector2(margen * 2f, margen * 2f);
+
+        // ══════════════════════════════════════════════════════════════
+        //  DIAGNÓSTICO CRÍTICO — si areaUI hay que clamparlo a 1×1, el
+        //  layout NO se resolvió antes de Construir(). Toda la escala
+        //  saldrá diminuta y el mapa parecerá vacío. Este warning apunta
+        //  al culpable exacto (Layout Group, contenedor sin tamaño, etc.).
+        // ══════════════════════════════════════════════════════════════
+        if (areaUI.x < 1f || areaUI.y < 1f)
+        {
+            Debug.LogWarning(
+                "[Mapa][Diag] areaUI degenerado antes del clamp: " + areaUI +
+                " (rect.size=" + contenedorSalas.rect.size + ", margen=" + margen + "). " +
+                "El layout del contenedor NO se resolvió. Revisa que contenedorSalas " +
+                "tenga tamaño propio (o un Layout Group padre bien configurado).");
+        }
         if (areaUI.x < 1f) areaUI.x = 1f;
         if (areaUI.y < 1f) areaUI.y = 1f;
 
@@ -183,6 +278,11 @@ public class MapScreenUI : MonoBehaviour
         // ══════════════════════════════════════════════════════════════
         float escala = Mathf.Min(areaUI.x / mundoTam.x, areaUI.y / mundoTam.y);
         Vector2 centroMundo = (Vector2)total.center;
+
+        Debug.Log("[Mapa][Diag] bounds mundo center=" + centroMundo +
+                  " size=" + mundoTam +
+                  " | areaUI=" + areaUI +
+                  " | escala=" + escala.ToString("F4"));
 
         // Proyección mundo → UI (origen en el centro del contenedor).
         Vector2 Proyectar(Vector2 mundo) => (mundo - centroMundo) * escala;

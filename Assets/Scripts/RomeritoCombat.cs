@@ -360,9 +360,17 @@ public class RomeritoCombat : MonoBehaviour
         if (anim != null) anim.SetTrigger("Attack");
 
         // ── Placeholder visual ────────────────────────────────────────────────
-        // Muestra el GO de ataque correspondiente al favor activo.
-        // Cuando existan animaciones reales, basta con eliminar esta línea.
-        vfxController?.MostrarAtaqueNormal((int)currentFavor);
+        // Muestra el GO de ataque correspondiente al favor activo. En el
+        // aire (no-pogo, ver umbralInputVertical) usamos el slot dedicado
+        // de aire — que cae al slot de tierra si no está cableado.
+        // Mismo criterio de "aire" que la rama de input de Update: isGrounded
+        // en RomeritoMovement + gracia post-pogo para no perder el aire durante
+        // los primeros frames tras un rebote.
+        bool enElAire = (_movement != null && !_movement.isGrounded) || (pogoAireTimer > 0f);
+        if (enElAire)
+            vfxController?.MostrarAtaqueLateralAire((int)currentFavor);
+        else
+            vfxController?.MostrarAtaqueNormal((int)currentFavor);
 
         _golpeConectado = false; // [RECOIL-FIX] Resetear antes de intentar el golpe
 

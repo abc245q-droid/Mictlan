@@ -227,6 +227,27 @@ public class CraneoProyectil : MonoBehaviour
         if (dueno != null) dueno.RegistrarHijo();
         EngancharMuerte();
 
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — Dirección al aterrizar.
+        //  MictecahBase.Start() (que corre al reactivar el cerebro más
+        //  abajo) lee el facing desde `transform.localScale.x`. Sin
+        //  este bloque, el localScale sigue con la escala fija del
+        //  prefab y el patrullero siempre despierta mirando a la
+        //  derecha. Capturamos el signo de la velocidad horizontal
+        //  ANTES de zeroearla y lo aplicamos al localScale.
+        //
+        //  Umbral pequeño para ignorar drift numérico. Si el cráneo
+        //  cae vertical (vx≈0, ej. pogo directamente arriba), dejamos
+        //  el facing tal cual — no hay dirección clara que preservar.
+        // ══════════════════════════════════════════════════════════════
+        float vx = rb.linearVelocity.x;
+        if (Mathf.Abs(vx) > 0.05f)
+        {
+            Vector3 s = transform.localScale;
+            s.x = Mathf.Abs(s.x) * Mathf.Sign(vx);
+            transform.localScale = s;
+        }
+
         transform.rotation = Quaternion.identity;
         rb.angularVelocity = 0f;
         rb.linearVelocity = Vector2.zero;

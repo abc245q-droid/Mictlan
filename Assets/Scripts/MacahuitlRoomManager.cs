@@ -185,6 +185,33 @@ public class MacahuitlRoomManager : MonoBehaviour
 
         isResetting = true;
 
+        // 0. Perder el Macahuitl — hay que volver a recogerlo del altar.
+        //
+        // ══════════════════════════════════════════════════════════════
+        //  FIX — Antes esta lógica vivía en RomeritoHealth.Respawn y se
+        //  disparaba SIEMPRE que resetRoutineFactory != null. Ahora vive
+        //  aquí, en la única rama que representa un reset real de la
+        //  sala del altar (playerIsInRoom && combatIsActive). El
+        //  early-return de más arriba garantiza que este bloque solo
+        //  corre cuando Romerito de verdad muere en pleno combate en
+        //  la sala del Macahuitl.
+        // ══════════════════════════════════════════════════════════════
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                RomeritoCombat combat = player.GetComponent<RomeritoCombat>();
+                if (combat != null)
+                {
+                    combat.tieneMacuahuitl = false;
+                    combat.currentFavor = RomeritoCombat.GodFavor.Neutro;
+                    if (combat.macahuitlSprite != null)
+                        combat.macahuitlSprite.enabled = false;
+                    Debug.Log("[MacahuitlRoom] Macahuitl arrebatado — vuelve al altar.");
+                }
+            }
+        }
+
         // 1. Destruir solo los enemigos dentro de los límites de la sala
         int destroyed = 0;
         if (roomBounds != null)
