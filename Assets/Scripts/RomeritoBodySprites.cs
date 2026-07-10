@@ -209,6 +209,9 @@ public class RomeritoBodySprites : MonoBehaviour
         if (Input.GetButton("Jump"))  return true;
         if (Input.GetButton("Fire1")) return true;
         if (Input.GetButton("Dash"))  return true;
+        // "Curar" (Y) también cuenta como input — mantener Y durante el
+        // canal de curación no debe dejar correr el timer de impaciente.
+        if (Input.GetButton("Curar")) return true;
 
         return false;
     }

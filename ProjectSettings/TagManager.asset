@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - Cempa
   - Cacao
+  - WeaponSprite
   layers:
   - Default
   - TransparentFX
@@ -19,8 +20,8 @@ TagManager:
   - Destructible
   - PostProcessing
   - Cacao
-  - 
-  - 
+  - PlayerProjectile
+  - PlayerIntangible
   - 
   - 
   - 

@@ -40,8 +40,11 @@ public class BarreraCopal : MonoBehaviour
     public float duracion = 5f;
 
     [Header("Condición de efecto")]
-    [Tooltip("Velocidad máxima (m/s) para considerarse 'quieto'.")]
-    public float deadzoneVelocidad = 0.2f;
+    [Tooltip("Umbral del stick horizontal por debajo del cual se considera 'quieto'. " +
+             "NOTA: se cambió de velocity a input porque el Rigidbody2D en el suelo " +
+             "tiene residuales de gravedad que rompían la detección. Ahora quieto = " +
+             "'el jugador no está tratando de moverse', que es lo que importa para el humo.")]
+    [Range(0f, 0.5f)] public float deadzoneStick = 0.15f;
 
     [Header("Visual")]
     [Tooltip("SpriteRenderer hijo con el humo. Se activa durante la barrera.")]
@@ -52,6 +55,23 @@ public class BarreraCopal : MonoBehaviour
     [Range(0f, 1f)] public float alphaSinEfecto = 0.3f;
     [Tooltip("Velocidad de transición del alpha entre ambos estados.")]
     public float velocidadFade = 6f;
+
+    [Header("Colisión: layer intangible (quieto + suelo)")]
+    [Tooltip("Nombre de la layer a la que Romerito pasa mientras la barrera lo " +
+             "CUBRE (quieto + suelo). Debe existir en Project Settings > Tags and Layers " +
+             "y su intersección con Enemy / EnemyProjectile debe estar DESMARCADA en " +
+             "la Layer Collision Matrix. Mantener MARCADA su intersección con el terreno.")]
+    public string layerIntangible = "PlayerIntangible";
+
+    [Header("Colisión: cápsula reducida (moviéndose o en el aire)")]
+    [Tooltip("CapsuleCollider2D de Romerito. Se encoge cuando la barrera está activa pero " +
+             "NO cubriendo, para que el jugador pueda esquivar ataques. Auto-detectado " +
+             "si se deja vacío.")]
+    public CapsuleCollider2D capsulaJugador;
+
+    [Tooltip("Fracción del tamaño original que la cápsula toma durante la barrera " +
+             "activa en movimiento. 1.0 = sin cambio, 0.6 = 60% del original.")]
+    [Range(0.4f, 1f)] public float proporcionEnMovimiento = 0.65f;
 
     // ── Estado público ───────────────────────────────────────
     public bool EstaActiva { get; private set; }
@@ -68,11 +88,35 @@ public class BarreraCopal : MonoBehaviour
     private Rigidbody2D rb;
     private Coroutine rutina;
 
+    // Estado guardado al inicio de la barrera — se restaura al terminar.
+    private int layerOriginal;
+    private Vector2 capsulaSizeOriginal;
+    private Vector2 capsulaOffsetOriginal;
+    // Detección de cambio de régimen para no reescribir cápsula/layer cada frame.
+    private bool aplicoIntangibleActual = false;
+    private bool cachedLayerIntangibleValida = false;
+    private int cachedLayerIntangibleId = -1;
+
     void Awake()
     {
         movement = GetComponent<RomeritoMovement>();
         health = GetComponent<RomeritoHealth>();
         rb = GetComponent<Rigidbody2D>();
+        if (capsulaJugador == null)
+            capsulaJugador = GetComponent<CapsuleCollider2D>();
+
+        // Warnings explícitos si algo falta — así un mal cableado no se
+        // convierte en un fallo silencioso ("la barrera no protege pero
+        // no dice por qué"). Todos DEBEN estar en el mismo GO que BarreraCopal.
+        if (health == null)
+            Debug.LogError("[BarreraCopal] Falta RomeritoHealth en el mismo GameObject. " +
+                           "La barrera NO podrá activar la invulnerabilidad.");
+        if (movement == null)
+            Debug.LogError("[BarreraCopal] Falta RomeritoMovement en el mismo GameObject. " +
+                           "La barrera NO podrá detectar si Romerito toca el suelo.");
+        if (capsulaJugador == null)
+            Debug.LogWarning("[BarreraCopal] Sin CapsuleCollider2D. " +
+                             "El efecto de 'cápsula reducida al esquivar' no aplicará.");
 
         if (spriteHumo != null)
             spriteHumo.gameObject.SetActive(false);
@@ -89,6 +133,28 @@ public class BarreraCopal : MonoBehaviour
     {
         EstaActiva = true;
 
+        // Guardar estado original de layer y cápsula — se restaura en Terminar().
+        layerOriginal = gameObject.layer;
+        if (capsulaJugador != null)
+        {
+            capsulaSizeOriginal = capsulaJugador.size;
+            capsulaOffsetOriginal = capsulaJugador.offset;
+        }
+
+        // Resolver la layer intangible UNA VEZ; si no existe, avisar y seguir sin
+        // ella (el resto del efecto — invulnerabilidad + cápsula reducida — funciona).
+        cachedLayerIntangibleId = LayerMask.NameToLayer(layerIntangible);
+        cachedLayerIntangibleValida = cachedLayerIntangibleId >= 0;
+        if (!cachedLayerIntangibleValida)
+        {
+            Debug.LogWarning("[BarreraCopal] La layer '" + layerIntangible + "' no existe. " +
+                             "Créala en Project Settings > Tags and Layers y desmárcala contra " +
+                             "Enemy/EnemyProjectile en la Layer Collision Matrix. Por ahora " +
+                             "la intangibilidad NO se aplicará (solo invulnerabilidad).");
+        }
+
+        aplicoIntangibleActual = false;
+
         if (spriteHumo != null)
         {
             spriteHumo.gameObject.SetActive(true);
@@ -100,15 +166,27 @@ public class BarreraCopal : MonoBehaviour
         {
             t += Time.deltaTime;
 
-            // ¿El humo lo cubre? Quieto (X e Y) y tocando el suelo.
-            bool quieto = rb == null ||
-                          (Mathf.Abs(rb.linearVelocity.x) < deadzoneVelocidad &&
-                           Mathf.Abs(rb.linearVelocity.y) < deadzoneVelocidad);
+            // ¿El humo lo cubre? Quieto (sin input horizontal) y tocando el suelo.
+            bool quieto = Mathf.Abs(Input.GetAxisRaw("Horizontal")) < deadzoneStick;
             bool enSuelo = movement != null && movement.isGrounded;
             bool cubierto = quieto && enSuelo;
 
             CamuflajeActivo = cubierto;
             if (health != null) health.SetInvulnerabilidadExterna(cubierto);
+
+            // Régimen de colisión — solo escribimos cuando cambia el estado.
+            if (cubierto && !aplicoIntangibleActual)
+            {
+                AplicarRegimenIntangible();
+                aplicoIntangibleActual = true;
+            }
+            else if (!cubierto && (aplicoIntangibleActual || t <= Time.deltaTime))
+            {
+                // El segundo bloque cubre el frame 0: si empezamos descubiertos,
+                // hay que aplicar la cápsula reducida sí o sí una vez.
+                AplicarRegimenReducido();
+                aplicoIntangibleActual = false;
+            }
 
             // Feedback: humo denso ↔ tenue según cobertura real.
             if (spriteHumo != null)
@@ -125,11 +203,60 @@ public class BarreraCopal : MonoBehaviour
         Terminar();
     }
 
+    /// <summary>
+    /// Cubierto: layer intangible (los enemigos atraviesan) + cápsula original.
+    /// </summary>
+    private void AplicarRegimenIntangible()
+    {
+        if (cachedLayerIntangibleValida && gameObject.layer != cachedLayerIntangibleId)
+            gameObject.layer = cachedLayerIntangibleId;
+
+        if (capsulaJugador != null)
+        {
+            capsulaJugador.size = capsulaSizeOriginal;
+            capsulaJugador.offset = capsulaOffsetOriginal;
+        }
+    }
+
+    /// <summary>
+    /// Descubierto pero barrera activa: layer original (los enemigos SÍ chocan)
+    /// + cápsula reducida para esquivar. El offset.y se compensa para que el
+    /// pie quede en el mismo Y (si no lo hiciéramos, la cápsula encogida
+    /// 'levitaría' o Romerito quedaría medio hundido en el suelo).
+    /// </summary>
+    private void AplicarRegimenReducido()
+    {
+        if (gameObject.layer != layerOriginal)
+            gameObject.layer = layerOriginal;
+
+        if (capsulaJugador != null)
+        {
+            Vector2 nuevaSize = capsulaSizeOriginal * proporcionEnMovimiento;
+            float deltaY = (capsulaSizeOriginal.y - nuevaSize.y) * 0.5f;
+            capsulaJugador.size = nuevaSize;
+            capsulaJugador.offset = new Vector2(
+                capsulaOffsetOriginal.x,
+                capsulaOffsetOriginal.y - deltaY);
+        }
+    }
+
     private void Terminar()
     {
         EstaActiva = false;
         CamuflajeActivo = false;
         if (health != null) health.SetInvulnerabilidadExterna(false);
+
+        // Restaurar layer y cápsula al estado que tenían antes de Activar().
+        // Importante: OnDisable llama a Terminar, así que muerte / descarga
+        // de escena SIEMPRE nos deja en el estado original.
+        gameObject.layer = layerOriginal;
+        if (capsulaJugador != null)
+        {
+            capsulaJugador.size = capsulaSizeOriginal;
+            capsulaJugador.offset = capsulaOffsetOriginal;
+        }
+        aplicoIntangibleActual = false;
+
         if (spriteHumo != null) spriteHumo.gameObject.SetActive(false);
         rutina = null;
     }

@@ -55,8 +55,8 @@ public class FavorManager : MonoBehaviour
     [Tooltip("Alternativa de teclado para ciclar favor.")]
     public KeyCode teclaCambiarFavor = KeyCode.Q;
 
-    [Tooltip("Botón para EJECUTAR la habilidad del favor. RB en control de Xbox.")]
-    public KeyCode botonEjecutarFavor = KeyCode.JoystickButton5;
+    [Tooltip("Botón para EJECUTAR la habilidad del favor. B en control de Xbox.")]
+    public KeyCode botonEjecutarFavor = KeyCode.JoystickButton1;
     [Tooltip("Alternativa de teclado para ejecutar la habilidad.")]
     public KeyCode teclaEjecutarFavor = KeyCode.F;
 

@@ -170,10 +170,21 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
         }
         else if (playerTransform != null)
         {
-            // 2. Detección con histéresis (evita parpadeo en el borde del rango).
-            float distToPlayer = Vector2.Distance(transform.position, playerTransform.position);
-            float activeRange = isChasing ? detectionRange + 3f : detectionRange;
-            isChasing = distToPlayer < activeRange;
+            // [COPAL] El humo ritual también engaña a los ojos que vuelan.
+            // Camuflado → pierde el objetivo de inmediato y no re-detecta
+            // hasta que el camuflaje caiga. WanderLogic toma el control y
+            // el volador se aleja con su deambular normal.
+            if (BarreraCopal.CamuflajeActivo)
+            {
+                isChasing = false;
+            }
+            else
+            {
+                // 2. Detección con histéresis (evita parpadeo en el borde del rango).
+                float distToPlayer = Vector2.Distance(transform.position, playerTransform.position);
+                float activeRange = isChasing ? detectionRange + 3f : detectionRange;
+                isChasing = distToPlayer < activeRange;
+            }
         }
 
         // 3. Selección de objetivo

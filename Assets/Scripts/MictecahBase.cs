@@ -160,6 +160,16 @@ public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
                 break;
 
             case Estado.Persiguiendo:
+                // [COPAL] Si Romerito se camufla a media persecución, el
+                // enemigo PIERDE el rastro: pausa breve, media vuelta y
+                // regresa a patrullar (EntrarEspera hace el retorno orgánico).
+                // Sin esto, se quedaba encima del jugador esperando a que la
+                // barrera caducara — daño de contacto garantizado al expirar.
+                if (BarreraCopal.CamuflajeActivo)
+                {
+                    EntrarEspera();
+                    break;
+                }
                 LogicaPersecucion();   // ← cada subclase
                 break;
 
@@ -230,6 +240,10 @@ public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
     protected virtual void ChequearJugador()
     {
         if (!ReaccionaAlJugador || player == null) return;
+
+        // [COPAL] El humo ritual esconde a Romerito de los ojos del Mictlán.
+        // Mientras el camuflaje está activo, este enemigo no puede detectarlo.
+        if (BarreraCopal.CamuflajeActivo) return;
 
         float dist = Vector2.Distance(transform.position, player.position);
         if (dist < detectionRange)

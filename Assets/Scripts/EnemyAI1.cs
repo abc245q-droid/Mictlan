@@ -130,6 +130,13 @@ public class EnemyAI : MonoBehaviour
     {
         if (playerTransform == null) return;
 
+        // [COPAL] Perdió el rastro: el humo lo esconde. Volver a esperar/patrullar.
+        if (BarreraCopal.CamuflajeActivo)
+        {
+            EnterWaitState();
+            return;
+        }
+
         float distToPlayer = Vector2.Distance(transform.position, playerTransform.position);
         if (distToPlayer > stopChaseRange)
         {
@@ -153,6 +160,9 @@ public class EnemyAI : MonoBehaviour
     void CheckForPlayer()
     {
         if (playerTransform == null) return;
+
+        // [COPAL] Camuflado → invisible para este enemigo.
+        if (BarreraCopal.CamuflajeActivo) return;
 
         float dist = Vector2.Distance(transform.position, playerTransform.position);
         if (dist < detectionRange)

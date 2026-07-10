@@ -104,6 +104,14 @@ public class CraneoProyectil : MonoBehaviour
             cerebroPatrullero.enabled = false;
     }
 
+    // Signo de la trayectoria intencionada del vuelo: +1 derecha, -1 izquierda.
+    // Se captura al Lanzar/Redirigir y se usa en Aterrizar para orientar al
+    // patrullero. NO usar rb.linearVelocity.x al aterrizar: si el cráneo
+    // rebota contra una pared antes de tocar suelo, la física de Unity ya
+    // invirtió vx cuando llegamos a Aterrizar y el patrullero despierta al
+    // revés (bug del "sortear al lanzador por arriba").
+    private int signoTrayectoria = 1;
+
     // ── API pública: el Lanza Cráneos llama esto al instanciar ──
     public void Lanzar(Vector2 velocidadInicial, MictecahLanzaCraneos lanzador)
     {
@@ -113,6 +121,14 @@ public class CraneoProyectil : MonoBehaviour
 
         rb.gravityScale = gravedadOriginal > 0f ? gravedadOriginal : 1f;
         rb.linearVelocity = velocidadInicial;
+
+        // Congelar el signo de la trayectoria. Se prefiere el vx inicial;
+        // si es despreciable (lanzamiento vertical puro), respetamos el
+        // facing actual del lanzador.
+        if (Mathf.Abs(velocidadInicial.x) > 0.05f)
+            signoTrayectoria = velocidadInicial.x > 0f ? 1 : -1;
+        else if (transform.localScale.x != 0f)
+            signoTrayectoria = transform.localScale.x > 0f ? 1 : -1;
 
         volando = true;
         yaResuelto = false;
@@ -141,6 +157,10 @@ public class CraneoProyectil : MonoBehaviour
         if (dir.y > -0.5f)
             nuevaVel += Vector2.up * alzaRedireccion;
         rb.linearVelocity = nuevaVel;
+
+        // El bateo redefine la trayectoria intencionada.
+        if (Mathf.Abs(nuevaVel.x) > 0.05f)
+            signoTrayectoria = nuevaVel.x > 0f ? 1 : -1;
 
         if (vfxBateo != null)
             Instantiate(vfxBateo, transform.position, Quaternion.identity);
@@ -228,23 +248,22 @@ public class CraneoProyectil : MonoBehaviour
         EngancharMuerte();
 
         // ══════════════════════════════════════════════════════════════
-        //  FIX — Dirección al aterrizar.
+        //  FIX v2 — Dirección al aterrizar.
         //  MictecahBase.Start() (que corre al reactivar el cerebro más
-        //  abajo) lee el facing desde `transform.localScale.x`. Sin
-        //  este bloque, el localScale sigue con la escala fija del
-        //  prefab y el patrullero siempre despierta mirando a la
-        //  derecha. Capturamos el signo de la velocidad horizontal
-        //  ANTES de zeroearla y lo aplicamos al localScale.
+        //  abajo) lee el facing desde `transform.localScale.x`. Aplicamos
+        //  aquí el signo verdadero de la trayectoria, capturado al
+        //  Lanzar/Redirigir en `signoTrayectoria`.
         //
-        //  Umbral pequeño para ignorar drift numérico. Si el cráneo
-        //  cae vertical (vx≈0, ej. pogo directamente arriba), dejamos
-        //  el facing tal cual — no hay dirección clara que preservar.
+        //  Por qué no usar sign(rb.linearVelocity.x) aquí: si el cráneo
+        //  rebota contra una pared antes de tocar suelo (típico al saltar
+        //  por arriba del lanzador — la parábola choca con el techo o
+        //  con una pared aledaña), la física de Unity ya invirtió vx
+        //  cuando este método se ejecuta desde OnCollisionEnter2D → el
+        //  patrullero despertaba al revés.
         // ══════════════════════════════════════════════════════════════
-        float vx = rb.linearVelocity.x;
-        if (Mathf.Abs(vx) > 0.05f)
         {
             Vector3 s = transform.localScale;
-            s.x = Mathf.Abs(s.x) * Mathf.Sign(vx);
+            s.x = Mathf.Abs(s.x) * signoTrayectoria;
             transform.localScale = s;
         }
 
