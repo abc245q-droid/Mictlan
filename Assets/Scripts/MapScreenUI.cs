@@ -185,7 +185,7 @@ public class MapScreenUI : MonoBehaviour
         foreach (var ms in shapes)
             if (!string.IsNullOrEmpty(ms.mapRoomId)) idsConShape.Add(ms.mapRoomId);
 
-        var confiners = FindObjectsByType<RoomConfiner>(FindObjectsSortMode.None);
+        var mapRooms = FindObjectsByType<MapRoom>(FindObjectsSortMode.None);
 
         // ══════════════════════════════════════════════════════════════
         //  DIAGNÓSTICO — permite ver desde consola por qué el mapa
@@ -205,7 +205,7 @@ public class MapScreenUI : MonoBehaviour
             Debug.Log(
                 "[Mapa][Diag] contenedorSalas.rect.size=" + rectSize +
                 " | shapes=" + shapes.Length +
-                " | confiners=" + confiners.Length +
+                " | mapRooms=" + mapRooms.Length +
                 " | idsConShape=" + idsConShape.Count +
                 " | tienePincel=" + tienePincel +
                 " | papelComprado=[" + papelComprado + "]" +
@@ -213,15 +213,46 @@ public class MapScreenUI : MonoBehaviour
                 " | asentadas=" + nAsentadas +
                 " | SalaActual=" + (MapManager.SalaActual ?? "null"));
 
-            // Confiners sin mapRoomId → sin dibujo posible: gritalo.
-            int confinersSinId = 0;
-            foreach (var rc in confiners) if (string.IsNullOrEmpty(rc.mapRoomId)) confinersSinId++;
-            if (confinersSinId > 0)
-                Debug.LogWarning("[Mapa][Diag] " + confinersSinId +
-                                 " RoomConfiner(s) sin mapRoomId — no se dibujarán.");
+            // MapRooms sin mapRoomId → sin dibujo posible: gritalo con ruta de jerarquía.
+            var sinId = new System.Collections.Generic.List<string>();
+            foreach (var mr in mapRooms)
+                if (string.IsNullOrEmpty(mr.mapRoomId))
+                    sinId.Add(GetJerarquiaPath(mr.transform));
+            if (sinId.Count > 0)
+                Debug.LogWarning("[Mapa][Diag] " + sinId.Count +
+                                 " MapRoom(s) sin mapRoomId — no se dibujarán. Culpables: " +
+                                 string.Join(" | ", sinId));
+
+            // Desajustes de IDs entre MapShape y MapRoom.
+            // GetEstado() es case-sensitive, así que un typo o una mayúscula
+            // distinta rompe el coloreado: la silueta detallada queda en 'NoVisitada'
+            // aunque el MapRoom hermano sí haya registrado la visita.
+            var idsMapRoomSet = new System.Collections.Generic.HashSet<string>();
+            foreach (var mr in mapRooms)
+                if (!string.IsNullOrEmpty(mr.mapRoomId)) idsMapRoomSet.Add(mr.mapRoomId);
+
+            var soloShape = new System.Collections.Generic.List<string>();
+            foreach (var ms in shapes)
+                if (!string.IsNullOrEmpty(ms.mapRoomId) && !idsMapRoomSet.Contains(ms.mapRoomId))
+                    soloShape.Add(ms.mapRoomId + "  @  " + GetJerarquiaPath(ms.transform));
+            if (soloShape.Count > 0)
+                Debug.LogWarning("[Mapa][Diag] " + soloShape.Count +
+                                 " MapShape(s) con ID sin MapRoom equivalente — la silueta " +
+                                 "saldrá como 'NoVisitada' aunque hayas entrado. Culpables:\n  " +
+                                 string.Join("\n  ", soloShape));
+
+            var soloMapRoom = new System.Collections.Generic.List<string>();
+            foreach (var mr in mapRooms)
+                if (!string.IsNullOrEmpty(mr.mapRoomId) && !idsConShape.Contains(mr.mapRoomId))
+                    soloMapRoom.Add(mr.mapRoomId + "  @  " + GetJerarquiaPath(mr.transform));
+            if (soloMapRoom.Count > 0)
+                Debug.Log("[Mapa][Diag] " + soloMapRoom.Count +
+                          " MapRoom(s) sin MapShape equivalente — se dibujarán como rectángulo " +
+                          "(benigno si es intencional):\n  " +
+                          string.Join("\n  ", soloMapRoom));
         }
 
-        // 2) Bounds combinados: siluetas + confiners que NO tengan silueta (fallback).
+        // 2) Bounds combinados: siluetas + MapRooms que NO tengan silueta (fallback).
         bool hayBounds = false;
         Bounds total = new Bounds();
         foreach (var ms in shapes)
@@ -230,13 +261,12 @@ public class MapScreenUI : MonoBehaviour
             if (!hayBounds) { total = ms.Bounds; hayBounds = true; }
             else total.Encapsulate(ms.Bounds);
         }
-        foreach (var rc in confiners)
+        foreach (var mr in mapRooms)
         {
-            if (string.IsNullOrEmpty(rc.mapRoomId) || idsConShape.Contains(rc.mapRoomId)) continue;
-            var col = rc.GetComponent<Collider2D>();
-            if (col == null) continue;
-            if (!hayBounds) { total = col.bounds; hayBounds = true; }
-            else total.Encapsulate(col.bounds);
+            if (string.IsNullOrEmpty(mr.mapRoomId) || idsConShape.Contains(mr.mapRoomId)) continue;
+            var b = mr.Bounds;
+            if (!hayBounds) { total = b; hayBounds = true; }
+            else total.Encapsulate(b);
         }
 
         if (!hayBounds)
@@ -313,19 +343,17 @@ public class MapScreenUI : MonoBehaviour
             CrearSilueta("Silueta_" + ms.mapRoomId, pts, tris, ColorDeEstado(ms.mapRoomId));
         }
 
-        // 3b) Fallback rectangular para salas sin silueta.
-        foreach (var rc in confiners)
+        // 3b) Fallback rectangular para MapRooms sin silueta detallada.
+        foreach (var mr in mapRooms)
         {
-            if (string.IsNullOrEmpty(rc.mapRoomId) || idsConShape.Contains(rc.mapRoomId)) continue;
-            var col = rc.GetComponent<Collider2D>();
-            if (col == null) continue;
+            if (string.IsNullOrEmpty(mr.mapRoomId) || idsConShape.Contains(mr.mapRoomId)) continue;
+            var b = mr.Bounds;
 
-            Vector2 pos = Proyectar(new Vector2(col.bounds.center.x, col.bounds.center.y));
-            // FIX (aspect ratio uniforme): usar el mismo 'escala' que Proyectar
-            // para que el rectángulo fallback herede el mismo aspecto del mundo.
-            Vector2 tam = (Vector2)col.bounds.size * escala * factorCelda;
+            Vector2 pos = Proyectar(new Vector2(b.center.x, b.center.y));
+            // Aspect ratio uniforme: mismo factor que Proyectar.
+            Vector2 tam = (Vector2)b.size * escala * factorCelda;
             tam.x = Mathf.Max(tam.x, 6f); tam.y = Mathf.Max(tam.y, 6f);
-            CrearCelda("Sala_" + rc.mapRoomId, pos, tam, ColorDeEstado(rc.mapRoomId));
+            CrearCelda("Sala_" + mr.mapRoomId, pos, tam, ColorDeEstado(mr.mapRoomId));
         }
 
         // 4) Marcador de Romerito (punto nocheztli).
@@ -340,7 +368,7 @@ public class MapScreenUI : MonoBehaviour
         // 5) Título.
         string idTitulo = shapes.Length > 0 && !string.IsNullOrEmpty(shapes[0].mapRoomId)
             ? shapes[0].mapRoomId
-            : (confiners.Length > 0 ? confiners[0].mapRoomId : "");
+            : (mapRooms.Length > 0 ? mapRooms[0].mapRoomId : "");
         if (tituloLabel != null) tituloLabel.text = "Códice — " + NombreNivel(idTitulo);
     }
 
@@ -410,5 +438,14 @@ public class MapScreenUI : MonoBehaviour
         if (congelar && playerRb != null) playerRb.linearVelocity = Vector2.zero;
         if (playerMovement != null) playerMovement.enabled = !congelar;
         if (playerCombat != null) playerCombat.enabled = !congelar;
+    }
+
+    // Utilidad local: ruta 'Padre/Hijo/Nieto' para localizar en la Hierarchy.
+    static string GetJerarquiaPath(Transform t)
+    {
+        if (t == null) return "<null>";
+        string s = t.name;
+        while (t.parent != null) { t = t.parent; s = t.name + "/" + s; }
+        return s;
     }
 }

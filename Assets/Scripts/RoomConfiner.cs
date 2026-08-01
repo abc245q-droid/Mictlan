@@ -8,7 +8,7 @@ public class RoomConfiner : MonoBehaviour
     public CinemachineCamera virtualCamera;
     public float transitionDelay = 0.0f; // Tiempo de espera antes de cambiar (ej: 0.5 seg)
 
-    [Tooltip("ID de esta sala para el mapa. Convención: 'L{nivel}_{nombre}'. Ej: 'L0_entrada'.")]
+    [Tooltip("LEGADO — el mapa ahora vive en MapRoom. Este campo se conserva SOLO para migrar escenas viejas. Usá el menú 'Mictlan → Mapa → Migrar mapRoomId a MapRoom'.")]
     public string mapRoomId = "";
 
     [Header("Opcional: Estilo Retro")]
@@ -33,7 +33,10 @@ public class RoomConfiner : MonoBehaviour
     {
         if (other.CompareTag("Player") && !other.isTrigger)
         {
-            MapManager.OnRoomEntered(mapRoomId);   // ← AÑADIR: registra el Borrador al entrar
+            // NOTA: el registro del mapa vive ahora en MapRoom (componente aparte).
+            // RoomConfiner es SOLO cámara. Si esta zona debe figurar en el Códice,
+            // añadí un MapRoom (mismo GameObject o hermano). Ver menú:
+            //   Mictlan → Mapa → Migrar mapRoomId a MapRoom (escena activa)
 
             // Detenemos cualquier transición previa para evitar conflictos
             if (transitionCoroutine != null) StopCoroutine(transitionCoroutine);
