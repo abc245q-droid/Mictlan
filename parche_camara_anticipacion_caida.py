@@ -1,8 +1,37 @@
-﻿using UnityEngine;
-using Unity.Cinemachine; // Cinemachine 3.x (Unity 6)
+# -*- coding: utf-8 -*-
+"""
+Parche: CameraLookControl.cs
+Añade "Anticipación de Caída" estilo Hollow Knight al control de cámara.
+Reemplazos por anclas exactas. Verifica balance de llaves antes de escribir.
+"""
+import io, sys
 
-/// <summary>
-/// Control vertical de cámara (estilo Hollow Knight). Dos subsistemas
+PATH = r"Assets/Scripts/CameraLookControl.cs"
+
+def leer(p):
+    for enc in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            with io.open(p, "r", encoding=enc) as f:
+                return f.read()
+        except UnicodeDecodeError:
+            continue
+    raise RuntimeError("No se pudo decodificar " + p)
+
+src = leer(PATH)
+
+def reemplazar(texto, ancla, nuevo, nombre):
+    if texto.count(ancla) != 1:
+        print("FALLO ancla (%s): apariciones = %d" % (nombre, texto.count(ancla)))
+        sys.exit(1)
+    return texto.replace(ancla, nuevo, 1)
+
+# ── 1) Comentario de cabecera ─────────────────────────────────
+ancla1 = """/// Control de "peek" vertical de cámara (estilo Hollow Knight):
+/// al mantener arriba/abajo estando quieto, desplaza el encuadre para
+/// revelar más terreno en esa dirección. Trabaja sobre el
+/// CinemachinePositionComposer de la CinemachineCamera.
+/// </summary>"""
+nuevo1 = """/// Control vertical de cámara (estilo Hollow Knight). Dos subsistemas
 /// que comparten un único punto de escritura sobre ScreenPosition.y:
 ///
 ///  1) PEEK MANUAL: al mantener arriba/abajo estando quieto y en suelo,
@@ -14,28 +43,14 @@ using Unity.Cinemachine; // Cinemachine 3.x (Unity 6)
 ///
 /// Trabaja sobre el CinemachinePositionComposer de la CinemachineCamera.
 /// Debe ser el ÚNICO script que escriba Composition.ScreenPosition.y.
-/// </summary>
-public class CameraLookControl : MonoBehaviour
-{
-    [Header("Referencias")]
-    public CinemachineCamera virtualCamera;
+/// </summary>"""
+src = reemplazar(src, ancla1, nuevo1, "cabecera")
 
-    [Header("Configuración")]
-    [Tooltip("Cuánto se desplaza el encuadre (fracción de pantalla).")]
-    public float lookOffsetAmount = 0.3f;
+# ── 2) Campos nuevos tras invertVertical ──────────────────────
+ancla2 = """    public bool invertVertical = false;
 
-    [Tooltip("Segundos manteniendo la dirección antes de activar el peek.")]
-    public float timeToTrigger = 0.25f;
-
-    [Tooltip("Nitidez del suavizado (mayor = más rápido). Ahora es independiente de los FPS.")]
-    public float smoothTime = 2f;
-
-    [Tooltip("Zona muerta del stick para ignorar el drift analógico del mando.")]
-    public float deadzone = 0.2f;
-
-    [Tooltip("Invertir el eje vertical del peek. false = comportamiento actual; " +
-             "true = convención Hollow Knight (arriba revela arriba).")]
-    public bool invertVertical = false;
+    private CinemachinePositionComposer composer;"""
+nuevo2 = """    public bool invertVertical = false;
 
     [Header("Anticipación de Caída (estilo Hollow Knight)")]
     [Tooltip("Si está activo, el encuadre desciende automáticamente durante " +
@@ -64,68 +79,55 @@ public class CameraLookControl : MonoBehaviour
              "Con la convención detectada en el peek (+y revela abajo) debe quedar en false.")]
     public bool invertirOffsetCaida = false;
 
-    private CinemachinePositionComposer composer;
-    private float defaultScreenY;
-    private float targetScreenY;
+    private CinemachinePositionComposer composer;"""
+src = reemplazar(src, ancla2, nuevo2, "campos publicos")
+
+# ── 3) Campos privados ────────────────────────────────────────
+ancla3 = """    private float targetScreenY;
+    private float timer;"""
+nuevo3 = """    private float targetScreenY;
     private float timer;
 
     // Anticipación de caída
     private Rigidbody2D playerRb;
     private RomeritoMovement playerMovement;
     private float fallTimer;
-    private float offsetCaidaActual;
+    private float offsetCaidaActual;"""
+src = reemplazar(src, ancla3, nuevo3, "campos privados")
 
-    void Start()
-    {
-        // Autolocalización: si la referencia no quedó asignada en esta
-        // escena, buscamos la CinemachineCamera activa (mismo patrón que
-        // CameraFinder). Así el peek sobrevive entre niveles aunque el
-        // Inspector local esté incompleto.
-        if (virtualCamera == null)
-            virtualCamera = FindFirstObjectByType<CinemachineCamera>();
-
-        if (virtualCamera == null)
-        {
-            Debug.LogWarning(
-                "[CameraLookControl] No hay ninguna CinemachineCamera en la " +
-                "escena. Peek y anticipación de caída DESACTIVADOS.", this);
-            return;
+# ── 4) Start(): localizar al jugador ──────────────────────────
+ancla4 = """            defaultScreenY = composer.Composition.ScreenPosition.y;
+            targetScreenY = defaultScreenY;
         }
-
-        composer = virtualCamera.GetComponent<CinemachinePositionComposer>();
-
-        if (composer == null)
-        {
-            Debug.LogWarning(
-                "[CameraLookControl] La CinemachineCamera '" + virtualCamera.name +
-                "' NO tiene CinemachinePositionComposer. Peek y anticipación de " +
-                "caída DESACTIVADOS en esta escena. Compárala con la cámara del " +
-                "Nivel 0 (instancia del prefab CinemachineCamera).", virtualCamera);
-        }
-
-        if (composer != null)
-        {
-            // Guardamos el encuadre base real (robusto ante cualquier convención).
-            defaultScreenY = composer.Composition.ScreenPosition.y;
+    }"""
+nuevo4 = """            defaultScreenY = composer.Composition.ScreenPosition.y;
             targetScreenY = defaultScreenY;
         }
 
         BuscarJugador();
-    }
+    }"""
+src = reemplazar(src, ancla4, nuevo4, "Start")
 
-    void Update()
-    {
-        if (composer == null) return;
+# ── 5) Update(): arbitraje peek + caída ───────────────────────
+ancla5 = """        if (horizontalIdle && (pressingUp || pressingDown))
+        {
+            timer += Time.deltaTime;
 
-        float xInput = Input.GetAxisRaw("Horizontal");
-        float yInput = Input.GetAxisRaw("Vertical");
-
-        // Umbrales con zona muerta en vez de igualdad exacta (fix del mando).
-        bool horizontalIdle = Mathf.Abs(xInput) < deadzone;
-        bool pressingUp = yInput > deadzone;
-        bool pressingDown = yInput < -deadzone;
-
-        // ── 1) PEEK MANUAL (solo con Romerito en suelo, como Hollow Knight) ──
+            if (timer >= timeToTrigger)
+            {
+                // Por defecto (comportamiento actual): ARRIBA revela abajo, ABAJO revela arriba.
+                // invertVertical = true -> convención Hollow Knight.
+                float dir = (pressingUp ? 1f : -1f) * (invertVertical ? -1f : 1f);
+                targetScreenY = defaultScreenY + dir * lookOffsetAmount;
+            }
+        }
+        else
+        {
+            // Al movernos horizontalmente o soltar, volvemos al encuadre base.
+            timer = 0f;
+            targetScreenY = defaultScreenY;
+        }"""
+nuevo5 = """        // ── 1) PEEK MANUAL (solo con Romerito en suelo, como Hollow Knight) ──
         bool enSuelo = (playerMovement == null) || playerMovement.isGrounded;
         float peekOffset = 0f;
 
@@ -152,19 +154,14 @@ public class CameraLookControl : MonoBehaviour
         // Ambos offsets se suman sobre el encuadre base. Durante una caída el
         // peek no puede activarse (requiere suelo), así que no compiten.
         float dirCaida = invertirOffsetCaida ? -1f : 1f;
-        targetScreenY = defaultScreenY + peekOffset + dirCaida * offsetCaidaActual;
+        targetScreenY = defaultScreenY + peekOffset + dirCaida * offsetCaidaActual;"""
+src = reemplazar(src, ancla5, nuevo5, "Update")
 
-        // Suavizado exponencial independiente del framerate.
-        float k = 1f - Mathf.Exp(-smoothTime * Time.deltaTime);
-
-        Vector2 pos = composer.Composition.ScreenPosition;
-        pos.y = Mathf.Lerp(pos.y, targetScreenY, k);
-
-        // Anclamos al llegar para no reescribir micro-valores eternamente.
-        if (Mathf.Abs(pos.y - targetScreenY) < 0.0005f)
-            pos.y = targetScreenY;
-
-        composer.Composition.ScreenPosition = pos;
+# ── 6) Métodos nuevos al final de la clase ────────────────────
+ancla6 = """        composer.Composition.ScreenPosition = pos;
+    }
+}"""
+nuevo6 = """        composer.Composition.ScreenPosition = pos;
     }
 
     /// <summary>
@@ -221,4 +218,15 @@ public class CameraLookControl : MonoBehaviour
         playerRb = player.GetComponent<Rigidbody2D>();
         playerMovement = player.GetComponent<RomeritoMovement>();
     }
-}
+}"""
+src = reemplazar(src, ancla6, nuevo6, "metodos finales")
+
+# ── Verificación de balance de llaves ─────────────────────────
+if src.count("{") != src.count("}"):
+    print("FALLO: llaves desbalanceadas (%d abre, %d cierra)" % (src.count("{"), src.count("}")))
+    sys.exit(1)
+
+with io.open(PATH, "w", encoding="utf-8-sig", newline="\n") as f:
+    f.write(src)
+
+print("OK - parche aplicado. Llaves: %d/%d" % (src.count("{"), src.count("}")))
