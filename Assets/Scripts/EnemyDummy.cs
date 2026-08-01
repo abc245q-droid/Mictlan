@@ -65,6 +65,21 @@ public class EnemyDummy : MonoBehaviour
     public bool EsInvulnerable => esInvulnerable;
     public void SetInvulnerable(bool valor) { esInvulnerable = valor; }
 
+    [Header("Categoría del Enemigo")]
+    [Tooltip("Marca true si es jefe o mini-jefe. Los jefes se destruyen " +
+             "permanentemente y se registran en PlayerData.jefesDerrotados " +
+             "para persistir entre sesiones. Los enemigos con esJefe=false " +
+             "que además tengan un componente EnemigoRespawnable se reagrupan " +
+             "cuando Romerito reaparece en un Cihuacalli.")]
+    public bool esJefe = false;
+
+    [Tooltip("ID único del jefe (ej: 'jefe_mascara_turquesa_n4'). " +
+             "Solo relevante si esJefe = true.")]
+    public string jefeID = "";
+
+    // Flag de runtime — lo marca WaveSpawner al instanciar. NO va en el Inspector.
+    [System.NonSerialized] public bool esDeOleada = false;
+
     // ★ Evento para el WaveSpawner (descontar enemigos vivos)
     public event System.Action OnDeath;
 
@@ -74,6 +89,17 @@ public class EnemyDummy : MonoBehaviour
 
     void Start()
     {
+        // Si es jefe y ya fue derrotado en una sesión anterior, no aparecer.
+        if (esJefe && !string.IsNullOrEmpty(jefeID) &&
+            GameManager01.instance != null &&
+            GameManager01.instance.currentData != null &&
+            GameManager01.instance.currentData.jefesDerrotados != null &&
+            GameManager01.instance.currentData.jefesDerrotados.Contains(jefeID))
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
     }
@@ -132,7 +158,53 @@ public class EnemyDummy : MonoBehaviour
         if (deathEffect != null)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
+        // ── Ruta de destrucción según categoría ──────────────
+
+        // A) JEFE — destrucción permanente + persistencia en el save
+        if (esJefe)
+        {
+            if (!string.IsNullOrEmpty(jefeID) && GameManager01.instance != null)
+            {
+                var data = GameManager01.instance.currentData;
+                if (data.jefesDerrotados == null)
+                    data.jefesDerrotados = new System.Collections.Generic.List<string>();
+                if (!data.jefesDerrotados.Contains(jefeID))
+                    data.jefesDerrotados.Add(jefeID);
+                GameManager01.instance.SaveGame();
+            }
+            Destroy(gameObject);
+            return;
+        }
+
+        // B) ENEMIGO DE OLEADA — destrucción normal (WaveSpawner reinstancia)
+        if (esDeOleada)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // C) ENEMIGO DE MUNDO — si tiene EnemigoRespawnable, se dispersa
+        var respawnable = GetComponent<EnemigoRespawnable>();
+        if (respawnable != null)
+        {
+            respawnable.Dispersar();
+            return;
+        }
+
+        // D) FALLBACK — enemigo sin categoría explícita, destruir
         Destroy(gameObject);
+    }
+
+    // ── API pública para EnemigoRespawnable ──────────────────
+
+    /// <summary>
+    /// Restaura la vida al máximo. Usado por EnemigoRespawnable
+    /// al reagrupar el enemigo — Start() no corre en reactivación
+    /// de GameObject, así que restauramos manualmente.
+    /// </summary>
+    public void ResetearVida()
+    {
+        currentHealth = maxHealth;
     }
 
     // ★ NUEVO: Calcula un punto de dispersión seguro para el loot.

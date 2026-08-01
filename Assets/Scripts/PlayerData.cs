@@ -56,6 +56,12 @@ public class PlayerData
     // Guardaremos los IDs (nombres) de los objetos que ya no deben aparecer
     public List<string> collectedItems = new List<string>();
 
+    // --- JEFES DERROTADOS (persisten entre sesiones) ---
+    // IDs de jefes/mini-jefes ya vencidos. EnemyDummy.Start() los usa
+    // para autodestruirse si el jefe ya fue derrotado en una sesión
+    // anterior. Coincide con EnemyDummy.jefeID.
+    public List<string> jefesDerrotados = new List<string>();
+
     // --- PROGRESO DEL MUNDO (Cihuacallis, Braseros, etc.) ---
     // Solo UN Cihuacalli está encendido a la vez: el checkpoint actual.
     // Guardamos su ID; al activar otro, el anterior se apaga.

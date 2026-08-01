@@ -200,7 +200,13 @@ public class WaveSpawner : MonoBehaviour
 
         EnemyDummy enemyScript = enemy.GetComponent<EnemyDummy>();
         if (enemyScript != null)
+        {
+            // Marcamos como enemigo de oleada — al morir se destruye
+            // normalmente, sin pasar por el sistema de reagrupación
+            // del yohual-ehécatl (que es solo para enemigos de mundo).
+            enemyScript.esDeOleada = true;
             enemyScript.OnDeath += HandleEnemyDeath;
+        }
         else
             Debug.LogWarning($"[WaveSpawner] '{prefab.name}' no tiene EnemyDummy. Usando polling.");
     }

@@ -502,6 +502,11 @@ public class RomeritoHealth : MonoBehaviour
         // 6. Reactivar movimiento
         if (movement != null) movement.enabled = true;
 
+        // ── Reagrupar enemigos comunes del nivel (yohual-ehécatl) ─
+        //    Jefes con esJefe=true y enemigos de oleada NO se ven afectados —
+        //    solo los que tengan un componente EnemigoRespawnable.
+        MictlanEnemyRegistry.Instance?.RespawnearTodos();
+
         // 7. Redundancia de seguridad: si el Inspector tiene una ref
         //    explícita a `macahuitlSprite` (aunque NO tenga tag
         //    "WeaponSprite" — típico si vive fuera de la jerarquía del
