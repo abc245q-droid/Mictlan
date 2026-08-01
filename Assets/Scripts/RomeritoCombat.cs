@@ -208,10 +208,17 @@ public class RomeritoCombat : MonoBehaviour
         Collider2D[] impactados = Physics2D.OverlapCircleAll(
             pogoPoint.position, pogoRadius, enemyLayers);
 
+        // [FIX-Trapdoor] Además, puertas destructibles (RoomDoor / PuertaUnilateral)
+        // en su propia layer. Antes el pogo no las detectaba, así que las
+        // trampillas horizontales eran irrompibles.
+        Collider2D[] impactadosDoors = destructibleLayer != 0
+            ? Physics2D.OverlapCircleAll(pogoPoint.position, pogoRadius, destructibleLayer)
+            : new Collider2D[0];
+
         // [FIX-2] Sin impacto → ataque visual sin rebote. Se elimina el
         // ApplyDamageArea() que usaba attackPoint (punto lateral) en lugar
         // de pogoPoint — era código muerto que no detectaba nada correcto.
-        if (impactados.Length == 0)
+        if (impactados.Length == 0 && impactadosDoors.Length == 0)
         {
             Debug.Log("[Pogo] Sin impacto — ataque visual ejecutado, sin rebote.");
             return;
@@ -246,6 +253,20 @@ public class RomeritoCombat : MonoBehaviour
             if (destruible != null)
             {
                 destruible.RecibirGolpe(DanoConPasiva(attackDamage), currentFavor); // [FAVOR-PASIVA]
+                rebotar = true;
+            }
+        }
+
+        // [FIX-Trapdoor] Caso C — Puertas destructibles debajo.
+        foreach (Collider2D col in impactadosDoors)
+        {
+            RoomDoor door = col.GetComponent<RoomDoor>();
+            if (door != null) { door.RecibirGolpe(); rebotar = true; continue; }
+
+            PuertaUnilateral puerta = col.GetComponent<PuertaUnilateral>();
+            if (puerta != null)
+            {
+                puerta.RecibirGolpe(transform.position);
                 rebotar = true;
             }
         }
@@ -561,7 +582,17 @@ public class RomeritoCombat : MonoBehaviour
             foreach (Collider2D hit in hitDoors)
             {
                 RoomDoor door = hit.GetComponent<RoomDoor>();
-                if (door != null) { door.RecibirGolpe(); _golpeConectado = true; } // [RECOIL-FIX]
+                if (door != null) { door.RecibirGolpe(); _golpeConectado = true; continue; } // [RECOIL-FIX]
+
+                // Puertas unilaterales (shortcuts): solo aceptan golpes del lado marcado.
+                // Del lado equivocado rebota — sin daño, pero _golpeConectado = true
+                // para que el recoil de Romerito dispare y el impacto se sienta.
+                PuertaUnilateral puerta = hit.GetComponent<PuertaUnilateral>();
+                if (puerta != null)
+                {
+                    puerta.RecibirGolpe(transform.position);
+                    _golpeConectado = true;
+                }
             }
         }
     }
