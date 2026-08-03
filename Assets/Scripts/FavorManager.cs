@@ -102,6 +102,10 @@ public class FavorManager : MonoBehaviour
 
     void Update()
     {
+
+        // Bloquear ejecución de Favor si hay un interactuable en rango
+        if (InteractionManager.HayInteractuableActivo) return;
+
         // ── Gates: mismas reglas que el resto de la UI/combate ──
         if (DialogueManager.IsActive) return;
         if (PochtecahShopUI.IsOpen) return;

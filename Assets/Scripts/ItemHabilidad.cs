@@ -1,6 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// ============================================================
+//  ItemHabilidad — refactor Opción B
+// ============================================================
+//  CAMBIOS respecto a versión previa:
+//  - Lógica del pickup extraída a Recoger(GameObject jugador) público.
+//  - Nuevo flag pickupAutomatico (default TRUE) para no romper otros
+//    pickups existentes. En el altar del Macahuitl debe estar FALSE
+//    para que MacahuitlPickup controle el flujo vía "Presiona B".
+//  - WaitForSeconds → WaitForSecondsRealtime en la corrutina, para
+//    que el ocultamiento no se congele si el modal de tutorial pausa
+//    el juego con Time.timeScale = 0 durante 0.5s.
+// ============================================================
+
 public class ItemHabilidad : MonoBehaviour
 {
     public enum HabilidadTipo
@@ -23,6 +36,11 @@ public class ItemHabilidad : MonoBehaviour
     public SpriteRenderer itemSprite;
     public Collider2D itemCollider;
 
+    [Header("Modo de Recogida")]
+    [Tooltip("Si es verdadero (default), el objeto se recoge al contacto con el Player. " +
+             "Si es falso, otro script (ej: MacahuitlPickup) debe llamar Recoger() manualmente.")]
+    public bool pickupAutomatico = true;
+
     [Header("Reseteable")]
     [Tooltip("Si es verdadero, el objeto puede ser restaurado al altar (ej: sala del Macahuitl). " +
              "Si es falso, se destruye permanentemente al recogerlo como antes.")]
@@ -30,18 +48,36 @@ public class ItemHabilidad : MonoBehaviour
 
     private bool recogido = false;
 
-    // ── Trigger ──────────────────────────────────────────────
+    public bool YaRecogido => recogido;
+
+    // ── Trigger (solo si pickupAutomatico) ────────────────────
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!pickupAutomatico) return;
         if (!collision.CompareTag("Player") || recogido) return;
+
+        Recoger(collision.gameObject);
+    }
+
+    // ── API Pública: Recoger ──────────────────────────────────
+
+    /// <summary>
+    /// Ejecuta el pickup completo: aplica la habilidad al Player,
+    /// instancia efectos y arranca la secuencia de ocultamiento.
+    /// Llamado por OnTriggerEnter2D (pickup automático) o por otro
+    /// script como MacahuitlPickup.Interactuar() (pickup manual).
+    /// </summary>
+    public void Recoger(GameObject jugador)
+    {
+        if (recogido || jugador == null) return;
 
         recogido = true;
 
         // CASO 1: Es el arma
         if (habilidadADesbloquear == HabilidadTipo.Macuahuitl)
         {
-            RomeritoCombat combate = collision.GetComponent<RomeritoCombat>();
+            RomeritoCombat combate = jugador.GetComponent<RomeritoCombat>();
             if (combate != null)
             {
                 combate.EquiparMacuahuitl();
@@ -51,7 +87,7 @@ public class ItemHabilidad : MonoBehaviour
         // CASO 2: Es una habilidad de movimiento
         else
         {
-            RomeritoMovement movimiento = collision.GetComponent<RomeritoMovement>();
+            RomeritoMovement movimiento = jugador.GetComponent<RomeritoMovement>();
             if (movimiento != null)
             {
                 string abilityString = habilidadADesbloquear switch
@@ -67,7 +103,7 @@ public class ItemHabilidad : MonoBehaviour
             }
         }
 
-        // Feedback y ocultamiento
+        // Feedback visual
         if (pickUpEffect != null)
             Instantiate(pickUpEffect, transform.position, Quaternion.identity);
 
@@ -81,32 +117,25 @@ public class ItemHabilidad : MonoBehaviour
         if (itemSprite != null) itemSprite.enabled = false;
         if (itemCollider != null) itemCollider.enabled = false;
 
-        yield return new WaitForSeconds(0.5f);
+        // Realtime: no se congela con Time.timeScale = 0 (modal tutorial).
+        yield return new WaitForSecondsRealtime(0.5f);
 
         if (esReseteable)
         {
-            // ★ CAMBIO CLAVE: en lugar de destruir, dejamos el GameObject
-            //   en escena pero desactivado. RestoreToAltar() lo reactiva.
-            //   El sprite y el collider ya están apagados desde arriba.
-            //   No hacemos nada más aquí.
+            // No destruir: queda desactivado visualmente hasta que
+            // RestoreToAltar() → Restaurar() lo restaure.
         }
         else
         {
-            // Comportamiento original para ítems de un solo uso (habilidades, etc.)
             Destroy(gameObject);
         }
     }
 
-    // ── API Pública ───────────────────────────────────────────
+    // ── Restauración (llamada por MacahuitlPickup.RestoreToAltar) ──
 
-    /// <summary>
-    /// Llamado por MacahuitlPickup.RestoreToAltar() (o directamente por
-    /// MacahuitlRoomManager) cuando la sala se resetea.
-    /// Devuelve el objeto a su estado inicial sin moverlo de posición.
-    /// </summary>
     public void Restaurar()
     {
-        if (!esReseteable) return;  // Seguridad: solo resetear los que deben serlo
+        if (!esReseteable) return;
 
         recogido = false;
 

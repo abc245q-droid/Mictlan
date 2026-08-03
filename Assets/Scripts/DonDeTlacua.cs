@@ -128,7 +128,10 @@ public class DonDeTlacua : MonoBehaviour
         }
 
         // Revelar el PanelTonalli
-        if (panelTonalli != null)
+        HUDCanvas hud = FindObjectOfType<HUDCanvas>();
+        if (hud != null)
+            hud.InicializarEstadoHUD();
+        else if (panelTonalli != null)
             panelTonalli.SetActive(true);
 
         // Efecto visual sobre Romerito
