@@ -46,3 +46,7 @@ crashlytics-build.properties
 
 # Archivos especificos de Windows
 Thumbs.db
+
+# Scripts de parcheo - herramientas locales, no forman parte del proyecto
+parche_*.py
+extraer_*.py

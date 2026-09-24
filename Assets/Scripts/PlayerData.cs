@@ -8,6 +8,14 @@ public class PlayerData
     public float positionY;
     public string currentScene; // Nombre de la escena actual
 
+    // ¿positionX/Y apuntan a un Cihuacalli real, o siguen en (0,0) porque
+    // el jugador aún no ha tocado ninguno? Sin esta bandera, "Continuar"
+    // sobre una partida muy temprana teletransportaría a Romerito al
+    // origen del mundo — normalmente dentro del terreno o en el vacío.
+    // JsonUtility rellena los campos ausentes con default(bool) = false,
+    // así que los saves antiguos se leen sin romperse.
+    public bool tieneCheckpointGuardado = false;
+
     // --- HABILIDADES DE MOVIMIENTO ---
     public bool unlockDoubleJump;
     public bool unlockRun;

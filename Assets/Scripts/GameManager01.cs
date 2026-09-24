@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using System.IO; // Necesario para guardar archivos
+using Unity.Cinemachine; // Cinemachine 3.x — corte de cámara al reposicionar
 
 public class GameManager01 : MonoBehaviour
 {
@@ -20,11 +22,106 @@ public class GameManager01 : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
             LoadGame(); // Al iniciar el juego, intentamos cargar datos previos
+
+            // sceneLoaded se dispara DESPUÉS de todos los Awake de la escena
+            // nueva y ANTES de todos los Start. Es exactamente la ventana que
+            // necesitamos para colocar a Romerito: ya existe (su Awake corrió)
+            // pero CameraFinder.Start todavía no ha enganchado la Cinemachine,
+            // así que la cámara se inicializa ya sobre la posición correcta y
+            // no hay que forzar ningún corte de cámara.
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        if (instance == this)
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene escena, LoadSceneMode modo)
+    {
+        if (SesionMictlan.intencion != IntencionArranque.Continuar) return;
+
+        // La intención se consume aunque falle la colocación: no queremos que
+        // se quede pegada y teletransporte a Romerito al cambiar de sala.
+        SesionMictlan.intencion = IntencionArranque.Ninguna;
+
+        if (!currentData.tieneCheckpointGuardado)
+        {
+            // Partida guardada antes de tocar ningún Cihuacalli: Romerito se
+            // queda donde el diseñador lo colocó en la escena.
+            Debug.Log("[GameManager] Continuar sin Cihuacalli previo: " +
+                      "Romerito arranca en el spawn de la escena.");
+            return;
+        }
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError("[GameManager] No hay Player en '" + escena.name +
+                           "'. No se pudo restaurar la posición.");
+            return;
+        }
+
+        player.transform.position = lastCheckPointPos;
+
+        Rigidbody2D rbJugador = player.GetComponent<Rigidbody2D>();
+        if (rbJugador != null)
+        {
+            rbJugador.linearVelocity = Vector2.zero;
+            rbJugador.angularVelocity = 0f;
+        }
+
+        // La colocación resuelve DÓNDE tiene que mirar la cámara, pero no
+        // impide que llegue ahí interpolando. Esto es lo que corta.
+        CortarCamara();
+        StartCoroutine(CortarCamaraTrasUnFrame());
+
+        Debug.Log("[GameManager] Romerito restaurado en " + lastCheckPointPos);
+    }
+
+    // ── Corte de cámara ──────────────────────────────────────
+
+    /// <summary>
+    /// Invalida el estado previo de todas las CinemachineCamera de la escena.
+    ///
+    /// PreviousStateIsValid = false hace que Cinemachine trate su próximo
+    /// update como el primer frame de esa cámara: sin estado anterior no hay
+    /// nada que interpolar y el damping no entra en juego. Es el mecanismo
+    /// que la propia Cinemachine usa internamente al activar una cámara.
+    ///
+    /// No confundir con poner el Damping a 0: eso mataría el peso de la
+    /// cámara durante todo el juego. Aquí sólo se salta UN frame.
+    /// </summary>
+    void CortarCamara()
+    {
+        var camaras = FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+
+        foreach (var cam in camaras)
+            cam.PreviousStateIsValid = false;
+    }
+
+    /// <summary>
+    /// Segunda pasada, un frame después.
+    ///
+    /// CameraFinder.Start() asigna el Follow y CameraLookControl.Start()
+    /// engancha el CinemachinePositionComposer. Ambos corren DESPUÉS de
+    /// sceneLoaded, y cualquiera de los dos puede dejar la cámara con
+    /// estado válido antes de que llegue a encuadrar a Romerito.
+    ///
+    /// Repetir el corte aquí cuesta un FindObjectsByType y nos hace
+    /// inmunes al orden de ejecución, que no queremos tener que recordar
+    /// cada vez que añadamos un componente a la cámara.
+    /// </summary>
+    IEnumerator CortarCamaraTrasUnFrame()
+    {
+        yield return null;
+        CortarCamara();
     }
 
     // --- SISTEMA DE GUARDADO ---
@@ -38,20 +135,17 @@ public class GameManager01 : MonoBehaviour
         string json = JsonUtility.ToJson(currentData, true);
 
         // 3. Escribir en disco
-        string path = Application.persistentDataPath + "/romerito_save.json";
-        File.WriteAllText(path, json);
+        File.WriteAllText(SaveSystem.Ruta, json);
 
-        Debug.Log("Juego Guardado en: " + path);
+        Debug.Log("Juego Guardado en: " + SaveSystem.Ruta);
     }
 
     public void LoadGame()
     {
-        string path = Application.persistentDataPath + "/romerito_save.json";
-
-        if (File.Exists(path))
+        if (File.Exists(SaveSystem.Ruta))
         {
             // 1. Leer texto
-            string json = File.ReadAllText(path);
+            string json = File.ReadAllText(SaveSystem.Ruta);
 
             // 2. Convertir Texto a Datos
             currentData = JsonUtility.FromJson<PlayerData>(json);
@@ -76,8 +170,24 @@ public class GameManager01 : MonoBehaviour
             // Guardar Posición
             // (Ojo: Generalmente guardamos la del último Checkpoint, no la actual exacta, 
             // pero si quieres guardar exacto usa player.transform.position)
-            currentData.positionX = lastCheckPointPos.x;
-            currentData.positionY = lastCheckPointPos.y;
+            if (guardarEnPosicionActual)
+            {
+                // Guardado manual desde el menú de pausa con la opción de
+                // "guardar donde estoy". No marcamos tieneCheckpointGuardado
+                // como algo distinto: para Continuar es una posición válida
+                // igual que un Cihuacalli.
+                currentData.positionX = player.transform.position.x;
+                currentData.positionY = player.transform.position.y;
+                currentData.tieneCheckpointGuardado = true;
+                lastCheckPointPos = player.transform.position;
+                guardarEnPosicionActual = false; // se consume, no es un modo
+            }
+            else
+            {
+                currentData.positionX = lastCheckPointPos.x;
+                currentData.positionY = lastCheckPointPos.y;
+            }
+
             currentData.currentScene = SceneManager.GetActiveScene().name;
 
             // Guardar Movimiento
@@ -118,7 +228,43 @@ public class GameManager01 : MonoBehaviour
     public void UpdateCheckPoint(Vector2 pos)
     {
         lastCheckPointPos = pos;
+
+        if (currentData != null)
+            currentData.tieneCheckpointGuardado = true;
+
         SaveGame(); // ¡Guardado Automático al tocar Checkpoint!
+    }
+
+    // ── GUARDADO MANUAL (menú de pausa) ──────────────────────
+
+    /// <summary>
+    /// Bandera de un solo uso leída por GatherDataFromPlayer. Se pone a true
+    /// justo antes de un SaveGame para que esa escritura concreta use la
+    /// posición actual de Romerito en vez del último Cihuacalli.
+    /// </summary>
+    [System.NonSerialized] public bool guardarEnPosicionActual = false;
+
+    /// <summary>
+    /// Guardado invocado desde el menú de pausa.
+    /// </summary>
+    /// <param name="usarPosicionActual">
+    /// true  → Romerito reaparecerá exactamente donde está ahora.
+    ///         Cómodo, pero permite guardar sobre pinchos o en caída libre.
+    /// false → reaparecerá en su último Cihuacalli (comportamiento clásico
+    ///         de Metroidvania; es lo que ya hace la muerte).
+    /// </param>
+    public void GuardarDesdeMenuPausa(bool usarPosicionActual)
+    {
+        // Si nunca ha tocado un Cihuacalli no hay checkpoint al que volver,
+        // así que forzamos posición actual: es eso o perder toda la sesión.
+        if (!usarPosicionActual && currentData != null &&
+            !currentData.tieneCheckpointGuardado)
+        {
+            usarPosicionActual = true;
+        }
+
+        guardarEnPosicionActual = usarPosicionActual;
+        SaveGame();
     }
 
 
@@ -164,14 +310,8 @@ public class GameManager01 : MonoBehaviour
     // --- NUEVA PARTIDA ---
     public void NewGame()
     {
-        string path = Application.persistentDataPath + "/romerito_save.json";
-
         // 1. Borrar el archivo físico si existe
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-            Debug.Log("Archivo de guardado eliminado.");
-        }
+        SaveSystem.Borrar();
 
         // 2. Resetear los datos en la memoria RAM
         currentData = new PlayerData(); // Crea una hoja en blanco
@@ -191,8 +331,7 @@ public class GameManager01 : MonoBehaviour
     [ContextMenu("Borrar Save (Desarrollo)")]
     public void BorrarSaveDesarrollo()
     {
-        string path = Application.persistentDataPath + "/romerito_save.json";
-        if (File.Exists(path)) File.Delete(path);
+        SaveSystem.Borrar();
         currentData = new PlayerData();
         Debug.Log("[Dev] Save borrado. Próximo Play empieza desde cero.");
     }
