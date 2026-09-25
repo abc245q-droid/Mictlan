@@ -25,14 +25,14 @@ MonoBehaviour:
       expresion: 
       limpiarRetratos: 0
     - speaker: 
-      text: "He esperado a alguien como t\xFA, ajolote."
+      text: "\xA1Vaya! \xBFPero qu\xE9 es esto? "
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 0}
       expresion: 
       limpiarRetratos: 0
     - speaker: Mictlantecuhtli
-      text: "Aunque no entiendes qu\xE9 significan tus pasos en mi reino."
+      text: Curioso, muy curioso...
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: a6577ef44d7cc714a989818ebc87af55, type: 2}
@@ -54,7 +54,15 @@ MonoBehaviour:
       expresion: 
       limpiarRetratos: 0
     - speaker: Mictlantecuhtli
-      text: "La salida est\xE1 arriba. Pero deber\xE1s ser fuerte."
+      text: "Te dejar\xE9 continuar, peque\xF1o ajolote. Pero te lo advierto, mi
+        Reino no es amable con los que viajan al rev\xE9s."
+      speakerColor: {r: 0, g: 0, b: 0, a: 0}
+      esAcotacion: 0
+      personaje: {fileID: 11400000, guid: a6577ef44d7cc714a989818ebc87af55, type: 2}
+      expresion: 
+      limpiarRetratos: 0
+    - speaker: Mictlantecuhtli
+      text: "\xA1JA! \xA1Qu\xE9 divertido! \xBFHasta d\xF3nde podr\xE1s llegar?"
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: a6577ef44d7cc714a989818ebc87af55, type: 2}

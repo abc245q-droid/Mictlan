@@ -50,3 +50,7 @@ Thumbs.db
 # Scripts de parcheo - herramientas locales, no forman parte del proyecto
 parche_*.py
 extraer_*.py
+
+# Proyectos de IDE generados por Unity
+*.csproj
+*.sln

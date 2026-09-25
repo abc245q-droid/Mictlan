@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b79450cde8d0d0949953cacce4dc2107, type: 3}
-  m_Name: msj_mover
+  m_Name: msj_tonalli
   m_EditorClassIdentifier: Assembly-CSharp::MensajeTutorial
-  id: tut_mover
-  texto: Usa el joystick izquierdo para moverte.
+  id: tut_tonalli
+  texto: "\xA1Ahora puedes almacenar el Tonalli que sueltan los enemigos!\n\nMant\xE9n
+    presionado Y para usarlo y curarte."
   iconoBoton: {fileID: 0}
-  tipo: 0
-  duracionToast: 5
+  tipo: 1
+  duracionToast: 4

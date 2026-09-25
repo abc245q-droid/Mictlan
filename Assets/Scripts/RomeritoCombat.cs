@@ -565,16 +565,18 @@ public class RomeritoCombat : MonoBehaviour
             }
 
             // --- CASO B: OBJETOS DESTRUIBLES ---
-            ObjetoDestruible paredScript = obj.GetComponent<ObjetoDestruible>();
-            if (paredScript != null)
-            {
-                paredScript.RecibirGolpe(dmg, currentFavor);
-                _golpeConectado = true; // [RECOIL-FIX]
-            }
+            //   [MOVIDO A CASO C]: ObjetoDestruible se detecta ahora en la
+            //   pasada de `destructibleLayer`, junto a RoomDoor y
+            //   PuertaUnilateral. Antaño vivía aquí sobre `enemyLayers`, lo
+            //   que hacía que un objeto en Layer "Destructible" (lo correcto
+            //   para paredes/puertas) fuese INDESTRUCTIBLE: bloqueaba paso
+            //   por colisión física pero el ataque nunca lo veía.
         }
 
-        // --- CASO C: PUERTAS DESTRUCTIBLES (RoomDoor) ---
-        // Usa una LayerMask separada ("Destructible") para no mezclar con enemigos.
+        // --- CASO C: DESTRUCTIBLES EN LAYER "Destructible" ---
+        //   RoomDoor, PuertaUnilateral y ObjetoDestruible (paredes, cofres,
+        //   jarrones, puertas simples). LayerMask separada para no mezclar
+        //   con `enemyLayers` — un destructible no es un enemigo.
         if (destructibleLayer != 0)
         {
             Collider2D[] hitDoors = Physics2D.OverlapCircleAll(origen, range, destructibleLayer);
@@ -591,6 +593,19 @@ public class RomeritoCombat : MonoBehaviour
                 if (puerta != null)
                 {
                     puerta.RecibirGolpe(transform.position);
+                    _golpeConectado = true;
+                    continue;
+                }
+
+                // Destructibles genéricos — paredes, cofres, jarrones,
+                // puertas simples. Respeta `debilidadEspecifica` del propio
+                // ObjetoDestruible: si el objeto exige un favor concreto y
+                // `currentFavor` no coincide, el golpe se descarta dentro de
+                // RecibirGolpe(). Aquí solo enrutamos.
+                ObjetoDestruible destr = hit.GetComponent<ObjetoDestruible>();
+                if (destr != null)
+                {
+                    destr.RecibirGolpe(dmg, currentFavor);
                     _golpeConectado = true;
                 }
             }

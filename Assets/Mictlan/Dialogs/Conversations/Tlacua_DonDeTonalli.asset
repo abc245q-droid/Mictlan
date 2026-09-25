@@ -17,46 +17,45 @@ MonoBehaviour:
   - nodeName: Don de Tlacua
     lines:
     - speaker: Tlacua
-      text: Ajolote
+      text: "\xA1Vaya! Esa Tlahuelpuchtli s\xED que da miedo, \xBFverdad?"
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "Llevas rato aqu\xED sin saber lo que tienes. Tu tonalli sigue prendido.
-        D\xE9bil, pero prendido."
+      text: Yo soy Tlacua, emisario de Huehueteotl, nuestro padre.
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "Los que caen cerca de ti dejan algo atr\xE1s. No lo ves. Yo s\xED. Siempre
-        lo veo \u2014 es lo que hago."
+      text: "Me ha otorgado la misi\xF3n de encender los braseros de Chicunamictl\xE1n,
+        \xA1pero esas brujas no dejan de molestarme!"
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "Podr\xEDa ense\xF1arte a atraparlo. A guardarlo aqu\xED, donde todav\xEDa
-        tienes calor."
+      text: "\xA1Oye! T\xFA pareces ser fuerte, \xBFme ayudas? A cambio te puedo
+        entregar un contenedor de Tonalli."
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "No es gratis. Los braseros del Chicunamictlan se apagaron. Sin braseros,
-        las almas no saben ad\xF3nde ir. Se dispersan. Se pierden del todo."
+      text: "En total son 9 braseros, hay que encenderlos por el ritual del fuego
+        neuvo, t\xFA sabes..."
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "T\xFA los enciendes. Yo te ense\xF1o a usar lo que ya es tuyo. \xBFParejo?"
+      text: "T\xFA despejas la zona de Mictecahs y yo los enciendo, \xBFtrato?"
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
@@ -64,29 +63,28 @@ MonoBehaviour:
       limpiarRetratos: 0
     - speaker: 
       text: "Romerito asiente. Tlacua extiende una mano peque\xF1a y sucia. Un calor
-        dorado recorre el pecho del ajolote \u2014 algo que siempre estuvo ah\xED,
-        pero que ahora reconoce."
+        dorado recorre el pecho del ajolote."
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 1
       personaje: {fileID: 0}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: Bien. Desde ahora, lo que caiga cerca tuyo te deja algo.
+      text: Listo, ahora puedes usar el Tonalli disperso para curarte.
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: "Y cuando necesites un latido de m\xE1s \u2014 ya sabes c\xF3mo pedirlo."
+      text: "M\xE1s adelante hay uno de los braseros..."
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}
       expresion: 
       limpiarRetratos: 0
     - speaker: Tlacua
-      text: Los braseros, ajolote. No se te olvide.
+      text: "\xA1Vamos!"
       speakerColor: {r: 0, g: 0, b: 0, a: 0}
       esAcotacion: 0
       personaje: {fileID: 11400000, guid: fb732a6c0cbc188498d6397c3c3d04e0, type: 2}

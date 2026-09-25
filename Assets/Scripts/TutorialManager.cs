@@ -58,15 +58,7 @@ public class TutorialManager : MonoBehaviour
     void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            var msj = ScriptableObject.CreateInstance<MensajeTutorial>();
-            msj.id = "test_" + Time.time;
-            msj.texto = "Toast de prueba";
-            msj.tipo = TipoMensajeTutorial.Toast;
-            msj.duracionToast = 3f;
-            Mostrar(msj);
-        }
+      
 
         if (modalActivo && Input.GetButtonDown(botonSubmit))
             CerrarModal();

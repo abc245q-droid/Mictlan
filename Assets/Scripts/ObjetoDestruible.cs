@@ -14,7 +14,7 @@ public class ObjetoDestruible : MonoBehaviour
     public SpriteRenderer spriteRenderer;
 
     private int golpesActuales;
-    private bool esInvulnerable = false; // <--- EL CANDADO DE SEGURIDAD
+    public bool esInvulnerable = false; // <--- EL CANDADO DE SEGURIDAD
 
     void Start()
     {
