@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -108,6 +108,15 @@ public class DialogueManager : MonoBehaviour
         IsActive = false;
     }
 
+    void OnDestroy()
+    {
+        // Si la escena se descarga a mitad de un diálogo, no dejar el
+        // mundo pausado. Solo la instancia viva: un duplicado destruido
+        // en Awake no debe liberar la pausa de la instancia real.
+        if (Instance == this && IsActive)
+            PausaMundo.Liberar(PausaMundo.Dialogo);
+    }
+
     void Update()
     {
         if (!IsActive) return;
@@ -158,6 +167,9 @@ public class DialogueManager : MonoBehaviour
         bloquearInputUnFrame = true;
 
         CongelarJugador(true);
+        // Congela el mundo: enemigos, físicas y proyectiles. El
+        // typewriter usa unscaledDeltaTime, así que sigue escribiendo.
+        PausaMundo.Solicitar(PausaMundo.Dialogo);
 
         if (dialoguePanel != null) dialoguePanel.SetActive(true);
         OcultarOpciones();
@@ -381,6 +393,11 @@ public class DialogueManager : MonoBehaviour
         Conversation terminada = convoActual;
         convoActual = null;
         nodoActual = null;
+
+        // Reanudar ANTES del callback: si el callback abre algo que
+        // también pausa (tienda, modal de tutorial), su Solicitar()
+        // llega después y el mundo sigue en pausa sin un frame suelto.
+        PausaMundo.Liberar(PausaMundo.Dialogo);
 
         // Primero el callback puntual, luego el evento global.
         System.Action cb = onComplete;

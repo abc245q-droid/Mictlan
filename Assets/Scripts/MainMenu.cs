@@ -74,7 +74,7 @@ public class MainMenu : MonoBehaviour
         // Si venimos de "Volver al Inicio", timeScale podría haber quedado
         // en 0 si el menú de pausa usaba Time.timeScale. Sin esto el menú
         // arranca con las animaciones congeladas.
-        Time.timeScale = 1f;
+        PausaMundo.Resetear();
 
         // El Steam Deck no tiene cursor en Modo Gaming, pero en Modo
         // Escritorio y en el editor sí. Lo liberamos por si el gameplay

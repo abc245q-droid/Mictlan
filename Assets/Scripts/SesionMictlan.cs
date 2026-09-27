@@ -70,7 +70,7 @@ public static class SesionMictlan
         // partida. Se resetea solo en el Awake del DialogueManager de la
         // escena nueva, pero lo dejamos explícito por si el menú llegara
         // a necesitar input antes de eso.
-        Time.timeScale = 1f;
+        PausaMundo.Resetear();
 
         var sonda = new GameObject("[SondaDDOL]");
         Object.DontDestroyOnLoad(sonda);

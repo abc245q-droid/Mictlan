@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -12,7 +12,7 @@ using TMPro;
 //  detalle que muestra la descripción de la fila seleccionada.
 //
 //  Reusa los patrones del juego:
-//    • Congela a Romerito SIN timeScale (igual que DialogueManager).
+//    • Congela a Romerito y pausa el mundo vía PausaMundo.
 //    • Selección por EventSystem para navegar con el mando.
 //    • Bandera estática IsOpen para que NPCs/Cihuacalli ignoren input.
 //
@@ -74,7 +74,11 @@ public class PochtecahShopUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (IsOpen) IsOpen = false;
+        if (IsOpen)
+        {
+            IsOpen = false;
+            PausaMundo.Liberar(PausaMundo.Tienda);
+        }
     }
 
     void Update()
@@ -97,6 +101,7 @@ public class PochtecahShopUI : MonoBehaviour
         bloquearInputUnFrame = true;   // el mismo B que abrió no cierra
 
         CongelarJugador(true);
+        PausaMundo.Solicitar(PausaMundo.Tienda);
         if (panel != null) panel.SetActive(true);
         if (hudJuego != null) hudJuego.SetActive(false);   // ← AÑADIR
         if (mensajeLabel != null) mensajeLabel.text = "";
@@ -114,6 +119,7 @@ public class PochtecahShopUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
         if (hudJuego != null) hudJuego.SetActive(true);    // ← AÑADIR
         CongelarJugador(false);
+        PausaMundo.Liberar(PausaMundo.Tienda);
         if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
 
         onCerrar?.Invoke();

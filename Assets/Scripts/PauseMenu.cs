@@ -142,6 +142,10 @@ public class PauseMenu : MonoBehaviour
         // No pausar si hay un diálogo activo
         if (DialogueManager.IsActive) return;
 
+        // Ni con la tienda abierta: Reanudar() re-habilitaría a
+        // Romerito con el panel de la tienda todavía en pantalla.
+        if (PochtecahShopUI.IsOpen) return;
+
         // Alternar pausa
         if (pausado)
             Reanudar();
@@ -185,7 +189,7 @@ public class PauseMenu : MonoBehaviour
         // Congelar juego
         if (usarTimeScale)
         {
-            Time.timeScale = 0f;
+            PausaMundo.Solicitar(PausaMundo.MenuPausa);
         }
         else
         {
@@ -210,7 +214,7 @@ public class PauseMenu : MonoBehaviour
         // Descongelar juego
         if (usarTimeScale)
         {
-            Time.timeScale = 1f;
+            PausaMundo.Liberar(PausaMundo.MenuPausa);
         }
         else
         {
@@ -285,7 +289,7 @@ public class PauseMenu : MonoBehaviour
         // Romerito congelado y timeScale a 0, la corrutina de transición
         // seguiría funcionando (yield return null es por frames) pero el
         // menú arrancaría con las animaciones muertas.
-        Time.timeScale = 1f;
+        PausaMundo.Resetear();
 
         if (pausePanel != null)
             pausePanel.SetActive(false);

@@ -150,7 +150,7 @@ public class TutorialManager : MonoBehaviour
         grupoModal.alpha = 0f;
         modalActivo = true;
         frameAperturaModal = Time.frameCount;
-        Time.timeScale = 0f;
+        PausaMundo.Solicitar(PausaMundo.ModalTutorial);
         StartCoroutine(FadeModal(0f, 1f));
     }
 
@@ -165,7 +165,7 @@ public class TutorialManager : MonoBehaviour
     {
         yield return FadeModal(1f, 0f);
         panelModal.SetActive(false);
-        Time.timeScale = 1f;
+        PausaMundo.Liberar(PausaMundo.ModalTutorial);
     }
 
     private IEnumerator FadeModal(float desde, float hasta)

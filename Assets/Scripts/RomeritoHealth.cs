@@ -358,6 +358,8 @@ public class RomeritoHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         if (isInvulnerable || invulnerableExterno || isDead) return;
+        // Mundo en pausa (diálogo, tienda, modal): ningún daño entra.
+        if (PausaMundo.Activa) return;
 
         currentHealth -= damage;
         if (heartSystem != null) heartSystem.UpdateHearts(currentHealth);
@@ -375,6 +377,8 @@ public class RomeritoHealth : MonoBehaviour
     public void TakeHazardDamage(Vector2 safePos)
     {
         if (isInvulnerable || invulnerableExterno || isDead) return;
+        // Mundo en pausa (diálogo, tienda, modal): ningún daño entra.
+        if (PausaMundo.Activa) return;
 
         // Si es el último corazón → muerte normal (DieRoutine)
         if (currentHealth - 1 <= 0)
