@@ -101,6 +101,10 @@ public class RomeritoMovement : MonoBehaviour
     // Timers
     private float coyoteTimeCounter;
     private float jumpBufferCounter;
+    // Frame en que Romerito recuperó el control (reanudar pausa, fin de
+    // diálogo, cierre de tienda). A es Submit Y Jump: la pulsación que
+    // cierra la UI no debe convertirse en salto. Ver SaltoPresionado().
+    private int frameRecuperoControl = -1;
     private float airControlTimer;
 
     // Corrutinas
@@ -185,7 +189,7 @@ public class RomeritoMovement : MonoBehaviour
         }
 
         // 4. TIMERS DE SALTO
-        if (Input.GetButtonDown("Jump")) jumpBufferCounter = jumpBufferTime;
+        if (SaltoPresionado()) jumpBufferCounter = jumpBufferTime;
         else jumpBufferCounter -= Time.deltaTime;
 
         if (isGrounded) coyoteTimeCounter = coyoteTime;
@@ -206,7 +210,7 @@ public class RomeritoMovement : MonoBehaviour
 
         // 6. LÓGICA DE WALL JUMP
         // Permitimos saltar tanto si deslizamos COMO si escalamos
-        if (Input.GetButtonDown("Jump") && (isWallSliding || isClimbing) && !isDashing && unlockWallJump)
+        if (SaltoPresionado() && (isWallSliding || isClimbing) && !isDashing && unlockWallJump)
         {
             wallJumpRequest = true;
             jumpBufferCounter = 0;
@@ -214,7 +218,7 @@ public class RomeritoMovement : MonoBehaviour
 
         // LÓGICA DE DOBLE SALTO
         // Añadimos !isClimbing a las restricciones
-        if (Input.GetButtonDown("Jump") && !isGrounded && unlockDoubleJump && canDoubleJump && !isTouchingWall && !isClimbing)
+        if (SaltoPresionado() && !isGrounded && unlockDoubleJump && canDoubleJump && !isTouchingWall && !isClimbing)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             canDoubleJump = false;
@@ -579,10 +583,32 @@ public class RomeritoMovement : MonoBehaviour
         Debug.Log($"[Pogo] Rebote aplicado con fuerza {force}");
     }
 
+    // ── Input de salto filtrado ──────────────────────────────
+
+    /// <summary>
+    /// GetButtonDown("Jump") filtrado: ignora el botón con el mundo en
+    /// pausa (modal de tutorial, diálogo, tienda — A cargaba el jump
+    /// buffer y, con deltaTime = 0, nunca caducaba) y en el frame en que
+    /// Romerito recupera el control.
+    /// </summary>
+    private bool SaltoPresionado()
+    {
+        if (PausaMundo.Activa) return false;
+        if (Time.frameCount <= frameRecuperoControl) return false;
+        // Menú de pausa con usarTimeScale=true o modal de tutorial: no nos
+        // deshabilitan, pero el mundo se reanuda en el frame del botón.
+        if (Time.frameCount <= PausaMundo.FrameReanudacion) return false;
+        return Input.GetButtonDown("Jump");
+    }
+
     // ── Congelado durante diálogos ───────────────────────────
 
     void OnEnable()
     {
+        // PauseMenu y PochtecahShopUI nos re-habilitan en el mismo frame
+        // en que se pulsó el botón que los cierra.
+        frameRecuperoControl = Time.frameCount;
+
         if (DialogueManager.Instance == null) return;
         DialogueManager.Instance.OnDialogueStarted += CongelarParaDialogo;
         DialogueManager.Instance.OnDialogueEnded += DescongelarDespuesDialogo;
@@ -605,6 +631,8 @@ public class RomeritoMovement : MonoBehaviour
 
     void DescongelarDespuesDialogo(Conversation _)
     {
+        // El A que cierra la última línea no debe saltar.
+        frameRecuperoControl = Time.frameCount;
         // El movimiento se reactiva solo cuando IsActive vuelve a false.
         // No hace falta hacer nada extra aquí, pero puedes añadir
         // efectos visuales de "reaparición" si quieres.

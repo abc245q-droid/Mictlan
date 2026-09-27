@@ -36,6 +36,13 @@ public static class PausaMundo
 
     private static readonly HashSet<string> motivos = new HashSet<string>();
 
+    /// <summary>
+    /// Frame en que el mundo se reanudó por última vez (el último motivo
+    /// se liberó). Sirve para descartar el botón que cerró la UI: A es
+    /// Submit y también Jump.
+    /// </summary>
+    public static int FrameReanudacion { get; private set; } = -1;
+
     /// <summary>True si hay al menos un motivo de pausa activo.</summary>
     public static bool Activa => motivos.Count > 0;
 
@@ -46,7 +53,9 @@ public static class PausaMundo
 
     public static void Liberar(string motivo)
     {
-        if (motivos.Remove(motivo)) Aplicar();
+        if (!motivos.Remove(motivo)) return;
+        if (motivos.Count == 0) FrameReanudacion = Time.frameCount;
+        Aplicar();
     }
 
     /// <summary>
@@ -70,5 +79,6 @@ public static class PausaMundo
     private static void LimpiarAlArrancar()
     {
         motivos.Clear();
+        FrameReanudacion = -1;
     }
 }
