@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: msj_tonalli
   m_EditorClassIdentifier: Assembly-CSharp::MensajeTutorial
   id: tut_tonalli
-  texto: "\xA1Ahora puedes almacenar el Tonalli que sueltan los enemigos!\n\nMant\xE9n
-    presionado Y para usarlo y curarte."
+  texto: "Has obtenido la J\xEDcara contenedora de Tonalli.\n\nAhora puedes almacenar el Tonalli que desprenden tus enemigos.\n\nMant\xE9n presionado Y para gastarlo y recuperar corazones."
   iconoBoton: {fileID: 0}
   tipo: 1
   duracionToast: 4

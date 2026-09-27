@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 // ============================================================
@@ -16,6 +16,7 @@ using UnityEngine.Events;
 //       • Guarda partida
 //       • Muestra el PanelTonalli (antes oculto)
 //       • Dispara el efecto visual del don
+//       • Muestra el tutorial modal de la Jícara de Tonalli
 //       • Dispara el evento OnDonOtorgado (para animar a Tlacua, etc.)
 //
 //  SETUP EN UNITY:
@@ -25,6 +26,7 @@ using UnityEngine.Events;
 //       • conversacion → el asset Conversation del diálogo de Tlacua
 //       • panelTonalli → el GameObject "PanelTonalli" del HUD Canvas
 //       • efectoDon    → prefab de partículas doradas (opcional)
+//       • mensajeDon   → msj_tonalli (Assets/Mictlan/Tutoriales)
 //  3. Conecta el UnityEvent OnDonOtorgado a lo que quieras:
 //       • Animación de Tlacua celebrando
 //       • Activar la misión de los braseros
@@ -49,6 +51,11 @@ public class DonDeTlacua : MonoBehaviour
 
     [Tooltip("Duración en segundos que el efecto permanece activo.")]
     public float duracionEfecto = 2f;
+
+    [Header("Tutorial")]
+    [Tooltip("Mensaje modal que se muestra al obtener la Jícara " +
+             "contenedora de Tonalli (msj_tonalli).")]
+    public MensajeTutorial mensajeDon;
 
     [Header("Evento al otorgar el don")]
     [Tooltip("Se dispara cuando Tlacua otorga el don — " +
@@ -142,6 +149,11 @@ public class DonDeTlacua : MonoBehaviour
             GameObject fx = Instantiate(efectoDon, pos, Quaternion.identity);
             Destroy(fx, duracionEfecto);
         }
+
+        // Tutorial modal: la jícara ya puede almacenar Tonalli.
+        // TutorialManager lo marca como visto — no reaparece.
+        if (mensajeDon != null && TutorialManager.Instance != null)
+            TutorialManager.Instance.Mostrar(mensajeDon);
 
         // Desactivar el collider — ya no necesitamos el trigger
         Collider2D col = GetComponent<Collider2D>();

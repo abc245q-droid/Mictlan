@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +39,10 @@ public class TutorialManager : MonoBehaviour
     private readonly Queue<MensajeTutorial> colaToasts = new Queue<MensajeTutorial>();
     private Coroutine rutinaToast;
     private bool modalActivo;
+    // Frame en que se abrió el modal. Submit comparte A/Espacio/Enter
+    // con el avance de diálogo: si un modal se abre al terminar una
+    // conversación, esa misma pulsación no debe cerrarlo.
+    private int frameAperturaModal = -1;
 
     void Awake()
     {
@@ -60,7 +64,8 @@ public class TutorialManager : MonoBehaviour
 
       
 
-        if (modalActivo && Input.GetButtonDown(botonSubmit))
+        if (modalActivo && Time.frameCount > frameAperturaModal &&
+            Input.GetButtonDown(botonSubmit))
             CerrarModal();
     }
 
@@ -144,6 +149,7 @@ public class TutorialManager : MonoBehaviour
         panelModal.SetActive(true);
         grupoModal.alpha = 0f;
         modalActivo = true;
+        frameAperturaModal = Time.frameCount;
         Time.timeScale = 0f;
         StartCoroutine(FadeModal(0f, 1f));
     }
