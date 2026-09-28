@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 // ============================================================
 //  Trampa — Hazard genérico para MICTLÁN
@@ -27,6 +27,8 @@ using UnityEngine;
 //     (ajusta la forma al área peligrosa).
 //  3. Asigna el tipo de respawn en el Inspector.
 //  4. Opcional: asigna efectoContacto (partículas, splash, etc.)
+//  5. Pogo: permitePogo = true en pinchos/obsidiana (defecto).
+//     DESACTÍVALO en agua y vacío — ahí no se rebota.
 //  ─────────────────────────────────────────────────────────────
 
 public class Trampa : MonoBehaviour
@@ -63,15 +65,33 @@ public class Trampa : MonoBehaviour
              "Si es false, spawna en el centro de esta trampa.")]
     public bool efectoEnJugador = true;
 
+    [Header("Pogo")]
+    [Tooltip("Romerito puede rebotar sobre esta trampa con el pogo " +
+             "(abajo + ataque en el aire). Activo en pinchos/obsidiana. " +
+             "Desactívalo en agua y vacío.")]
+    public bool permitePogo = true;
+
+    [Tooltip("Efecto opcional en el punto del rebote " +
+             "(chispas de obsidiana, polvo, etc.).")]
+    public GameObject efectoPogo;
+
     // ── Unity ────────────────────────────────────────────────
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other) => Contacto(other);
+
+    // Stay además de Enter: si Romerito entra durante i-frames (golpe
+    // previo, rebote de pogo, Barrera de Copal), Enter no vuelve a
+    // dispararse y podía quedarse parado sobre los pinchos sin daño.
+    // Al dañar hay soft respawn, así que Stay no se repite.
+    void OnTriggerStay2D(Collider2D other) => Contacto(other);
+
+    void Contacto(Collider2D other)
     {
         // Solo el collider físico de Romerito (no sus triggers internos)
         if (!other.CompareTag("Player") || other.isTrigger) return;
 
         RomeritoHealth health = other.GetComponent<RomeritoHealth>();
-        if (health == null) return;
+        if (health == null || !health.PuedeRecibirDano) return;
 
         // Calcular posición de reaparición
         Vector2 safePos = ObtenerPosicionSegura(other.gameObject);
@@ -87,6 +107,18 @@ public class Trampa : MonoBehaviour
                 : transform.position;
             Instantiate(efectoContacto, posEfecto, Quaternion.identity);
         }
+    }
+
+    // ── Pogo ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// Llamado por RomeritoCombat.EjecutarPogo() al rebotar sobre esta
+    /// trampa. La trampa no recibe daño: solo feedback.
+    /// </summary>
+    public void RecibirPogo(Vector2 punto)
+    {
+        if (efectoPogo != null)
+            Instantiate(efectoPogo, punto, Quaternion.identity);
     }
 
     // ── Lógica de posición segura ────────────────────────────

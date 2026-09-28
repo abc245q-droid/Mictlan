@@ -215,17 +215,20 @@ public class RomeritoCombat : MonoBehaviour
             ? Physics2D.OverlapCircleAll(pogoPoint.position, pogoRadius, destructibleLayer)
             : new Collider2D[0];
 
+        // [POGO-TRAMPA] Pinchos debajo: rebote sin daño (ver helper).
+        bool trampaDebajo = HayTrampaPogoableDebajo();
+
         // [FIX-2] Sin impacto → ataque visual sin rebote. Se elimina el
         // ApplyDamageArea() que usaba attackPoint (punto lateral) en lugar
         // de pogoPoint — era código muerto que no detectaba nada correcto.
-        if (impactados.Length == 0 && impactadosDoors.Length == 0)
+        if (impactados.Length == 0 && impactadosDoors.Length == 0 && !trampaDebajo)
         {
             Debug.Log("[Pogo] Sin impacto — ataque visual ejecutado, sin rebote.");
             return;
         }
 
         // ── Golpeó algo: aplicar daño + rebote según el favor ──
-        bool rebotar = false;
+        bool rebotar = trampaDebajo;
 
         foreach (Collider2D col in impactados)
         {
@@ -323,6 +326,29 @@ public class RomeritoCombat : MonoBehaviour
         Debug.Log($"[Pogo] ¡Rebote! Favor: {currentFavor} | Impactados: {impactados.Length}");
     }
 
+
+    // ────────────────────────────────────────────────────────────
+    //  POGO SOBRE TRAMPAS (pinchos)
+    // ────────────────────────────────────────────────────────────
+
+    // [POGO-TRAMPA] ¿Hay una Trampa pogoable bajo el pogoPoint?
+    // Sin LayerMask a propósito: los pinchos son triggers en Default y
+    // Physics2D tiene 'Queries Hit Triggers' activo. Se filtra por
+    // componente. Basta con una: dos pinchos contiguos no duplican el
+    // efecto.
+    bool HayTrampaPogoableDebajo()
+    {
+        Collider2D[] cols = Physics2D.OverlapCircleAll(pogoPoint.position, pogoRadius);
+        foreach (Collider2D col in cols)
+        {
+            Trampa trampa = col.GetComponent<Trampa>();
+            if (trampa == null || !trampa.permitePogo) continue;
+
+            trampa.RecibirPogo(col.ClosestPoint(pogoPoint.position));
+            return true;
+        }
+        return false;
+    }
 
     // ────────────────────────────────────────────────────────────
     //  PASIVAS DE FAVOR

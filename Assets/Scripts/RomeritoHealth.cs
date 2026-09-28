@@ -82,6 +82,14 @@ public class RomeritoHealth : MonoBehaviour
     }
     private bool isDead = false;
 
+    /// <summary>
+    /// True si un golpe ahora mismo haría daño: sin i-frames, sin
+    /// invulnerabilidad externa (Barrera de Copal), vivo y con el mundo
+    /// sin pausa. Lo usa Trampa para ignorar contactos que no cuentan.
+    /// </summary>
+    public bool PuedeRecibirDano =>
+        !isInvulnerable && !invulnerableExterno && !isDead && !PausaMundo.Activa;
+
     // Estado del hold de curación (canal continuo)
     private bool estaCargando = false;
     private float cargaTimer = 0f;
