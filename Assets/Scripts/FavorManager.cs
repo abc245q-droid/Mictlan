@@ -109,6 +109,7 @@ public class FavorManager : MonoBehaviour
         // ── Gates: mismas reglas que el resto de la UI/combate ──
         if (DialogueManager.IsActive) return;
         if (PochtecahShopUI.IsOpen) return;
+        if (PausaMundo.Congelado) return;   // [IMPACTO] hit-stop
         if (MapScreenUI.IsOpen) return;
         if (!combat.tieneMacuahuitl) return;   // sin arma no hay favores
 

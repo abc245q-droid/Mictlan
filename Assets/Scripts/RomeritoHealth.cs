@@ -115,6 +115,28 @@ public class RomeritoHealth : MonoBehaviour
     // ── Evento para MacahuitlRoomManager ─────────────────────
     public event System.Action OnPlayerDied;
 
+    // ── [IMPACTO] Eventos para ImpactoDano (impact frames) ───
+    /// <summary>Datos de un golpe que SÍ quitó vida.</summary>
+    public struct InfoDano
+    {
+        public int dano;
+        public int vidaRestante;
+        /// <summary>El golpe quitó el último corazón.</summary>
+        public bool letal;
+        /// <summary>Vino de una Trampa / Hazard (soft respawn).</summary>
+        public bool porTrampa;
+    }
+
+    /// <summary>Se dispara en TakeDamage, ANTES de iniciar la muerte.</summary>
+    public event System.Action<InfoDano> OnDanoRecibido;
+
+    /// <summary>Se dispara al terminar Respawn().</summary>
+    public event System.Action OnRespawn;
+
+    // TakeHazardDamage marca el siguiente TakeDamage como golpe de trampa.
+    private bool siguienteDanoEsTrampa = false;
+    private Coroutine rutinaTeletransporte;
+
     private System.Func<IEnumerator> resetRoutineFactory = null;
 
     // ── Unity ────────────────────────────────────────────────
@@ -142,6 +164,12 @@ public class RomeritoHealth : MonoBehaviour
 
         if (cargaVFX == null)
             cargaVFX = GetComponent<CargaTonalliVFX>();
+
+        // [IMPACTO] Impact frames sin setup: si el prefab no lo trae, se
+        // añade con valores por defecto. Para ajustarlo de forma
+        // persistente, añádelo al prefab de Romerito.
+        if (GetComponent<ImpactoDano>() == null)
+            gameObject.AddComponent<ImpactoDano>();
 
         Debug.Log($"[RomeritoHealth] HeartSystem: {(heartSystem != null ? "ENCONTRADO" : "NULL")}");
         Debug.Log($"[RomeritoHealth] TonalliSystem: {(tonalliSystem != null ? "ENCONTRADO" : "NULL")}");
@@ -373,6 +401,18 @@ public class RomeritoHealth : MonoBehaviour
         if (heartSystem != null) heartSystem.UpdateHearts(currentHealth);
         Debug.Log("¡Romerito herido! Vida restante: " + currentHealth);
 
+        // [IMPACTO] Notificar ANTES de DieRoutine: el hit-stop tiene que
+        // estar pedido cuando DieRoutine pregunte si esperar.
+        bool porTrampa = siguienteDanoEsTrampa;
+        siguienteDanoEsTrampa = false;
+        OnDanoRecibido?.Invoke(new InfoDano
+        {
+            dano = damage,
+            vidaRestante = currentHealth,
+            letal = currentHealth <= 0,
+            porTrampa = porTrampa
+        });
+
         if (currentHealth <= 0)
         {
             StartCoroutine(DieRoutine());
@@ -391,12 +431,28 @@ public class RomeritoHealth : MonoBehaviour
         // Si es el último corazón → muerte normal (DieRoutine)
         if (currentHealth - 1 <= 0)
         {
+            siguienteDanoEsTrampa = true;
             TakeDamage(1);
             return;
         }
 
         // Quitar 1 vida (activa i-frames automáticamente via TakeDamage)
+        siguienteDanoEsTrampa = true;
         TakeDamage(1);
+
+        // [IMPACTO] Teletransportar DESPUÉS del hit-stop: si no, el salto de
+        // posición se ve antes que el golpe. Mientras dura la congelación
+        // Romerito sigue sobre la trampa, protegido por los i-frames.
+        // Sin hit-stop la corrutina teletransporta en este mismo frame.
+        if (rutinaTeletransporte != null) StopCoroutine(rutinaTeletransporte);
+        rutinaTeletransporte = StartCoroutine(TeletransporteTrasImpacto(safePos));
+    }
+
+    IEnumerator TeletransporteTrasImpacto(Vector2 safePos)
+    {
+        while (PausaMundo.Congelado) yield return null;
+        rutinaTeletransporte = null;
+        if (isDead) yield break;
 
         // Teletransportar a posición segura
         transform.position = safePos;
@@ -418,6 +474,10 @@ public class RomeritoHealth : MonoBehaviour
     {
         isDead = true;
         Debug.Log("💀 Romerito ha muerto.");
+
+        // [IMPACTO] Dejar ver el golpe letal: Romerito se oculta cuando
+        // termina el hit-stop, no en el mismo frame del golpe.
+        while (PausaMundo.Congelado) yield return null;
 
         // [FIX-2] Restaurar colisiones si muere con I-frames activos.
         SetIntangibleVsEnemies(false);
@@ -535,6 +595,9 @@ public class RomeritoHealth : MonoBehaviour
 
         isDead = false;
         Debug.Log("[Respawn] Romerito reaparecido en: " + transform.position);
+
+        // [IMPACTO] Devolver color y sonido al mundo tras el golpe letal.
+        OnRespawn?.Invoke();
     }
 
     // ── I-Frames ─────────────────────────────────────────────

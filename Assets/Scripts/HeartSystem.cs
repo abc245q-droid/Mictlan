@@ -79,7 +79,8 @@ public class HeartSystem : MonoBehaviour
 
         while (t < shakeDuracion)
         {
-            t += Time.deltaTime;
+            // [IMPACTO] Tiempo real: vibra también durante el hit-stop.
+            t += Time.unscaledDeltaTime;
             float fuerza = Mathf.Lerp(shakeFuerza, 0f, t / shakeDuracion);
             rt.anchoredPosition = posOriginal + Random.insideUnitCircle * fuerza;
             yield return null;

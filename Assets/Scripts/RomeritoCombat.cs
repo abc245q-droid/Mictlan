@@ -130,6 +130,9 @@ public class RomeritoCombat : MonoBehaviour
     {
 
         if (DialogueManager.IsActive) return;
+        // [IMPACTO] Durante el hit-stop de un golpe recibido no se ataca:
+        // el mundo está congelado y el golpe conectaría fuera de tiempo.
+        if (PausaMundo.Congelado) return;
 
         // 1. Si NO tenemos el arma física, no hacemos nada al presionar botón
         if (!tieneMacuahuitl) return;

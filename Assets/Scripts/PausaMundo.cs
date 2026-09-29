@@ -21,6 +21,13 @@ using UnityEngine;
 //    PausaMundo.Liberar(PausaMundo.Dialogo);
 //    if (PausaMundo.Activa) ...
 //
+//  HIT-STOP (congelación):
+//    PausaMundo.SolicitarCongelacion() / LiberarCongelacion()
+//  Congela el tiempo igual que una pausa, pero NO cuenta como pausa de
+//  gameplay: Activa sigue en false, así que no bloquea input, daño ni
+//  el menú de pausa. Es para impactos de décimas de segundo
+//  (ImpactoDano). Usa contador: varias congelaciones se solapan bien.
+//
 //  Lo que deba seguir vivo durante la pausa (typewriter, fades de UI,
 //  animaciones de NPCs) debe usar Time.unscaledDeltaTime /
 //  WaitForSecondsRealtime / Animator en modo "Unscaled Time".
@@ -46,6 +53,26 @@ public static class PausaMundo
     /// <summary>True si hay al menos un motivo de pausa activo.</summary>
     public static bool Activa => motivos.Count > 0;
 
+    // Hit-stop: contador aparte de los motivos (ver cabecera).
+    private static int congelaciones = 0;
+
+    /// <summary>True durante un hit-stop (congelación de impacto).</summary>
+    public static bool Congelado => congelaciones > 0;
+
+    /// <summary>Inicia un hit-stop. Cada llamada DEBE tener su Liberar.</summary>
+    public static void SolicitarCongelacion()
+    {
+        congelaciones++;
+        Aplicar();
+    }
+
+    public static void LiberarCongelacion()
+    {
+        if (congelaciones == 0) return;
+        congelaciones--;
+        Aplicar();
+    }
+
     public static void Solicitar(string motivo)
     {
         if (motivos.Add(motivo)) Aplicar();
@@ -65,12 +92,13 @@ public static class PausaMundo
     public static void Resetear()
     {
         motivos.Clear();
+        congelaciones = 0;
         Time.timeScale = 1f;
     }
 
     private static void Aplicar()
     {
-        Time.timeScale = motivos.Count > 0 ? 0f : 1f;
+        Time.timeScale = (motivos.Count > 0 || congelaciones > 0) ? 0f : 1f;
     }
 
     // Con "Enter Play Mode Options" (sin recarga de dominio) los estáticos
@@ -79,6 +107,7 @@ public static class PausaMundo
     private static void LimpiarAlArrancar()
     {
         motivos.Clear();
+        congelaciones = 0;
         FrameReanudacion = -1;
     }
 }
