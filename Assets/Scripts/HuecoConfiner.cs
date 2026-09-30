@@ -19,10 +19,11 @@ using Unity.Cinemachine;
 //   Si hay ambos, manda el PolygonCollider2D.
 //
 //  CÓMO FUNCIONA
-//   CinemachineConfiner2D une los caminos del polígono con la regla
-//   EvenOdd: un camino DENTRO del contorno exterior es un hueco. En
-//   Start este componente copia la forma del hueco como camino(s)
-//   extra del PolygonCollider2D del RoomConfiner e invalida la caché
+//   CinemachineConfiner2D acepta varios caminos en el polígono. Uno
+//   DENTRO del contorno exterior y con orientación CONTRARIA es un hueco
+//   (Clipper lo exige al encoger el polígono). En Start este componente
+//   copia la forma del hueco como camino(s) extra del PolygonCollider2D
+//   del RoomConfiner, con la orientación corregida, e invalida la caché
 //   del confiner. El collider del hueco solo es una guía visual: se
 //   desactiva en Awake y no participa en físicas.
 //
@@ -85,9 +86,18 @@ public class HuecoConfiner : MonoBehaviour
         if (poligono == null) return;
 
         List<List<Vector2>> huecos = CaminosEnEspacioDe(poligono);
+        float areaExterior = AreaFirmada(poligono.GetPath(0));
 
         foreach (List<Vector2> hueco in huecos)
         {
+            // ORIENTACIÓN: Confiner2D encoge el polígono con ClipperOffset
+            // (EndType.Polygon), que decide qué es hueco por el SENTIDO del
+            // camino: el contorno exterior en un sentido, los huecos en el
+            // contrario. Con el mismo sentido, Clipper trata el hueco como
+            // una isla más, la encoge y la une al resto: el hueco desaparece.
+            if (Mathf.Sign(AreaFirmada(hueco)) == Mathf.Sign(areaExterior))
+                hueco.Reverse();
+
             if (!DentroDelContornoExterior(poligono, hueco))
                 Debug.LogWarning("[HuecoConfiner] '" + name + "' no queda completo " +
                                  "dentro del polígono de '" + poligono.name + "'. Con " +
@@ -193,6 +203,15 @@ public class HuecoConfiner : MonoBehaviour
         foreach (Vector2 p in puntos)
             if (!PuntoEnPoligono(p, exterior)) return false;
         return true;
+    }
+
+    // Fórmula del área de Gauss (shoelace). Positiva = antihorario.
+    static float AreaFirmada(IList<Vector2> camino)
+    {
+        float a = 0f;
+        for (int i = 0, j = camino.Count - 1; i < camino.Count; j = i++)
+            a += (camino[j].x * camino[i].y) - (camino[i].x * camino[j].y);
+        return a * 0.5f;
     }
 
     // Ray casting clásico.
