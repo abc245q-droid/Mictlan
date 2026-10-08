@@ -110,6 +110,9 @@ public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
     protected virtual void IniciarPersecucion() { estado = Estado.Persiguiendo; }
     /// <summary>Se llama cuando recibe daño (para abortar sprints/saltos, etc.).</summary>
     protected virtual void OnHerido() { }
+    /// <summary>[SUPERARMOR] Si es true, el enemigo recibe dano pero NO retrocede ni
+    /// entra en Herido (golpe de arma ni contacto). Ej.: RanaSahumadora durante su aviso.</summary>
+    protected virtual bool IgnoraRetroceso => false;
 
     // ── Ciclo de vida ────────────────────────────────────────
     protected virtual void Awake()
@@ -253,6 +256,8 @@ public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
     // ── HERIDO / RETROCESO (común) ───────────────────────────
     private void RecibirGolpe()
     {
+        if (IgnoraRetroceso) return;   // [SUPERARMOR] el dano ya lo aplico EnemyDummy
+
         // Retrocede ALEJÁNDOSE del jugador (el que golpea es Romerito).
         int dir = facing;
         if (player != null)
@@ -389,6 +394,7 @@ public abstract class MictecahBase : MonoBehaviour, IEnemigoConKnockbackPropio
     {
         // El golpe de arma tiene prioridad absoluta.
         if (estado == Estado.Herido) return;
+        if (IgnoraRetroceso) return;   // [SUPERARMOR]
 
         // Retroceder alejandose de Romerito.
         int dir = facing;

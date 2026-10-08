@@ -22,6 +22,8 @@ public class EnemyDummy : MonoBehaviour
     [Header("Stats")]
     public int maxHealth = 3;
     private int currentHealth;
+    /// <summary>Vida actual (solo lectura). 0 antes de Start.</summary>
+    public int VidaActual => currentHealth;
 
     [Header("Loot (Recompensas)")]
     public GameObject lootDrop;                       // ← Prefab de la semilla de cacao
