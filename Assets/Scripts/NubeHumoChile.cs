@@ -36,6 +36,10 @@ public class NubeHumoChile : MonoBehaviour
     public Collider2D zonaDanio;
     [Tooltip("Fracción de la vida de la nube durante la cual hace daño (0–1).")]
     [Range(0f, 1f)] public float fraccionDanina = 0.5f;
+    [Tooltip("Impulso con el que el humo expulsa a Romerito al dañarlo (mismo criterio que el contacto de los Mictecah).")]
+    public float fuerzaEmpuje = 10f;
+    [Tooltip("Componente vertical del empuje (la horizontal sale del centro de la nube hacia Romerito).")]
+    public float empujeVertical = 0.5f;
 
     [Header("Tiempo")]
     [Tooltip("Vida total de la nube en segundos.")]
@@ -125,6 +129,19 @@ public class NubeHumoChile : MonoBehaviour
 
         RomeritoHealth health = other.GetComponent<RomeritoHealth>();
         if (health == null || !health.PuedeRecibirDano) return;
+
+        // Empuje SOLO cuando el golpe cuenta: durante i-frames no lo
+        // seguimos empujando cada frame del Stay.
+        Rigidbody2D prb = other.attachedRigidbody;
+        if (prb != null && fuerzaEmpuje > 0f)
+        {
+            Vector2 centro = zonaDanio != null ? (Vector2)zonaDanio.bounds.center : (Vector2)transform.position;
+            float lado = Mathf.Sign(prb.position.x - centro.x);
+            if (lado == 0f) lado = 1f;
+            Vector2 dir = new Vector2(lado, empujeVertical);
+            prb.linearVelocity = Vector2.zero;
+            prb.AddForce(dir * fuerzaEmpuje, ForceMode2D.Impulse);
+        }
 
         health.TakeDamage(danio);
     }
