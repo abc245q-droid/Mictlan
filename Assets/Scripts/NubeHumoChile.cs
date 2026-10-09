@@ -53,6 +53,10 @@ public class NubeHumoChile : MonoBehaviour
     [Tooltip("Unidades que sube la nube a lo largo de su vida.")]
     public float subida = 0.5f;
 
+    // Lo fija quien instancia la nube (p. ej. la humareda final de la
+    // Rana, más grande). Se aplica en Start, después de Awake.
+    [System.NonSerialized] public float multiplicadorEscala = 1f;
+
     private SpriteRenderer sr;
     private Vector3 escalaBase;
     private Vector3 posInicial;
@@ -70,6 +74,7 @@ public class NubeHumoChile : MonoBehaviour
     void Start()
     {
         posInicial = transform.position;
+        escalaBase *= multiplicadorEscala;
         Aplicar(0f);
     }
 

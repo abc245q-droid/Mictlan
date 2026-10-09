@@ -29,7 +29,7 @@
 //      en el aire, primero aterriza). Tiembla cada vez más fuerte
 //      mientras las brasas suben al rojo y, al final, revienta en
 //      una última llamarada (deathEffect de EnemyDummy) que daña en
-//      radioExplosion. Muere por la ruta normal de EnemyDummy: loot,
+//      radioExplosion, y suelta una última humareda más grande. Muere por la ruta normal de EnemyDummy: loot,
 //      Tonalli y dispersión de EnemigoRespawnable intactos.
 //      Nota de balance: con vidaParaAgrietarse = 1, el golpe que la
 //      deja en 1 ya es el "golpe final" (maxHealth 4 = 3 golpes).
@@ -137,6 +137,12 @@ public class RanaSahumadora : MictecahBase
     public int danioExplosion = 1;
     [Tooltip("Empuje que la llamarada da a Romerito.")]
     public float empujeExplosion = 9f;
+    [Tooltip("Prefab de la humareda final. Vacío = usa 'nubeHumo'.")]
+    public GameObject nubeFinal;
+    [Tooltip("Escala de la humareda final respecto a la normal.")]
+    public float escalaNubeFinal = 1.4f;
+    [Tooltip("Si la agrietan en el aire y no toca suelo en este tiempo, revienta igual.")]
+    public float maxEsperaAterrizaje = 2f;
 
     // ── Interno ──────────────────────────────────────────────
     private enum FaseHumadera { Ninguna, Aviso, Agonia }
@@ -406,16 +412,26 @@ public class RanaSahumadora : MictecahBase
         controlVelocidad = false;
         targetVelocity = Vector2.zero;
 
-        if (CheckGroundBelow() && rb.linearVelocity.y <= 0.5f)
+        if (ApoyadaEnSuelo())
             ComenzarTemblor();
+    }
+
+    // [FIX-FLOTE] Contacto REAL del collider con el suelo, no el rayo de
+    // CheckGroundBelow: ese rayo llega más abajo que las patas y, al
+    // pasar a Kinematic en ese instante, la rana quedaba flotando.
+    private bool ApoyadaEnSuelo()
+    {
+        return rb.IsTouchingLayers(groundLayer) && Mathf.Abs(rb.linearVelocity.y) < 0.1f;
     }
 
     private void ActualizarAgonia()
     {
         if (!temblando)
         {
-            // Esperando aterrizar (la agrietaron a medio salto)
-            if (CheckGroundBelow() && rb.linearVelocity.y <= 0.5f)
+            // Esperando aterrizar (la agrietaron a medio salto). Red de
+            // seguridad: si cae a un vacío o se atora, revienta igual.
+            timerAgonia += Time.deltaTime;
+            if (ApoyadaEnSuelo() || timerAgonia >= maxEsperaAterrizaje)
                 ComenzarTemblor();
             return;
         }
@@ -443,6 +459,16 @@ public class RanaSahumadora : MictecahBase
     private void Reventar()
     {
         transform.position = posAgonia;
+
+        // Última humareda: el sahumador se vacía al romperse.
+        GameObject prefabNube = nubeFinal != null ? nubeFinal : nubeHumo;
+        if (prefabNube != null)
+        {
+            Vector3 pos = bocaHumo != null ? bocaHumo.position : transform.position;
+            GameObject n = Instantiate(prefabNube, pos, Quaternion.identity);
+            NubeHumoChile nube = n.GetComponent<NubeHumoChile>();
+            if (nube != null) nube.multiplicadorEscala = escalaNubeFinal;   // antes de su Start
+        }
 
         // Última llamarada: daño + empuje radial a Romerito
         if (danioExplosion > 0 && player != null && playerHealth != null
