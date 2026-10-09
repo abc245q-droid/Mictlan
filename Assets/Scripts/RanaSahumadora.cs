@@ -24,8 +24,15 @@
 //    • Durante el aviso es "superarmor": recibe daño pero NO
 //      retrocede. Pegarle no cancela el humo — la respuesta correcta
 //      es alejarse o rematarla antes de que acumule.
-//    • Con poca vida cambia al sprite agrietado y las brasas
-//      parpadean irregulares.
+//    • AGONÍA: al llegar a vidaParaAgrietarse, cambia al sprite
+//      agrietado, se vuelve INVULNERABLE y deja de moverse (si iba
+//      en el aire, primero aterriza). Tiembla cada vez más fuerte
+//      mientras las brasas suben al rojo y, al final, revienta en
+//      una última llamarada (deathEffect de EnemyDummy) que daña en
+//      radioExplosion. Muere por la ruta normal de EnemyDummy: loot,
+//      Tonalli y dispersión de EnemigoRespawnable intactos.
+//      Nota de balance: con vidaParaAgrietarse = 1, el golpe que la
+//      deja en 1 ya es el "golpe final" (maxHealth 4 = 3 golpes).
 //    • Hereda de MictecahBase: daño por contacto, retroceso,
 //      camuflaje de la Barrera de Copal, EnemigoRespawnable.
 //
@@ -106,7 +113,7 @@ public class RanaSahumadora : MictecahBase
     public float velocidadLatido = 0.35f;
     [Tooltip("Calor máximo (0–1) que alcanza mientras Romerito acumula cerca. Debe quedar por debajo del Bloom.")]
     [Range(0f, 0.8f)] public float calorAcumuladoMax = 0.4f;
-    [Tooltip("Parpadeo irregular (0–1) cuando está agrietada.")]
+    [Tooltip("Parpadeo irregular (0–1) de las brasas durante la agonía.")]
     [Range(0f, 0.4f)] public float calorAgrietado = 0.18f;
     [Tooltip("Curva del aviso: de calor acumulado a barro al rojo.")]
     public AnimationCurve curvaAviso = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -117,9 +124,27 @@ public class RanaSahumadora : MictecahBase
     [Tooltip("Solo funciona si 'cuerpo' es un HIJO (no el renderer raíz).")]
     public float amplitudVibracion = 0.04f;
 
+    [Header("── Agonía y última llamarada ──")]
+    [Tooltip("Segundos que tiembla, invulnerable, antes de reventar.")]
+    public float duracionAgonia = 1.4f;
+    [Tooltip("Temblor al empezar la agonía (unidades de mundo).")]
+    public float temblorInicial = 0.015f;
+    [Tooltip("Temblor justo antes de reventar.")]
+    public float temblorFinal = 0.08f;
+    [Tooltip("Radio de daño de la llamarada. Debe coincidir con el tamaño del VFX (deathEffect).")]
+    public float radioExplosion = 1.6f;
+    [Tooltip("Daño de la llamarada a Romerito. 0 = solo visual.")]
+    public int danioExplosion = 1;
+    [Tooltip("Empuje que la llamarada da a Romerito.")]
+    public float empujeExplosion = 9f;
+
     // ── Interno ──────────────────────────────────────────────
-    private enum FaseHumadera { Ninguna, Aviso }
+    private enum FaseHumadera { Ninguna, Aviso, Agonia }
     private FaseHumadera fase = FaseHumadera.Ninguna;
+
+    private bool temblando;           // false = agonía esperando aterrizar
+    private float timerAgonia;
+    private Vector3 posAgonia;
 
     private float acumulado;          // segundos de Romerito cerca
     private float timerAviso;
@@ -133,8 +158,10 @@ public class RanaSahumadora : MictecahBase
     private Vector3 posLocalCuerpo;
     private bool cuerpoEsHijo;
 
-    // Superarmor durante el aviso: recibe daño, no retrocede.
-    protected override bool IgnoraRetroceso => fase == FaseHumadera.Aviso;
+    // Superarmor durante el aviso y la agonía: no retrocede.
+    // EstaAgrietada cubre el golpe que la agrieta: OnHurt se dispara
+    // después de restar la vida, así que ese golpe ya no la empuja.
+    protected override bool IgnoraRetroceso => fase != FaseHumadera.Ninguna || EstaAgrietada;
 
     // ── Ciclo de vida ────────────────────────────────────────
     protected override void Awake()
@@ -167,12 +194,35 @@ public class RanaSahumadora : MictecahBase
         targetVelocity = Vector2.zero;
         estado = Estado.Patrullando;
         if (cuerpoEsHijo) cuerpo.transform.localPosition = posLocalCuerpo;
+
+        // Deshacer la agonía (respawn tras dispersión)
+        temblando = false;
+        timerAgonia = 0f;
+        if (rb != null) rb.bodyType = RigidbodyType2D.Dynamic;
+        if (dummy != null) dummy.SetInvulnerable(false);
+
+        // El golpe final dispara FlashWhite (rojo) y la dispersión corta
+        // la corrutina antes de volver a blanco: limpiamos al reaparecer.
+        if (cuerpo != null) cuerpo.color = Color.white;
+
         ActualizarVisual();
     }
 
     protected override void Update()
     {
         if (timerEnfriamiento > 0f) timerEnfriamiento -= Time.deltaTime;
+
+        // La agonía tiene prioridad sobre todo (cancela un aviso a medias:
+        // ya no hay humo, solo la última llamarada).
+        if (fase != FaseHumadera.Agonia && EstaAgrietada)
+            IniciarAgonia();
+
+        if (fase == FaseHumadera.Agonia)
+        {
+            ActualizarAgonia();
+            ActualizarVisual();
+            return;
+        }
 
         // Durante el aviso la rana está plantada: la máquina de estados
         // de la base no corre (ni persecución, ni pérdida de rastro por
@@ -343,6 +393,81 @@ public class RanaSahumadora : MictecahBase
         estado = Estado.Patrullando;
     }
 
+    // ── AGONÍA ───────────────────────────────────────────────
+    private void IniciarAgonia()
+    {
+        fase = FaseHumadera.Agonia;
+        temblando = false;
+        timerAgonia = 0f;
+        if (dummy != null) dummy.SetInvulnerable(true);
+        if (cuerpoEsHijo) cuerpo.transform.localPosition = posLocalCuerpo;
+
+        // Suelta el control: si iba en el aire termina su caída natural.
+        controlVelocidad = false;
+        targetVelocity = Vector2.zero;
+
+        if (CheckGroundBelow() && rb.linearVelocity.y <= 0.5f)
+            ComenzarTemblor();
+    }
+
+    private void ActualizarAgonia()
+    {
+        if (!temblando)
+        {
+            // Esperando aterrizar (la agrietaron a medio salto)
+            if (CheckGroundBelow() && rb.linearVelocity.y <= 0.5f)
+                ComenzarTemblor();
+            return;
+        }
+
+        timerAgonia += Time.deltaTime;
+        float k = Mathf.Clamp01(timerAgonia / duracionAgonia);
+        float amp = Mathf.Lerp(temblorInicial, temblorFinal, k * k);
+        transform.position = posAgonia + (Vector3)(Random.insideUnitCircle * amp);
+
+        if (timerAgonia >= duracionAgonia)
+            Reventar();
+    }
+
+    private void ComenzarTemblor()
+    {
+        temblando = true;
+        timerAgonia = 0f;
+        // Plantada: kinematic para que nada la empuje mientras tiembla.
+        // Sigue teniendo collider, así que tocarla todavía quema.
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        posAgonia = transform.position;
+    }
+
+    private void Reventar()
+    {
+        transform.position = posAgonia;
+
+        // Última llamarada: daño + empuje radial a Romerito
+        if (danioExplosion > 0 && player != null && playerHealth != null
+            && DistanciaAlJugador() <= radioExplosion && playerHealth.PuedeRecibirDano)
+        {
+            Rigidbody2D prb = player.GetComponent<Rigidbody2D>();
+            if (prb != null)
+            {
+                Vector2 dir = ((Vector2)(player.position - transform.position)).normalized;
+                dir.y = Mathf.Max(dir.y, 0.5f);
+                prb.linearVelocity = Vector2.zero;
+                prb.AddForce(dir.normalized * empujeExplosion, ForceMode2D.Impulse);
+            }
+            playerHealth.TakeDamage(danioExplosion);
+        }
+
+        // Muerte por la ruta normal de EnemyDummy (loot, Tonalli,
+        // deathEffect = la llamarada, dispersión/respawn).
+        if (dummy != null)
+        {
+            dummy.SetInvulnerable(false);
+            dummy.TakeDamage(Mathf.Max(1, dummy.VidaActual));
+        }
+    }
+
     // ── VISUAL: sprite + brillo ──────────────────────────────
     private bool EstaAgrietada =>
         dummy != null && dummy.VidaActual > 0 && dummy.VidaActual <= vidaParaAgrietarse;
@@ -359,16 +484,20 @@ public class RanaSahumadora : MictecahBase
         if (s != null && cuerpo.sprite != s) cuerpo.sprite = s;
 
         // 2. Calor objetivo (0 = sprite tal cual, 1 = barro al rojo)
-        float calorBase;
-        if (EstaAgrietada)
-            calorBase = Mathf.PerlinNoise(Time.time * 3f, 0.37f) * calorAgrietado;
-        else
-            calorBase = (Mathf.Sin(Time.time * velocidadLatido * Mathf.PI * 2f) + 1f) * 0.5f * calorReposo;
+        float calorBase = (Mathf.Sin(Time.time * velocidadLatido * Mathf.PI * 2f) + 1f) * 0.5f * calorReposo;
 
         float calorAcum = (tiempoProximidad > 0f ? acumulado / tiempoProximidad : 0f) * calorAcumuladoMax;
         float objetivo = Mathf.Max(calorBase, calorAcum);
 
-        if (fase == FaseHumadera.Aviso)
+        if (fase == FaseHumadera.Agonia)
+        {
+            // Las brasas suben al rojo durante el temblor, con parpadeo
+            // irregular encima: el barro está por reventar.
+            float k = temblando ? Mathf.Clamp01(timerAgonia / duracionAgonia) : 0f;
+            float parpadeo = Mathf.PerlinNoise(Time.time * 6f, 0.37f) * calorAgrietado;
+            calorActual = Mathf.Clamp01(Mathf.Lerp(calorAcumuladoMax, 1f, k * k) + parpadeo);
+        }
+        else if (fase == FaseHumadera.Aviso)
         {
             float k = curvaAviso.Evaluate(Mathf.Clamp01(timerAviso / duracionAviso));
             objetivo = Mathf.Lerp(Mathf.Max(calorAcum, calorAcumuladoMax), 1f, k);
@@ -409,5 +538,7 @@ public class RanaSahumadora : MictecahBase
         Gizmos.DrawWireSphere(transform.position, radioHumadera);
         if (bocaHumo != null)
             Gizmos.DrawWireSphere(bocaHumo.position, 0.12f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, radioExplosion);
     }
 }
