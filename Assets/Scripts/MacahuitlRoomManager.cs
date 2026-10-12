@@ -41,16 +41,9 @@ public class MacahuitlRoomManager : MonoBehaviour
 
     void Start()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            playerHealth = player.GetComponent<RomeritoHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.SetResetRoutine(ResetRoomRoutine);
-                playerHealth.OnPlayerDied += HandlePlayerDied;
-            }
-        }
+        // Vinculación inicial "best effort". Las que cuentan son las de
+        // OnTriggerEnter2D y NotifyCombatStarted (ver VincularJugador).
+        VincularJugador(ResolverJugador());
 
         if (waveSpawner != null)
             waveSpawner.OnAllWavesFinished += HandleCombatFinished;
@@ -68,11 +61,57 @@ public class MacahuitlRoomManager : MonoBehaviour
             waveSpawner.OnAllWavesFinished -= HandleCombatFinished;
     }
 
+    // ── Vinculación con Romerito ─────────────────────────────
+    //
+    // ══════════════════════════════════════════════════════════════
+    //  FIX — Morir en la sala no reiniciaba el evento.
+    //
+    //  RomeritoHealth guarda UN solo resetRoutineFactory y antes solo
+    //  se registraba en Start():
+    //    A) Una salida "legítima" (sin combate) hace ClearResetRoutine(),
+    //       pero volver a entrar no lo re-registraba. Cruzar el umbral
+    //       fuera/dentro antes de tomar el Macahuitl bastaba para perderlo.
+    //    B) FindGameObjectWithTag("Player") en Start() puede devolver el
+    //       Romerito duplicado que PersistentPlayer destruye al final del
+    //       frame: se registraba sobre el Romerito equivocado.
+    //  AHORA: se re-registra en cada entrada y al iniciar el combate,
+    //  siempre sobre el Romerito real.
+    // ══════════════════════════════════════════════════════════════
+
+    RomeritoHealth ResolverJugador()
+    {
+        if (PersistentPlayer.instance != null)
+        {
+            RomeritoHealth h = PersistentPlayer.instance.GetComponentInChildren<RomeritoHealth>();
+            if (h != null) return h;
+        }
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        return player != null ? player.GetComponentInParent<RomeritoHealth>() : null;
+    }
+
+    void VincularJugador(RomeritoHealth h)
+    {
+        if (h == null) return;
+
+        if (h != playerHealth)
+        {
+            if (playerHealth != null) playerHealth.OnPlayerDied -= HandlePlayerDied;
+            playerHealth = h;
+            playerHealth.OnPlayerDied += HandlePlayerDied;
+        }
+
+        playerHealth.SetResetRoutine(ResetRoomRoutine);
+    }
+
     // ── Trigger de entrada ───────────────────────────────────
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") || other.isTrigger) return;
+
+        // FIX — re-registrar el reset en CADA entrada (ver VincularJugador).
+        VincularJugador(other.GetComponentInParent<RomeritoHealth>());
+
         if (playerIsInRoom) return;
 
         playerIsInRoom = true;
@@ -122,6 +161,12 @@ public class MacahuitlRoomManager : MonoBehaviour
     {
         combatIsActive = true;
         Debug.Log("[MacahuitlRoom] Combate iniciado.");
+
+        // FIX — el combate solo empieza dentro de la sala (el altar está
+        // dentro): garantizar estado y registro del reset pase lo que pase
+        // con el trigger.
+        playerIsInRoom = true;
+        VincularJugador(ResolverJugador());
 
         // Cerrar la entrada — Romerito ya no puede salir por donde entró
         if (doorEntrada != null) doorEntrada.Cerrar();
@@ -179,6 +224,9 @@ public class MacahuitlRoomManager : MonoBehaviour
         // Solo ejecutar si el jugador estaba en combate dentro de la sala
         if (!playerIsInRoom || !combatIsActive)
         {
+            if (combatIsActive)
+                Debug.LogWarning("[MacahuitlRoom] Muerte con combate activo pero " +
+                                 "playerIsInRoom = false: la sala NO se resetea.");
             yield return new WaitForSeconds(postResetPause);
             yield break;
         }

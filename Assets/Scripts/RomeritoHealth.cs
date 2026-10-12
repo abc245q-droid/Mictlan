@@ -43,6 +43,16 @@ public class RomeritoHealth : MonoBehaviour
              "El MacahuitlRoomManager usa este tiempo para limpiar la sala.")]
     public float deathPauseDuration = 2f;
 
+    // [IRIS] Cortinilla de muerte estilo Mario (TransicionIris).
+    [Header("Transición de Muerte (iris)")]
+    [Tooltip("La calavera de Mictlantecuhtli se cierra sobre Romerito al morir " +
+             "y se abre de nuevo en el Cihuacalli.")]
+    public bool usarTransicionIris = true;
+
+    [Tooltip("Segundos en negro total antes de reaparecer (cuando no hay reset de sala). " +
+             "Con el iris activo sustituye a deathPauseDuration: el cierre ya da el respiro.")]
+    public float pausaEnNegro = 0.5f;
+
     [Header("Referencias")]
     public HeartSystem heartSystem;
     public RomeritoCombat combatScript;
@@ -493,6 +503,11 @@ public class RomeritoHealth : MonoBehaviour
         foreach (var col in allColliders)
             col.enabled = false;
 
+        // [IRIS] La silueta se cierra sobre Romerito TODAVÍA VISIBLE
+        // (congelado, intangible). Se oculta ya en negro.
+        if (usarTransicionIris)
+            yield return TransicionIris.Instancia.Cerrar(transform);
+
         if (spriteRend != null) spriteRend.enabled = false;
         foreach (var sr in allSprites) sr.enabled = false;
 
@@ -506,10 +521,15 @@ public class RomeritoHealth : MonoBehaviour
         }
         else
         {
-            yield return new WaitForSeconds(deathPauseDuration);
+            yield return new WaitForSeconds(usarTransicionIris ? pausaEnNegro : deathPauseDuration);
         }
 
         Respawn();
+
+        // [IRIS] Asentar cámara en el checkpoint y abrir sobre Romerito.
+        // No bloquea el control: los i-frames de reaparición corren en paralelo.
+        if (usarTransicionIris)
+            yield return TransicionIris.Instancia.Abrir(transform);
     }
 
     // ── Respawn ──────────────────────────────────────────────
