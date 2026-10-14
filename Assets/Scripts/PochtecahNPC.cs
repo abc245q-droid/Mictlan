@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 // ============================================================
 //  PochtecahNPC — Interacción con el mercader
@@ -31,6 +31,19 @@ public class PochtecahNPC : MonoBehaviour
     [Tooltip("ID para recordar que el lore ya se vio (se guarda en collectedItems). Ej: 'lore_pochtecah_n1'.")]
     public string dialogoLoreID = "";
 
+    [Header("Regalo: Códice Maestro")]
+    [Tooltip("La PRIMERA vez que Romerito habla con este Pochtecah recibe el " +
+             "Códice Maestro (mapa, inventario, equipamiento, bestiario, herbario). " +
+             "Actívalo solo en el Pochtecah del Nivel 0.")]
+    public bool regalaCodiceMaestro = false;
+    [Tooltip("Diálogo de la entrega. Si se deja vacío se usa dialogoLore.")]
+    public Conversation dialogoRegalo;
+    [Tooltip("true → el regalo incluye el Estuche de Tlacuilo: el mapa se dibuja " +
+             "desde ya. false → el Estuche se sigue comprando aparte.")]
+    public bool regaloIncluyeEstuche = true;
+    [Tooltip("Mensaje que enseña a abrir el Códice (View / Tab). Opcional.")]
+    public MensajeTutorial mensajeCodice;
+
     [Header("UI de prompt")]
     [Tooltip("Objeto hijo 'Pulsa B' que aparece en rango (opcional).")]
     public GameObject promptInteraccion;
@@ -53,7 +66,8 @@ public class PochtecahNPC : MonoBehaviour
         if (!jugadorEnRango) { return; }
 
         // Nada de prompts/input durante diálogo o con la tienda ya abierta.
-        if (DialogueManager.IsActive || PochtecahShopUI.IsOpen || ocupado)
+        if (DialogueManager.IsActive || PochtecahShopUI.IsOpen || ocupado ||
+            CodiceUI.BloqueaInput)
         {
             OcultarPrompt();
             return;
@@ -67,6 +81,15 @@ public class PochtecahNPC : MonoBehaviour
 
     private void Interactuar()
     {
+        // ── Regalo del Códice Maestro (una sola vez en toda la partida) ──
+        // Esa primera visita es solo para el regalo; la tienda abre en la
+        // siguiente interacción.
+        if (regalaCodiceMaestro && !CodiceMaestro.TieneCodice)
+        {
+            EntregarCodice();
+            return;
+        }
+
         if (dialogoLore != null && !LoreYaVisto() && DialogueManager.Instance != null)
         {
             OcultarPrompt();
@@ -81,6 +104,39 @@ public class PochtecahNPC : MonoBehaviour
         }
 
         AbrirTienda();
+    }
+
+    private void EntregarCodice()
+    {
+        bool usaLore = dialogoRegalo == null;
+        Conversation conv = usaLore ? dialogoLore : dialogoRegalo;
+
+        if (conv != null && DialogueManager.Instance != null)
+        {
+            OcultarPrompt();
+            ocupado = true;
+            DialogueManager.Instance.StartConversation(conv, () =>
+            {
+                ocupado = false;
+                FinalizarRegalo(usaLore);
+            });
+            return;
+        }
+
+        FinalizarRegalo(false);
+    }
+
+    private void FinalizarRegalo(bool loreReproducido)
+    {
+        if (!CodiceMaestro.DarCodice(regaloIncluyeEstuche)) return;
+
+        // Si el lore sirvió de diálogo de entrega, no se repite al abrir la tienda.
+        if (loreReproducido) MarcarLoreVisto();
+
+        if (GameManager01.instance != null) GameManager01.instance.SaveGame();
+
+        if (mensajeCodice != null && TutorialManager.Instance != null)
+            TutorialManager.Instance.Mostrar(mensajeCodice);
     }
 
     private void AbrirTienda()

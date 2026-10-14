@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -63,6 +63,9 @@ public class InteractionManager : MonoBehaviour
                 interactuableActual.PosicionMundo);
             promptRect.position = pantalla + (Vector3)offsetPantalla;
         }
+
+        // Con el Códice abierto (o cerrándose con B) no se interactúa.
+        if (CodiceUI.BloqueaInput) return;
 
         // Detectar B
         if (Input.GetButtonDown(botonInteraccion))

@@ -111,6 +111,7 @@ public class FavorManager : MonoBehaviour
         if (PochtecahShopUI.IsOpen) return;
         if (PausaMundo.Congelado) return;   // [IMPACTO] hit-stop
         if (MapScreenUI.IsOpen) return;
+        if (CodiceUI.BloqueaInput) return;   // LB/RB cambian pestaña; B cierra
         if (!combat.tieneMacuahuitl) return;   // sin arma no hay favores
 
         // Sincroniza el color del HUD si el favor cambió por OTRA vía

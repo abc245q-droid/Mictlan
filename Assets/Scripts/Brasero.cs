@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 // ============================================================
@@ -80,7 +80,7 @@ public class Brasero : MonoBehaviour
     {
         if (encendido) { OcultarPrompt(); return; }       // ya encendido: nada que hacer
         if (!jugadorEnRango) return;
-        if (DialogueManager.IsActive) { OcultarPrompt(); return; }
+        if (DialogueManager.IsActive || CodiceUI.BloqueaInput) { OcultarPrompt(); return; }
 
         MostrarPrompt();
         if (Input.GetKeyDown(botonInteraccion) || Input.GetKeyDown(teclaAlterna))

@@ -44,6 +44,12 @@ public class PlayerData
 
 
     // --- CÓDICE / MAPA (El Códice de Romerito) ---
+    // Códice Maestro: regalo del Pochtecah del Nivel 0. Desbloquea el menú
+    // de progreso completo (mapa, inventario, equipamiento, bestiario,
+    // herbario). Los saves anteriores a este campo se migran al cargar
+    // (CodiceMaestro.MigrarSaveAntiguo).
+    public bool tieneCodice = false;
+
     // Herramientas y pigmentos: banderas de una sola vez para todo el juego.
     public bool tienePincel = false;     // Estuche de Tlacuilo: enciende la capacidad de mapear
     public bool tieneRojo = false;       // nocheztli  → Cihuacallis + viaje rápido

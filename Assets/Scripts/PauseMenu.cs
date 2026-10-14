@@ -86,6 +86,10 @@ public class PauseMenu : MonoBehaviour
 
     private bool pausado = false;
 
+    /// <summary>Estado estático para que otras UIs (CodiceUI) no se abran
+    /// encima de la pausa, incluso con usarTimeScale = false.</summary>
+    public static bool EstaAbierto { get; private set; }
+
     // Referencias a componentes de Romerito (cacheadas en Start)
     private RomeritoMovement movimiento;
     private RomeritoCombat combate;
@@ -146,11 +150,20 @@ public class PauseMenu : MonoBehaviour
         // Romerito con el panel de la tienda todavía en pantalla.
         if (PochtecahShopUI.IsOpen) return;
 
+        // Ni con el Códice abierto (ni en el frame en que Escape lo cierra).
+        if (CodiceUI.BloqueaInput) return;
+
         // Alternar pausa
         if (pausado)
             Reanudar();
         else
             Pausar();
+    }
+
+    void OnDestroy()
+    {
+        // Escena descargada con la pausa abierta: no dejar el estático pegado.
+        if (pausado) EstaAbierto = false;
     }
 
     // ── API Pública ──────────────────────────────────────────
@@ -162,6 +175,7 @@ public class PauseMenu : MonoBehaviour
     public void Pausar()
     {
         pausado = true;
+        EstaAbierto = true;
 
         // Mostrar panel
         if (pausePanel != null)
@@ -206,6 +220,7 @@ public class PauseMenu : MonoBehaviour
     public void Reanudar()
     {
         pausado = false;
+        EstaAbierto = false;
 
         // Ocultar panel
         if (pausePanel != null)
@@ -284,6 +299,7 @@ public class PauseMenu : MonoBehaviour
     public void VolverAlInicio()
     {
         pausado = false;
+        EstaAbierto = false;
 
         // Descongelamos ANTES de desmontar: si volviésemos al menú con
         // Romerito congelado y timeScale a 0, la corrutina de transición
