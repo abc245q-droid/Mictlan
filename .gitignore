@@ -54,3 +54,4 @@ extraer_*.py
 # Proyectos de IDE generados por Unity
 *.csproj
 *.sln
+patch_*.py
