@@ -99,6 +99,11 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
              "Más alto = corrige más rápido (pero más brusco).")]
     public float fuerzaCorreccionAltura = 8f;
 
+    // [NAV v2] La lumbre rodea plataformas en vez de pegarse a ellas.
+    [Header("── Navegación (anti-atascos) ──")]
+    [Tooltip("Distancia a la que la lumbre 've' obstáculos.")]
+    public float alcanceNavegacion = 1.5f;
+
     [Header("── Sacudida (mini-sprint aéreo) ──")]
     [Tooltip("Velocidad de la sacudida hacia la posición de Romerito.")]
     public float velocidadSacudida = 9f;
@@ -273,7 +278,8 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
         if (player != null)
         {
             Vector2 objetivo = (Vector2)player.position + Vector2.up * alturaFlotacion;
-            haciaObjetivo = (objetivo - (Vector2)transform.position).normalized;
+            // [NAV v2] Rodea plataformas en vez de empujar contra ellas.
+            haciaObjetivo = DireccionNavegada(objetivo - (Vector2)transform.position, alcanceNavegacion);
         }
 
         // …más un jitter Perlin en ambos ejes (el "temblor" del diagrama).
@@ -289,7 +295,11 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
         // Solo empuja hacia ARRIBA (nunca la fuerza a bajar), así el jitter
         // sigue viéndose natural en la parte alta.
         float alturaSuelo = AlturaDelSueloDebajo();
-        if (alturaSuelo > float.NegativeInfinity)
+        // [NAV v2] Si lo de abajo es una plataforma por ENCIMA de Romerito,
+        // no es "su" suelo: el clamp la dejaría flotando sobre ella para
+        // siempre (atasco). Solo respetamos el suelo que comparte con él.
+        bool sueloIntermedio = player != null && alturaSuelo > player.position.y + 0.1f;
+        if (alturaSuelo > float.NegativeInfinity && !sueloIntermedio)
         {
             float alturaActual = transform.position.y - alturaSuelo;
             if (alturaActual < alturaMinimaSobreSuelo)
@@ -328,7 +338,8 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
         // así que el jugador puede leer y esquivar cada embestida.
         Vector2 dir = Vector2.right * facing;
         if (player != null)
-            dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            dir = DireccionNavegada((Vector2)player.position - (Vector2)transform.position,
+                                    velocidadSacudida * duracionSacudida);   // [NAV v2]
 
         MirarHacia(dir.x >= 0f ? 1 : -1);
         rb.linearVelocity = dir * velocidadSacudida;
@@ -349,7 +360,9 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
             bool cerca = DistanciaAlJugador() <= rangoAtaqueFinal;
             bool agotada = sacudidasHechas >= maxSacudidas;
 
-            if (cerca || agotada) IniciarAtaqueFinal();
+            // [NAV v2] Cerca pero con una plataforma en medio: otra sacudida
+            // para rodearla, en vez de embestir contra el tile.
+            if ((cerca && LineaLibreAlJugador()) || agotada) IniciarAtaqueFinal();
             else
             {
                 fase = FaseNexhualli.Temblor;
@@ -363,7 +376,8 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
     {
         Vector2 dir = Vector2.right * facing;
         if (player != null)
-            dir = ((Vector2)player.position - (Vector2)transform.position).normalized;
+            dir = DireccionNavegada((Vector2)player.position - (Vector2)transform.position,
+                                    velocidadAtaqueFinal * duracionAtaqueFinal);   // [NAV v2]
 
         MirarHacia(dir.x >= 0f ? 1 : -1);
         rb.linearVelocity = dir * velocidadAtaqueFinal;
@@ -438,6 +452,15 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
             return;
         }
 
+        // [NAV v2] Chocó con un tile durante la sacudida o la embestida:
+        // cortarla ya (antes se quedaba empujando contra él hasta el timer).
+        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        {
+            if (fase == FaseNexhualli.Sacudida || fase == FaseNexhualli.AtaqueFinal)
+                faseTimer = 0f;
+            return;
+        }
+
         if (!collision.gameObject.CompareTag("Player")) return;
 
         Vector2 knockDir = (collision.transform.position - transform.position).normalized;
@@ -454,6 +477,39 @@ public class Tlahuelpuchi_Nexhualli : MictecahBase
             playerHealth.TakeDamage(contactDamage);
 
         IniciarRegreso();
+    }
+
+    // ── [NAV v2] Navegación ──────────────────────────────────
+    private Collider2D ColliderActual() =>
+        colliderPrincipal != null ? (Collider2D)colliderPrincipal : GetComponent<Collider2D>();
+
+    private Vector2 CentroCuerpo()
+    {
+        Collider2D c = ColliderActual();
+        return c != null ? (Vector2)c.bounds.center : (Vector2)transform.position;
+    }
+
+    private float RadioIgneo()
+    {
+        Vector2 t = colliderTamanoIgneo;
+        return Mathf.Max(0.05f, Mathf.Min(t.x, t.y) * 0.5f * 0.9f);
+    }
+
+    private Vector2 DireccionNavegada(Vector2 haciaObjetivo, float alcance)
+    {
+        Vector2 dir = NavegacionAerea.ElegirDireccion(
+            CentroCuerpo(), haciaObjetivo, rb.linearVelocity, RadioIgneo(),
+            Mathf.Max(0.3f, alcance), groundLayer);
+        return dir != Vector2.zero ? dir : haciaObjetivo.normalized;
+    }
+
+    private bool LineaLibreAlJugador()
+    {
+        if (player == null) return false;
+        Vector2 desde = CentroCuerpo();
+        Vector2 hacia = (Vector2)player.position - desde;
+        return !Physics2D.CircleCast(desde, RadioIgneo(), hacia.normalized,
+                                     hacia.magnitude, groundLayer);
     }
 
     // ── Presentación ─────────────────────────────────────────

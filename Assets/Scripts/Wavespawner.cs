@@ -3,8 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 
 // ============================================================
-//  WaveSpawner — v2 (con ResetWaves y evento OnAllWavesFinished)
+//  WaveSpawner — v3 (presagio del tzompantli)
 // ============================================================
+//
+//  CAMBIOS v3:
+//  • Si un spawnPoint tiene TzompantliPresagio, el cráneo tiembla y
+//    se suelta ANTES de instanciar al enemigo (telegrafeo).
+//  • spawnsPendientes: la oleada no cuenta como limpia mientras haya
+//    presagios en curso (si no, el último enemigo aún "en camino"
+//    podía dar la oleada por terminada).
+//  • Se evita repetir un punto que ya está presagiando.
+//  • ResetWaves()/StopWaves() cancelan presagios y restauran cráneos.
 //
 //  CAMBIOS respecto a v1:
 //  • Evento público OnAllWavesFinished que MacahuitlRoomManager escucha.
@@ -52,6 +61,12 @@ public class WaveSpawner : MonoBehaviour
     public bool waitForWaveClear = true;
     public bool startAutomatically = false;
 
+    [Header("Presagio del Tzompantli (telegrafeo)")]
+    [Tooltip("Usar TzompantliPresagio en los spawnPoints que lo tengan")]
+    public bool usarPresagio = true;
+    [Tooltip("No elegir un punto que ya está temblando si hay otro libre")]
+    public bool evitarPuntoOcupado = true;
+
     [Header("Eventos (Opcional)")]
     public GameObject objectToActivateOnFinish;
     public Animator animatorToTriggerOnFinish;
@@ -76,6 +91,7 @@ public class WaveSpawner : MonoBehaviour
     private int enemiesAlive = 0;
     private bool allWavesComplete = false;
     private List<GameObject> activeEnemies = new List<GameObject>();
+    private int spawnsPendientes = 0;   // presagios en curso (enemigos "en camino")
 
     // ----------------------------------------------------------
     //  UNITY MESSAGES
@@ -117,7 +133,9 @@ public class WaveSpawner : MonoBehaviour
         StopAllCoroutines();
         isRunning = false;
         enemiesAlive = 0;
+        spawnsPendientes = 0;
         activeEnemies.Clear();
+        CancelarPresagios();
     }
 
     /// <summary>
@@ -133,7 +151,9 @@ public class WaveSpawner : MonoBehaviour
         isRunning = false;
         allWavesComplete = false;
         enemiesAlive = 0;
+        spawnsPendientes = 0;
         activeEnemies.Clear();
+        CancelarPresagios();
 
         Debug.Log("[WaveSpawner] Oleadas reseteadas. Listo para StartWaves().");
     }
@@ -164,6 +184,10 @@ public class WaveSpawner : MonoBehaviour
             }
         }
 
+        // Que ningún enemigo quede "en camino" al cerrar el combate.
+        while (spawnsPendientes > 0)
+            yield return null;
+
         OnAllWavesComplete();
     }
 
@@ -183,16 +207,61 @@ public class WaveSpawner : MonoBehaviour
 
         for (int i = 0; i < wave.enemyCount; i++)
         {
-            SpawnOneEnemy(wave.enemyPrefab);
+            // El intervalo cuenta desde el INICIO del presagio: el ritmo de la
+            // oleada no cambia, el enemigo llega 'duracion' segundos después.
+            StartCoroutine(PresagiarYSpawnear(wave.enemyPrefab));
 
             if (i < wave.enemyCount - 1)
                 yield return new WaitForSeconds(wave.spawnInterval);
         }
     }
 
-    void SpawnOneEnemy(GameObject prefab)
+    IEnumerator PresagiarYSpawnear(GameObject prefab)
     {
-        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        Transform spawnPoint = ElegirPuntoDeAparicion();
+        spawnsPendientes++;
+
+        TzompantliPresagio presagio = usarPresagio
+            ? spawnPoint.GetComponent<TzompantliPresagio>()
+            : null;
+
+        if (presagio != null)
+            yield return presagio.Presagiar();
+
+        SpawnOneEnemy(prefab, spawnPoint);
+        spawnsPendientes = Mathf.Max(0, spawnsPendientes - 1);
+    }
+
+    Transform ElegirPuntoDeAparicion()
+    {
+        if (usarPresagio && evitarPuntoOcupado)
+        {
+            List<Transform> libres = new List<Transform>();
+            foreach (Transform sp in spawnPoints)
+            {
+                if (sp == null) continue;
+                TzompantliPresagio p = sp.GetComponent<TzompantliPresagio>();
+                if (p == null || !p.Ocupado) libres.Add(sp);
+            }
+            if (libres.Count > 0)
+                return libres[Random.Range(0, libres.Count)];
+        }
+        return spawnPoints[Random.Range(0, spawnPoints.Length)];
+    }
+
+    void CancelarPresagios()
+    {
+        if (spawnPoints == null) return;
+        foreach (Transform sp in spawnPoints)
+        {
+            if (sp == null) continue;
+            TzompantliPresagio p = sp.GetComponent<TzompantliPresagio>();
+            if (p != null) p.Cancelar();
+        }
+    }
+
+    void SpawnOneEnemy(GameObject prefab, Transform spawnPoint)
+    {
         GameObject enemy = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
 
         enemiesAlive++;
@@ -217,7 +286,8 @@ public class WaveSpawner : MonoBehaviour
         {
             activeEnemies.RemoveAll(e => e == null);
 
-            if (enemiesAlive <= 0 || activeEnemies.Count == 0)
+            if (spawnsPendientes <= 0 &&
+                (enemiesAlive <= 0 || activeEnemies.Count == 0))
                 break;
 
             yield return new WaitForSeconds(0.25f);

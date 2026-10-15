@@ -60,7 +60,22 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
     [Tooltip("Distancia a la que se vuelve 100% preciso (ataque letal).")]
     public float precisionRadius = 1.5f;
 
+    // [NAV v2] Navegación por "context steering" (ver NavegacionAerea.cs).
+    [Header("Navegación (anti-atascos)")]
+    [Tooltip("Radio del cuerpo para los sensores. 0 = automático (del Collider2D).")]
+    public float radioCuerpo = 0f;
+    [Tooltip("Distancia a la que 've' obstáculos.")]
+    public float alcanceSensor = 1.5f;
+    [Tooltip("Direcciones que evalúa cuando el camino directo está bloqueado.")]
+    public int muestrasSensor = 16;
+    [Tooltip("Preferencia por seguir la dirección actual. Evita que oscile " +
+             "debajo de una plataforma: la rodea por UN lado.")]
+    public float pesoContinuidad = 0.35f;
+    [Tooltip("Cada cuánto revisa si quedó atascado (s).")]
+    public float tiempoAtasco = 0.6f;
+
     [Header("Combate")]
+    [Tooltip("(Sin uso desde Navegación v2; se conserva por compatibilidad.)")]
     public float avoidanceForce = 10f;
     [Tooltip("Amnesia tras picar: tiempo que ignora al jugador para mantener presión.")]
     public float ignorePlayerTime = 1.5f;
@@ -110,6 +125,11 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
     private float ignoreTimer = 0f;
     private Vector2 currentMoveDirection;
 
+    // [NAV v2]
+    private Collider2D cuerpo;
+    private Vector2 posControlAtasco;
+    private float timerAtasco;
+
     // ── Estado HERIDO (retroceso propio) ─────────────────────
     private bool herido = false;
     private float hurtTimer = 0f;
@@ -121,6 +141,7 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
         rb = GetComponent<Rigidbody2D>();
         spriteRend = GetComponent<SpriteRenderer>();
         dummy = GetComponent<EnemyDummy>();
+        cuerpo = GetComponent<Collider2D>();   // [NAV v2]
     }
 
     void OnEnable()
@@ -138,6 +159,7 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
     {
         startPosition = transform.position;
         currentMoveDirection = Vector2.zero;
+        posControlAtasco = transform.position;   // [NAV v2]
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -198,34 +220,71 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
 
     void FixedUpdate()
     {
+        // [NAV v2] 0. Si quedó metido en un tile (knockback, spawn), sacarlo.
+        NavegacionAerea.Despenetrar(rb, cuerpo, obstacleLayer);
+
         // ── HERIDO: el retroceso manda; se resuelve por MovePosition y decae.
-        // Funciona sea Kinematic o Dynamic y NUNCA pelea con AddForce externos.
+        // [NAV v2] Ahora desliza por los muros en vez de incrustarse.
         if (herido)
         {
-            rb.MovePosition(rb.position + knockbackVel * Time.fixedDeltaTime);
+            Mover(knockbackVel * Time.fixedDeltaTime);
             knockbackVel = Vector2.Lerp(knockbackVel, Vector2.zero, knockbackDecay * Time.fixedDeltaTime);
             return;
         }
 
         // ── Vuelo normal ────────────────────────────────────
         float speed = isChasing ? chaseSpeed : flySpeed;
+        Vector2 haciaObjetivo = targetPosition - Centro();
 
-        // A. Dirección deseada hacia el objetivo.
-        Vector2 desiredDirection = (targetPosition - (Vector2)transform.position).normalized;
-
-        // B. Evasión de obstáculos (override).
-        Vector2 avoidance = AvoidObstacles(desiredDirection);
-        if (avoidance != Vector2.zero)
-        {
-            desiredDirection += avoidance;
-            desiredDirection.Normalize();
-        }
+        // A+B. Dirección deseada con evasión (context steering).
+        Vector2 desiredDirection = NavegacionAerea.ElegirDireccion(
+            Centro(), haciaObjetivo, currentMoveDirection, RadioCuerpo(),
+            alcanceSensor, obstacleLayer, muestrasSensor, pesoContinuidad);
 
         // C. Suavizado: convierte el movimiento robótico en curvas orgánicas.
         currentMoveDirection = Vector2.Lerp(currentMoveDirection, desiredDirection, turnSpeed * Time.fixedDeltaTime);
 
-        // D. Mover.
-        rb.MovePosition(rb.position + currentMoveDirection * speed * Time.fixedDeltaTime);
+        // D. Mover (recortando antes del muro y deslizando).
+        Mover(currentMoveDirection * speed * Time.fixedDeltaTime);
+
+        RevisarAtasco(haciaObjetivo.magnitude);
+    }
+
+    // ── [NAV v2] Movimiento seguro ───────────────────────────
+    Vector2 Centro() => cuerpo != null ? (Vector2)cuerpo.bounds.center : rb.position;
+
+    float RadioCuerpo()
+    {
+        if (radioCuerpo > 0f) return radioCuerpo;
+        if (cuerpo == null) return 0.2f;
+        Vector3 e = cuerpo.bounds.extents;
+        return Mathf.Max(0.05f, Mathf.Min(e.x, e.y) * 0.9f);
+    }
+
+    void Mover(Vector2 delta)
+    {
+        Vector2 d = NavegacionAerea.Desplazamiento(Centro(), delta, RadioCuerpo(), obstacleLayer);
+        rb.MovePosition(rb.position + d);
+    }
+
+    // Si en 'tiempoAtasco' casi no avanzó y el objetivo sigue lejos,
+    // cambia de plan: nuevo punto de deambular y, si perseguía, una
+    // amnesia corta para que rodee en vez de insistir contra el tile.
+    void RevisarAtasco(float distObjetivo)
+    {
+        timerAtasco += Time.fixedDeltaTime;
+        if (timerAtasco < tiempoAtasco) return;
+
+        float avance = (rb.position - posControlAtasco).magnitude;
+        if (avance < 0.15f && distObjetivo > 0.6f)
+        {
+            if (isChasing) ignoreTimer = Mathf.Max(ignoreTimer, 0.8f);
+            PickNewPosition();
+            changeDirTimer = 2f;
+            currentMoveDirection = Vector2.zero;
+        }
+        posControlAtasco = rb.position;
+        timerAtasco = 0f;
     }
 
     // ── PERCEPCIÓN / MOVIMIENTO (intacto respecto al original) ──
@@ -254,18 +313,7 @@ public class FlyingEnemyAI : MonoBehaviour, IEnemigoConKnockbackPropio
         targetPosition = (Vector2)playerTransform.position + organicOffset;
     }
 
-    Vector2 AvoidObstacles(Vector2 dir)
-    {
-        float checkDist = 1.5f;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, checkDist, obstacleLayer);
-        if (hit.collider != null)
-        {
-            // Reflejar la dirección para "rebotar" suavemente del obstáculo.
-            Vector2 reflectDir = Vector2.Reflect(dir, hit.normal);
-            return reflectDir.normalized * avoidanceForce;
-        }
-        return Vector2.zero;
-    }
+    // [NAV v2] AvoidObstacles (raycast + reflexión) reemplazado por NavegacionAerea.
 
     void PickNewPosition()
     {

@@ -19,6 +19,12 @@ using UnityEngine;
 //      el Macahuitl puede romperla con un golpe normal
 //    • Una vez destruida, no regresa (no forma parte del reset)
 //
+//  SELLO (DoorType.Sello) — usado por SalaSellada:
+//    • Abierta al llegar. Si no tiene spriteAbierta, se oculta.
+//    • SalaSellada la cierra cuando Romerito cruza el umbral.
+//    • SalaSellada la hace destructible al encender el brasero.
+//    • RestaurarRota(): aparece ya rota al cargar partida.
+//
 //  SETUP EN UNITY:
 //  ─────────────────────────────────────────────────────────────
 //  1. Crea dos GameObjects en la sala: "Puerta_Entrada" y "Puerta_Salida"
@@ -36,7 +42,7 @@ using UnityEngine;
 
 public class RoomDoor : MonoBehaviour
 {
-    public enum DoorType { Entrada, Salida }
+    public enum DoorType { Entrada, Salida, Sello }
 
     [Header("Configuración")]
     public DoorType doorType = DoorType.Entrada;
@@ -62,16 +68,28 @@ public class RoomDoor : MonoBehaviour
     private int hitsReceived = 0;
     private bool destroyed = false;
 
+    /// <summary>Se dispara al romperse con el Macahuitl.</summary>
+    public event System.Action OnRota;
+
+    public bool EstaRota => destroyed;
+
     // ── Unity ────────────────────────────────────────────────
 
-    void Start()
+    // Referencias en Awake: SalaSellada puede llamar RestaurarRota()
+    // desde su Start, antes de que corra el Start de la puerta.
+    void Awake()
     {
         col = GetComponent<Collider2D>();
         sr = GetComponent<SpriteRenderer>();
+    }
+
+    void Start()
+    {
+        if (destroyed) return;   // ya restaurada como rota (SalaSellada)
 
         // Estado inicial según tipo
-        if (doorType == DoorType.Entrada)
-            Abrir();         // La entrada empieza abierta
+        if (doorType == DoorType.Entrada || doorType == DoorType.Sello)
+            Abrir();         // Entrada y Sello empiezan abiertas
         else
             Bloquear();      // La salida empieza bloqueada
     }
@@ -84,6 +102,7 @@ public class RoomDoor : MonoBehaviour
         if (destroyed) return;
         esDestructible = false;
         if (col != null) col.enabled = true;
+        if (sr != null) sr.enabled = true;
         SetSprite(spriteCerrada);
     }
 
@@ -96,6 +115,8 @@ public class RoomDoor : MonoBehaviour
         if (destroyed) return;
         esDestructible = false;
         if (col != null) col.enabled = false;
+        // Sello sin sprite de abierta: el hueco queda libre (invisible).
+        if (sr != null) sr.enabled = !(doorType == DoorType.Sello && spriteAbierta == null);
         SetSprite(spriteAbierta);
     }
 
@@ -105,10 +126,11 @@ public class RoomDoor : MonoBehaviour
     /// </summary>
     public void HacerDestructible()
     {
-        if (doorType != DoorType.Salida || destroyed) return;
+        if (doorType == DoorType.Entrada || destroyed) return;
         esDestructible = true;
         hitsReceived = 0;
         if (col != null) col.enabled = true;
+        if (sr != null) sr.enabled = true;
         SetSprite(spriteDestructible);
         Debug.Log("[RoomDoor] Salida ahora es destructible — golpéala con el Macahuitl.");
     }
@@ -145,6 +167,19 @@ public class RoomDoor : MonoBehaviour
         if (sr != null) sr.enabled = false;
 
         Debug.Log("[RoomDoor] ¡Salida destruida! Romerito puede avanzar.");
+        OnRota?.Invoke();
+    }
+
+    /// <summary>
+    /// Deja la puerta rota SIN efecto ni evento. Para restaurar el
+    /// estado al cargar partida (SalaSellada con brasero ya encendido).
+    /// </summary>
+    public void RestaurarRota()
+    {
+        destroyed = true;
+        esDestructible = false;
+        if (col != null) col.enabled = false;
+        if (sr != null) sr.enabled = false;
     }
 
     // ── Utilidad ─────────────────────────────────────────────
@@ -158,9 +193,9 @@ public class RoomDoor : MonoBehaviour
     // Gizmo para ver la puerta en el editor aunque sea invisible
     void OnDrawGizmos()
     {
-        Gizmos.color = doorType == DoorType.Entrada
-            ? new Color(0f, 1f, 0f, 0.4f)
-            : new Color(1f, 0.3f, 0f, 0.4f);
+        Gizmos.color = doorType == DoorType.Entrada ? new Color(0f, 1f, 0f, 0.4f)
+                     : doorType == DoorType.Sello   ? new Color(0.8f, 0.3f, 1f, 0.4f)
+                     :                                new Color(1f, 0.3f, 0f, 0.4f);
 
         Gizmos.DrawCube(transform.position, transform.localScale);
     }

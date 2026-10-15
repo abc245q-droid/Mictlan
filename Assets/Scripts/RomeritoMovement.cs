@@ -85,9 +85,42 @@ public class RomeritoMovement : MonoBehaviour
     private bool isDashDecelerating = false;
     private bool isPogoBouncing = false;
 
-    // [RECOIL] Velocidad horizontal adicional al atacar; decae en MoveCharacterSmooth.
-    private float recoilVelocityX = 0f;
-    private const float RECOIL_DECAY = 14f; // qué tan rápido se amortigua
+    // ══════════════════════════════════════════════════════════════
+    //  [RECOIL v2] Retroceso de ataque independiente de la carrera
+    //
+    //  ANTES: el recoil se sumaba a la velocidad y el siguiente
+    //  FixedUpdate SmoothDamp leía rb.linearVelocity CON el recoil
+    //  dentro. Quieto, eso lo amplificaba (se sentía bien); corriendo
+    //  hacia el enemigo, SmoothDamp (smoothTime 0.05) lo absorbía en
+    //  ~2 pasos de física para volver a 6 m/s: el recoil "se cancelaba".
+    //
+    //  AHORA:
+    //   • SmoothDamp trabaja sobre la velocidad BASE (sin el recoil que
+    //     nosotros mismos sumamos): ya no lo absorbe ni lo amplifica.
+    //   • El recoil dura 'recoilDuracion' y sigue 'recoilCurva'.
+    //   • Durante esa ventana el input HACIA el golpe se atenúa.
+    //   • Al conectar, el impulso de carrera hacia el golpe se frena.
+    //  Resultado: el mismo retroceso quieto o corriendo (Hollow Knight).
+    // ══════════════════════════════════════════════════════════════
+    [Header("Recoil de Ataque (v2)")]
+    [Tooltip("Duración del retroceso (s). La fuerza la define RomeritoCombat.recoilFuerzaLateral.")]
+    public float recoilDuracion = 0.12f;
+    [Tooltip("Forma del retroceso en la ventana: 1 al conectar → 0 al terminar.")]
+    public AnimationCurve recoilCurva = new AnimationCurve(
+        new Keyframe(0f, 1f, 0f, -2f), new Keyframe(1f, 0f, 0f, 0f));
+    [Tooltip("Cuánto input HACIA el golpe se respeta durante el recoil. " +
+             "0 = el stick no pelea contra el retroceso; 1 = comportamiento anterior.")]
+    [Range(0f, 1f)] public float recoilControlHaciaGolpe = 0.1f;
+    [Tooltip("Cuánto del impulso de carrera hacia el golpe se conserva al conectar. " +
+             "0 = frena en seco; 1 = no frena.")]
+    [Range(0f, 1f)] public float recoilConservarImpulso = 0.25f;
+
+    private float recoilVelocityX = 0f;        // recoil sumado en este paso
+    private float recoilInicial = 0f;          // fuerza con signo del último golpe
+    private float recoilInicioT = -999f;       // Time.fixedTime al conectar
+    private float recoilAplicadoPrevio = 0f;   // recoil sumado en el paso anterior
+    private float recoilAplicadoT = -999f;
+    private bool recoilPendienteFrenar = false;
     private bool isRunning = false;
 
     // Flag para Doble Salto
@@ -376,37 +409,59 @@ public class RomeritoMovement : MonoBehaviour
 
     void MoveCharacterSmooth(float currentSpeed)
     {
-        // 1. MOVIMIENTO EN EL SUELO
+        // [RECOIL v2] 1. Velocidad base: lo que trae el Rigidbody MENOS el
+        //   recoil que sumamos nosotros el paso anterior (si fue el anterior;
+        //   tras un dash o un wall-jump ya no está ahí).
+        float velX = rb.linearVelocity.x;
+        if (Time.fixedTime - recoilAplicadoT <= Time.fixedDeltaTime * 1.5f)
+            velX -= recoilAplicadoPrevio;
+
+        float plataforma = isGrounded ? platformVelocity.x : 0f;
+        float velRel = velX - plataforma;
+
+        // 2. Recoil vigente
+        float tRecoil = (Time.fixedTime - recoilInicioT) / Mathf.Max(0.0001f, recoilDuracion);
+        bool enRecoil = Mathf.Abs(recoilInicial) > 0.01f && tRecoil >= 0f && tRecoil < 1f;
+        recoilVelocityX = enRecoil ? recoilInicial * recoilCurva.Evaluate(tRecoil) : 0f;
+        float dirGolpe = -Mathf.Sign(recoilInicial);   // hacia el objetivo golpeado
+
+        // 3. Primer paso tras conectar: frenar la carrera que va hacia el golpe
+        if (recoilPendienteFrenar)
+        {
+            recoilPendienteFrenar = false;
+            if (enRecoil && velRel * dirGolpe > 0f)
+                velRel *= recoilConservarImpulso;
+            smoothInputVelocity = 0f;
+        }
+
+        // 4. Input efectivo: durante el recoil, empujar hacia el golpe pesa menos
+        float inputEf = inputX;
+        if (enRecoil && inputX * dirGolpe > 0f)
+            inputEf *= recoilControlHaciaGolpe;
+
+        float nuevaX;
         if (isGrounded)
         {
-            float targetSpeed = inputX * currentSpeed;
-            float currentSpeedX = Mathf.SmoothDamp(rb.linearVelocity.x - platformVelocity.x, targetSpeed, ref smoothInputVelocity, smoothTime);
-
-            // AQUÍ ESTÁ LA MAGIA: Sumamos la velocidad de la plataforma al final
-            rb.linearVelocity = new Vector2(currentSpeedX + platformVelocity.x + recoilVelocityX, rb.linearVelocity.y); // [RECOIL]
+            // 1. MOVIMIENTO EN EL SUELO (la plataforma se suma al final)
+            nuevaX = Mathf.SmoothDamp(velRel, inputEf * currentSpeed,
+                                      ref smoothInputVelocity, smoothTime) + plataforma;
         }
-        // 2. MOVIMIENTO AÉREO (Momentum)
+        else if (inputX != 0)
+        {
+            // 2. MOVIMIENTO AÉREO con input (momentum)
+            nuevaX = Mathf.SmoothDamp(velRel, inputEf * currentSpeed,
+                                      ref smoothInputVelocity, airControlSmooth);
+        }
         else
         {
-            // En el aire, la plataforma ya no nos empuja, pero conservamos la inercia
-            // gracias a que platformVelocity se vuelve (0,0) al salir, 
-            // pero el Rigidbody ya trae el impulso acumulado.
-
-            if (inputX != 0)
-            {
-                float targetSpeed = inputX * currentSpeed;
-                float currentSpeedX = Mathf.SmoothDamp(rb.linearVelocity.x, targetSpeed, ref smoothInputVelocity, airControlSmooth);
-                rb.linearVelocity = new Vector2(currentSpeedX + recoilVelocityX, rb.linearVelocity.y); // [RECOIL]
-            }
-            else
-            {
-                float currentSpeedX = Mathf.Lerp(rb.linearVelocity.x, 0, airDrag * Time.fixedDeltaTime);
-                rb.linearVelocity = new Vector2(currentSpeedX + recoilVelocityX, rb.linearVelocity.y); // [RECOIL]
-            }
+            // 2b. Aire sin input: arrastre
+            nuevaX = Mathf.Lerp(velRel, 0f, airDrag * Time.fixedDeltaTime);
         }
 
-        // [RECOIL] Amortiguación del retroceso de ataque: decae hacia 0 cada FixedUpdate.
-        recoilVelocityX = Mathf.Lerp(recoilVelocityX, 0f, RECOIL_DECAY * Time.fixedDeltaTime);
+        rb.linearVelocity = new Vector2(nuevaX + recoilVelocityX, rb.linearVelocity.y);
+
+        recoilAplicadoPrevio = recoilVelocityX;
+        recoilAplicadoT = Time.fixedTime;
     }
 
     void WallSlideLerp()
@@ -551,7 +606,14 @@ public class RomeritoMovement : MonoBehaviour
     // fuerzaY: empuje vertical instantáneo (negativo = hacia abajo, para ataque arriba).
     public void AplicarRecoilAtaque(float fuerzaX, float fuerzaY = 0f)
     {
-        recoilVelocityX = fuerzaX;
+        // [RECOIL v2] Abre una ventana de recoil (solo si hay componente lateral;
+        // el ataque hacia arriba manda 0 y no debe pisar un recoil en curso).
+        if (Mathf.Abs(fuerzaX) > 0.01f)
+        {
+            recoilInicial = fuerzaX;
+            recoilInicioT = Time.fixedTime;
+            recoilPendienteFrenar = true;
+        }
         // El componente vertical es un nudge instantáneo (no decae; la gravedad lo corrige).
         if (Mathf.Abs(fuerzaY) > 0.01f)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + fuerzaY);

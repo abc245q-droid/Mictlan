@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 // ============================================================
@@ -77,7 +77,7 @@ public class EntradaVertical : MonoBehaviour
         }
 
         // Teleportar a la posición de esta entrada
-        player.transform.position = transform.position;
+        player.transform.position = (Vector2)transform.position;   // [Z-FIX] Romerito siempre en Z = 0
 
         // Actualizar checkpoint en esta posición
         GameManager01.instance.UpdateCheckPoint(transform.position);

@@ -266,6 +266,16 @@ public class RomeritoCombat : MonoBehaviour
         // [FIX-Trapdoor] Caso C — Puertas destructibles debajo.
         foreach (Collider2D col in impactadosDoors)
         {
+            // [GOLPEABLE] Pogo sobre mazorcas de cacao y demás golpeables.
+            IGolpeableMacahuitl golpeable = col.GetComponent<IGolpeableMacahuitl>();
+            if (golpeable != null)
+            {
+                if (golpeable.RecibirGolpeMacahuitl(transform.position,
+                        DanoConPasiva(attackDamage), currentFavor))
+                    rebotar = true;
+                continue;
+            }
+
             RoomDoor door = col.GetComponent<RoomDoor>();
             if (door != null) { door.RecibirGolpe(); rebotar = true; continue; }
 
@@ -612,6 +622,15 @@ public class RomeritoCombat : MonoBehaviour
 
             foreach (Collider2D hit in hitDoors)
             {
+                // [GOLPEABLE] Objetos genéricos (mazorcas de cacao, …).
+                IGolpeableMacahuitl golpeable = hit.GetComponent<IGolpeableMacahuitl>();
+                if (golpeable != null)
+                {
+                    if (golpeable.RecibirGolpeMacahuitl(transform.position, dmg, currentFavor))
+                        _golpeConectado = true;
+                    continue;
+                }
+
                 RoomDoor door = hit.GetComponent<RoomDoor>();
                 if (door != null) { door.RecibirGolpe(); _golpeConectado = true; continue; } // [RECOIL-FIX]
 

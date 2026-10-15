@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 // ============================================================
@@ -12,6 +12,11 @@ using UnityEngine.Events;
 //  Pertenece opcionalmente a un BraseroGrupo: cuando TODOS los del
 //  grupo están encendidos, el grupo dispara su evento de completado
 //  (abrir puerta, cutscene, etc.).
+//
+//  BLOQUEO (SalaSellada):
+//  Mientras 'bloqueado' sea true no se puede encender: Tlacua no
+//  trabaja con custodios cerca. Se muestra promptBloqueado en lugar
+//  del prompt normal y B dispara OnIntentoBloqueado.
 //
 //  SETUP EN UNITY:
 //  ─────────────────────────────────────────────────────────────
@@ -54,12 +59,43 @@ public class Brasero : MonoBehaviour
     [Tooltip("Se dispara al encender ESTE brasero (FX, sonido).")]
     public UnityEvent OnEncendido;
 
+    [Header("Bloqueo (lo controla SalaSellada)")]
+    [Tooltip("Mientras esté bloqueado no se puede encender.")]
+    [SerializeField] private bool bloqueado = false;
+    [Tooltip("Se muestra en rango mientras está bloqueado (ej. Tlacua escondido). Opcional.")]
+    public GameObject promptBloqueado;
+    [Tooltip("B pulsado estando bloqueado: chillido de Tlacua, sacudida. Opcional.")]
+    public UnityEvent OnIntentoBloqueado;
+    [Tooltip("Se desbloquea (zona limpia): brasas, Tlacua asoma. Opcional.")]
+    public UnityEvent OnDesbloqueado;
+    [Tooltip("Se vuelve a bloquear (custodios reagrupados). Opcional.")]
+    public UnityEvent OnBloqueado;
+
     // ── Estado ───────────────────────────────────────────────
     private SpriteRenderer sr;
     private bool jugadorEnRango = false;
     private bool encendido = false;
 
     public bool EstaEncendido => encendido;
+    public bool EstaBloqueado => bloqueado;
+
+    /// <summary>Lo llama SalaSellada según queden custodios vivos.</summary>
+    public void SetBloqueado(bool valor)
+    {
+        if (bloqueado == valor) return;
+        bloqueado = valor;
+        if (encendido) return;   // ya encendido: el bloqueo no aplica
+
+        if (bloqueado) OnBloqueado?.Invoke();
+        else           OnDesbloqueado?.Invoke();
+
+        // Refrescar el prompt si Romerito está ahí parado.
+        if (jugadorEnRango)
+        {
+            if (bloqueado) MostrarPromptBloqueado();
+            else           MostrarPrompt();
+        }
+    }
 
     void Start()
     {
@@ -82,6 +118,15 @@ public class Brasero : MonoBehaviour
         if (!jugadorEnRango) return;
         if (DialogueManager.IsActive) { OcultarPrompt(); return; }
 
+        // [SALA-SELLADA] Tlacua no trabaja con custodios cerca.
+        if (bloqueado)
+        {
+            MostrarPromptBloqueado();
+            if (Input.GetKeyDown(botonInteraccion) || Input.GetKeyDown(teclaAlterna))
+                OnIntentoBloqueado?.Invoke();
+            return;
+        }
+
         MostrarPrompt();
         if (Input.GetKeyDown(botonInteraccion) || Input.GetKeyDown(teclaAlterna))
             Encender();
@@ -89,7 +134,7 @@ public class Brasero : MonoBehaviour
 
     private void Encender()
     {
-        if (encendido) return;
+        if (encendido || bloqueado) return;
         encendido = true;
 
         if (GameManager01.instance != null)
@@ -132,12 +177,24 @@ public class Brasero : MonoBehaviour
     {
         if (promptInteraccion != null && !promptInteraccion.activeSelf)
             promptInteraccion.SetActive(true);
+        if (promptBloqueado != null && promptBloqueado.activeSelf)
+            promptBloqueado.SetActive(false);
+    }
+
+    private void MostrarPromptBloqueado()
+    {
+        if (promptInteraccion != null && promptInteraccion.activeSelf)
+            promptInteraccion.SetActive(false);
+        if (promptBloqueado != null && !promptBloqueado.activeSelf)
+            promptBloqueado.SetActive(true);
     }
 
     private void OcultarPrompt()
     {
         if (promptInteraccion != null && promptInteraccion.activeSelf)
             promptInteraccion.SetActive(false);
+        if (promptBloqueado != null && promptBloqueado.activeSelf)
+            promptBloqueado.SetActive(false);
     }
 
     void OnDrawGizmos()

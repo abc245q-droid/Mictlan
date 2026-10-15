@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class SceneEntrance : MonoBehaviour
 {
@@ -14,11 +14,11 @@ public class SceneEntrance : MonoBehaviour
 
             if (player != null)
             {
-                // 3. Movemos a Romerito a ESTA posición
-                player.transform.position = transform.position;
+                // 3. Movemos a Romerito a ESTA posiciÃ³n
+                player.transform.position = (Vector2)transform.position;   // [Z-FIX] Romerito siempre en Z = 0
 
                 // 4. Importante: Si Romerito miraba a la derecha y esta entrada
-                // requiere mirar a la izquierda, aquí podrías forzar el Flip.
+                // requiere mirar a la izquierda, aquÃ­ podrÃ­as forzar el Flip.
             }
         }
     }
@@ -28,6 +28,6 @@ public class SceneEntrance : MonoBehaviour
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, 0.5f);
-        // Dibuja una flecha indicando hacia dónde mira
+        // Dibuja una flecha indicando hacia dÃ³nde mira
     }
 }
