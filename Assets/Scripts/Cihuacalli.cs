@@ -104,7 +104,7 @@ public class Cihuacalli : MonoBehaviour
         if (!jugadorEnRango) return;
 
         // Durante un diálogo, nada de prompts ni inputs.
-        if (DialogueManager.IsActive) { OcultarPrompt(); return; }
+        if (DialogueManager.IsActive || CodiceUI.BloqueaInput) { OcultarPrompt(); return; }
 
         MostrarPrompt();
 

@@ -150,6 +150,10 @@ public class GameManager01 : MonoBehaviour
             // 2. Convertir Texto a Datos
             currentData = JsonUtility.FromJson<PlayerData>(json);
 
+            // Saves anteriores al Códice Maestro: si ya había progreso,
+            // se concede el Códice para no dejar al jugador sin mapa.
+            CodiceMaestro.MigrarSaveAntiguo(currentData, json);
+
             lastCheckPointPos = new Vector2(currentData.positionX, currentData.positionY);
             Debug.Log("Datos cargados correctamente.");
         }

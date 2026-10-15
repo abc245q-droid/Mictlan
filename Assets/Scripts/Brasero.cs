@@ -116,7 +116,7 @@ public class Brasero : MonoBehaviour
     {
         if (encendido) { OcultarPrompt(); return; }       // ya encendido: nada que hacer
         if (!jugadorEnRango) return;
-        if (DialogueManager.IsActive) { OcultarPrompt(); return; }
+        if (DialogueManager.IsActive || CodiceUI.BloqueaInput) { OcultarPrompt(); return; }
 
         // [SALA-SELLADA] Tlacua no trabaja con custodios cerca.
         if (bloqueado)

@@ -32,6 +32,13 @@ public class MapScreenUI : MonoBehaviour
 {
     public static bool IsOpen { get; private set; }
 
+    /// <summary>
+    /// true → el mapa vive dentro del Códice (CodiceUI) como una pestaña:
+    /// deja de leer su propio input (Tab/View/Escape) y solo se abre con
+    /// AbrirEmbebido/CerrarEmbebido. Lo activa CodiceUI en su Awake.
+    /// </summary>
+    [System.NonSerialized] public bool gestionadoPorCodice = false;
+
     [Header("Refs de UI")]
     public GameObject panel;
     public RectTransform contenedorSalas;
@@ -73,6 +80,9 @@ public class MapScreenUI : MonoBehaviour
 
     void Update()
     {
+        // Dentro del Códice, quien manda el input es CodiceUI.
+        if (gestionadoPorCodice) return;
+
         if (!IsOpen)
         {
             if (DialogueManager.IsActive || PochtecahShopUI.IsOpen) return;
@@ -171,6 +181,27 @@ public class MapScreenUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
         if (hudJuego != null) hudJuego.SetActive(true);
         CongelarJugador(false);
+    }
+
+    // ── Modo embebido (pestaña Mapa del Códice) ───────────
+    // CodiceUI ya congela a Romerito, pausa el mundo y oculta el HUD;
+    // aquí solo se enciende el panel y se dibuja.
+    public void AbrirEmbebido()
+    {
+        if (IsOpen) return;
+        IsOpen = true;
+        if (panel != null) panel.SetActive(true);
+        StartCoroutine(ConstruirDelayed());
+    }
+
+    public void CerrarEmbebido()
+    {
+        if (!IsOpen) return;
+        IsOpen = false;
+        // Cambio rápido de pestaña: que no se construya tras cerrar.
+        StopAllCoroutines();
+        Limpiar();
+        if (panel != null) panel.SetActive(false);
     }
 
     // ── Construcción del minimapa ─────────────────────────

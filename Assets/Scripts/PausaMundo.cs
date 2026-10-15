@@ -40,6 +40,7 @@ public static class PausaMundo
     public const string Tienda        = "Tienda";
     public const string ModalTutorial = "ModalTutorial";
     public const string MenuPausa     = "MenuPausa";
+    public const string Codice        = "Codice";
 
     private static readonly HashSet<string> motivos = new HashSet<string>();
 
