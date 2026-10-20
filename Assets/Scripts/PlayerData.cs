@@ -66,6 +66,16 @@ public class PlayerData
 
 
 
+    // --- HERBARIO (página del Códice) ---
+    // Una entrada por especie que Romerito ya avistó: etapa + muestras.
+    // Lista y no Dictionary porque JsonUtility no serializa diccionarios.
+    // Saves anteriores: el campo llega vacío y HerbarioManager lo crea.
+    public List<EntradaHerbario> herbario = new List<EntradaHerbario>();
+
+    // ¿Ya conoció al ticitl de Apanohualoyan? Él le enseña los nombres
+    // náhuatl de las plantas; antes de eso el Herbario muestra "?".
+    public bool conocioTicitl = false;
+
     // --- MUNDO (Para objetos únicos destruidos o recogidos) ---
     // Guardaremos los IDs (nombres) de los objetos que ya no deben aparecer
     public List<string> collectedItems = new List<string>();

@@ -330,8 +330,19 @@ public class CodiceUI : MonoBehaviour
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(null);
-            if (actual != null && actual.primerSeleccionable != null)
-                EventSystem.current.SetSelectedGameObject(actual.primerSeleccionable);
+
+            GameObject foco = actual != null ? actual.primerSeleccionable : null;
+
+            // Páginas con botones creados en tiempo de ejecución (Herbario,
+            // Bestiario...): la propia página dice qué recibe el foco.
+            if (foco == null && actual != null && actual.pagina != null)
+            {
+                IPaginaCodice dinamica = actual.pagina.GetComponentInChildren<IPaginaCodice>(true);
+                if (dinamica != null) foco = dinamica.AlMostrarPagina();
+            }
+
+            if (foco != null)
+                EventSystem.current.SetSelectedGameObject(foco);
         }
     }
 
