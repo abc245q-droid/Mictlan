@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_sinicuichi
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: sinicuichi
+  nombreNahuatl: Sinicuichi
+  glosa: (origen del nombre discutido)
+  nombreEspanol: sinicuiche
+  nombreCientifico: Heimia salicifolia
+  descripcion: "Arbusto de flores amarillas. Dicen que ti\xF1e la vista de oro, aleja
+    los sonidos y hace recordar lo olvidado."
+  notaTicitl: Huele a algo que ya viviste. No te asustes si recuerdas.
+  fuente: "Registros etnobot\xE1nicos de los siglos XIX y XX"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: -1
+  roles: 2
+  notaDiseno: 'Coleccionable narrativo: recuerdos de la vida de Romerito. No hay
+    fuente colonial clara; verificar origen del nombre.'

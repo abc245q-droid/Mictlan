@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_quetzalaxochiacatl
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: quetzalaxochiacatl
+  nombreNahuatl: Quetzalaxochiacatl
+  glosa: "flor acu\xE1tica preciosa (lectura aproximada)"
+  nombreEspanol: ninfa, lirio de agua
+  nombreCientifico: Nymphaea ampla
+  descripcion: "Nen\xFAfar que abre con la luz y se cierra en la oscuridad. Aparece
+    en los murales de Tlalocan, en Teotihuacan."
+  notaTicitl: Tus parientes duermen entre sus hojas, ajolote. Pisa con cuidado.
+  fuente: "Hern\xE1ndez; murales de Tepantitla, Teotihuacan"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: 2
+  roles: 18
+  notaDiseno: "Plataforma temporizada por luz en Atoctlan. Verificar graf\xEDa, glosa
+    e identificaci\xF3n con N. ampla."

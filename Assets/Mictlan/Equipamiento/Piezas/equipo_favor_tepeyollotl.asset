@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dc453021897431e8ed767fa2e136afb, type: 3}
+  m_Name: equipo_favor_tepeyollotl
+  m_EditorClassIdentifier: Assembly-CSharp::EquipoDefinition
+  id: favor_tepeyollotl
+  nombre: Favor de Tepeyollotl
+  subtitulo: "coraz\xF3n del monte"
+  icono: {fileID: 0}
+  categoria: 2
+  requisito: 5
+  favor: 3
+  descripcion: El jaguar que habita el interior de los montes presta su fuerza a
+    Romerito.
+  controles: 'LB: cambiar de Favor.'
+  notaDiseno: 'Texto provisional: completar con la habilidad cuando se implemente.'

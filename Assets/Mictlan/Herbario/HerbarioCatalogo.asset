@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79f68ce615e348e292169cba60523081, type: 3}
+  m_Name: HerbarioCatalogo
+  m_EditorClassIdentifier: Assembly-CSharp::HerbarioCatalogo
+  especies:
+  - {fileID: 11400000, guid: 8b35322bf8f468f40a3fcea3519547c2, type: 2}
+  - {fileID: 11400000, guid: 8565fb716d5458a4f8da1ce0ca9cafda, type: 2}
+  - {fileID: 11400000, guid: 0dc8a142117ed624aa0fd73925f9e37c, type: 2}
+  - {fileID: 11400000, guid: 14ddc9309778aaa41825837a37bab32c, type: 2}
+  - {fileID: 11400000, guid: e1b01cd89fbbc0848afe4fe80ec8796b, type: 2}
+  - {fileID: 11400000, guid: f1b3d7a7e90bb2b41b6319878e46efb5, type: 2}
+  - {fileID: 11400000, guid: 79ec077b77f205248883d78cf196684c, type: 2}
+  - {fileID: 11400000, guid: d5e9d35573ad37247b6ef188cd896775, type: 2}
+  - {fileID: 11400000, guid: 36ce309cd05fbf14aa56d67b7c076eaa, type: 2}
+  - {fileID: 11400000, guid: 97a744c34a3fab641af4d19858c2e44b, type: 2}
+  - {fileID: 11400000, guid: 0c2f5580a374dfb4597ba451750a3a3e, type: 2}
+  - {fileID: 11400000, guid: 7cddfa026d40b3142ae901951b8646dc, type: 2}
+  - {fileID: 11400000, guid: ecbeee2cc376e3c44a234f9d89a39c9d, type: 2}
+  - {fileID: 11400000, guid: c020488b86b560d479e77a73c7754ecb, type: 2}
+  - {fileID: 11400000, guid: 4e9de1b77bd7674429a0ba01470ce80e, type: 2}
+  - {fileID: 11400000, guid: ee6f1f98305ab494e895db6fd79dfedf, type: 2}
+  - {fileID: 11400000, guid: 655cc097aabe59145bce9c790e33654f, type: 2}
+  - {fileID: 11400000, guid: 21252a83e1599aa4eb4bad096237502f, type: 2}
+  - {fileID: 11400000, guid: 24120ae6ed1a1744aa5adcfc96a1001c, type: 2}
+  - {fileID: 11400000, guid: 6d7ea4a70110d7842a0b319f62d0feb5, type: 2}
+  - {fileID: 11400000, guid: 4e5dc5eb3ba4df04b9a7bfe490b39123, type: 2}
+  - {fileID: 11400000, guid: 4779a601c86b16c49a68eaa18585aca2, type: 2}

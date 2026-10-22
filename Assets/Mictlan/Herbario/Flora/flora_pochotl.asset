@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_pochotl
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: pochotl
+  nombreNahuatl: Pochotl
+  glosa: 
+  nombreEspanol: ceiba
+  nombreCientifico: Ceiba sp.
+  descripcion: "\xC1rbol enorme de tronco espinoso. En muchas tradiciones mesoamericanas
+    sus ra\xEDces bajan al inframundo y sus ramas sostienen el cielo."
+  notaTicitl: "Si alguna vez te pierdes, busca sus ra\xEDces. Todas llevan hacia
+    arriba."
+  fuente: "Hern\xE1ndez; C\xF3dice Fej\xE9rv\xE1ry-Mayer (\xE1rboles de las direcciones)"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 1
+  nivelPrincipal: -1
+  roles: 1
+  notaDiseno: "Decoraci\xF3n monumental. Con una sola muestra queda estudiado (una
+    astilla de corteza)."

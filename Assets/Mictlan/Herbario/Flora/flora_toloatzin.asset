@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_toloatzin
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: toloatzin
+  nombreNahuatl: Toloatzin
+  glosa: la venerable cabeza inclinada
+  nombreEspanol: toloache
+  nombreCientifico: Datura spp.
+  descripcion: 'Su flor blanca cuelga como una cabeza que se inclina. Quien la toca
+    pierde el rumbo: la derecha se vuelve izquierda.'
+  notaTicitl: Untada con cuidado calma el dolor. Tocada sin respeto, voltea el camino.
+    No la mires de frente cuando se inclina.
+  fuente: "Sahag\xFAn, C\xF3dice Florentino, Libro XI; Hern\xE1ndez"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: 1
+  roles: 10
+  notaDiseno: "Etimolog\xEDa: tolohua, 'inclinar la cabeza' + -tzin reverencial.
+    Enemigo pasivo: p\xE9ndulo + inversi\xF3n de controles."

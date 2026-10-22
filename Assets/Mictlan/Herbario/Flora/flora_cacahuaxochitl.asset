@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_cacahuaxochitl
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: cacahuaxochitl
+  nombreNahuatl: Cacahuaxochitl
+  glosa: flor del cacao
+  nombreEspanol: rosita de cacao
+  nombreCientifico: Quararibea funebris
+  descripcion: "\xC1rbol cuyas flores secas perfumaban el cacao de los se\xF1ores.
+    Aqu\xED abajo florece donde los vivos todav\xEDa dejan ofrendas."
+  notaTicitl: "Huele a fiesta de muertos. Alguien all\xE1 arriba todav\xEDa se acuerda."
+  fuente: "Sahag\xFAn; Hern\xE1ndez"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: -1
+  roles: 7
+  notaDiseno: "Con cacao \u2192 cacahuatl (restaura vidas). Verificar el origen del
+    ep\xEDteto 'funebris' antes de usarlo en texto."

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dc453021897431e8ed767fa2e136afb, type: 3}
+  m_Name: equipo_macahuitl
+  m_EditorClassIdentifier: Assembly-CSharp::EquipoDefinition
+  id: macahuitl
+  nombre: Macahuitl
+  subtitulo: espada de madera y obsidiana
+  icono: {fileID: 0}
+  categoria: 0
+  requisito: 1
+  favor: 0
+  descripcion: "Madera dura con filos de obsidiana incrustados. Golpea enemigos,
+    rompe muros y mazorcas petrificadas, y corta las plantas m\xE1s duras."
+  controles: 'X: atacar. Con arriba o abajo, golpe vertical. Hacia abajo en el aire,
+    rebota sobre lo que golpea.'
+  notaDiseno: 

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_picietl
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: picietl
+  nombreNahuatl: Picietl
+  glosa: tabaco silvestre
+  nombreEspanol: "tabaco cimarr\xF3n"
+  nombreCientifico: Nicotiana rustica
+  descripcion: "Tabaco fuerte de hoja ancha. Molido con cal se vuelve tenexyetl,
+    que protege contra lo que da\xF1a sin dejarse ver."
+  notaTicitl: "Golp\xE9alo nueve veces, como se hac\xEDa. Ni una m\xE1s, ni una menos."
+  fuente: "Sahag\xFAn; Ruiz de Alarc\xF3n (1629)"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: -1
+  roles: 6
+  notaDiseno: "Cosecha con 9 golpes (golpesParaCosechar = 9). Verificar en Ruiz de
+    Alarc\xF3n el ep\xEDteto ritual de 'nueve veces golpeado'."

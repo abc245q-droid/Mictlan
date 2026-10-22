@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc72586c225468aaa55a470296700ae, type: 3}
+  m_Name: flora_teonanacatl
+  m_EditorClassIdentifier: Assembly-CSharp::FloraDefinition
+  id: teonanacatl
+  nombreNahuatl: Teonanacatl
+  glosa: hongo divino
+  nombreEspanol: hongo de los volcanes
+  nombreCientifico: Psilocybe aztecorum
+  descripcion: "Hongo de los bosques de pino en las laderas de los volcanes, tierra
+    de Tl\xE1loc. Brota despu\xE9s de la lluvia."
+  notaTicitl: "Brotan despu\xE9s de la tormenta. Si les hablas bajito, a veces contestan."
+  fuente: "Sahag\xFAn, C\xF3dice Florentino, Libro XI; G. Guzm\xE1n, The Genus Psilocybe
+    (1983)"
+  ilustracion: {fileID: 0}
+  muestrasParaEstudiar: 3
+  nivelPrincipal: -1
+  roles: 18
+  notaDiseno: "Gate del Favor de Tl\xE1loc: la lluvia los hace brotar como plataformas
+    de rebote. Verificar el nombre 'apipiltzin' antes de usarlo. Que los hongos 'hablen'
+    es tradici\xF3n mazateca: acreditarla as\xED."
