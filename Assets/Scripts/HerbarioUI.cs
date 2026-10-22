@@ -42,8 +42,8 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
     [Header("Cuadrícula")]
     [Tooltip("RectTransform con GridLayoutGroup donde se crean las casillas.")]
     public RectTransform contenedorSlots;
-    [Tooltip("Opcional. Prefab con Button + HerbarioSlot. Vacío = casillas automáticas.")]
-    public HerbarioSlot slotPrefab;
+    [Tooltip("Opcional. Prefab con Button + CodiceSlot. Vacío = casillas automáticas.")]
+    public CodiceSlot slotPrefab;
 
     [Header("Detalle (todos opcionales)")]
     public Image ilustracion;
@@ -63,6 +63,14 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
     public Color colorFondoEstudiada   = new Color(0.90f, 0.70f, 0.25f, 0.85f);
     [Tooltip("Tinte del botón con el foco del mando (se multiplica con el fondo).")]
     public Color colorFoco             = new Color(1.00f, 0.85f, 0.50f, 1.00f);
+    [Tooltip("Color del nombre en las casillas.")]
+    public Color colorEtiqueta         = new Color(0.23f, 0.16f, 0.10f, 1.00f);
+    [Tooltip("Color del '???' de las plantas que aún no has visto.")]
+    public Color colorEtiquetaDesconocida = new Color(0.23f, 0.16f, 0.10f, 0.45f);
+
+    [Header("Foco")]
+    [Tooltip("Cuánto crece la casilla con el foco del mando (1 = no crece).")]
+    [Range(1f, 1.3f)] public float escalaFoco = 1.1f;
 
     [Header("Textos")]
     public string textoDesconocida = "Aún no has visto esta planta.";
@@ -73,7 +81,7 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
     public string textoFaltanEstudio = "Lleva {0} muestra(s) más al ticitl para estudiarla.";
 
     // ── Estado ───────────────────────────────────────────────
-    private readonly List<HerbarioSlot> slots = new List<HerbarioSlot>();
+    private readonly List<CodiceSlot> slots = new List<CodiceSlot>();
     private int seleccionado = 0;
 
     // ── Unity ────────────────────────────────────────────────
@@ -126,7 +134,7 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
             MostrarDetalle(Mathf.Clamp(seleccionado, 0, slots.Count - 1));
     }
 
-    /// <summary>Lo llama HerbarioSlot al recibir el foco.</summary>
+    /// <summary>Lo llama la casilla (CodiceSlot) al recibir el foco.</summary>
     public void AlSeleccionarSlot(int indice)
     {
         seleccionado = indice;
@@ -145,73 +153,24 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
 
         for (int i = 0; i < n; i++)
         {
-            HerbarioSlot s = slotPrefab != null
+            CodiceSlot s = slotPrefab != null
                 ? Instantiate(slotPrefab, contenedorSlots)
-                : CrearSlotAutomatico();
+                : CodiceSlot.Crear(contenedorSlots, colorFoco);
 
             s.name = "Slot_" + i;
             s.indice = i;
-            s.ui = this;
-            AplicarColorFoco(s);
+            s.alSeleccionar = AlSeleccionarSlot;
+            s.escalaFoco = escalaFoco;
+            CodiceSlot.AplicarColorFoco(s.GetComponent<Button>(), colorFoco);
             slots.Add(s);
         }
     }
 
-    private HerbarioSlot CrearSlotAutomatico()
-    {
-        var go = new GameObject("Slot", typeof(RectTransform), typeof(Image), typeof(Button), typeof(HerbarioSlot));
-        go.transform.SetParent(contenedorSlots, false);
-
-        var slot = go.GetComponent<HerbarioSlot>();
-        slot.fondo = go.GetComponent<Image>();
-        go.GetComponent<Button>().targetGraphic = slot.fondo;
-
-        // Icono: ocupa la casilla con margen, respetando proporción.
-        var goIcono = new GameObject("Icono", typeof(RectTransform), typeof(Image));
-        var rtIcono = goIcono.GetComponent<RectTransform>();
-        rtIcono.SetParent(go.transform, false);
-        rtIcono.anchorMin = new Vector2(0f, 0.22f);
-        rtIcono.anchorMax = Vector2.one;
-        rtIcono.offsetMin = new Vector2(6f, 0f);
-        rtIcono.offsetMax = new Vector2(-6f, -6f);
-        slot.icono = goIcono.GetComponent<Image>();
-        slot.icono.preserveAspect = true;
-        slot.icono.raycastTarget = false;
-
-        // Etiqueta: franja inferior con el nombre (o "?").
-        var goTxt = new GameObject("Etiqueta", typeof(RectTransform), typeof(TextMeshProUGUI));
-        var rtTxt = goTxt.GetComponent<RectTransform>();
-        rtTxt.SetParent(go.transform, false);
-        rtTxt.anchorMin = Vector2.zero;
-        rtTxt.anchorMax = new Vector2(1f, 0.22f);
-        rtTxt.offsetMin = new Vector2(2f, 2f);
-        rtTxt.offsetMax = new Vector2(-2f, 0f);
-        var tmp = goTxt.GetComponent<TextMeshProUGUI>();
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.enableAutoSizing = true;
-        tmp.fontSizeMin = 8f;
-        tmp.fontSizeMax = 20f;
-        tmp.textWrappingMode = TextWrappingModes.NoWrap;
-        tmp.raycastTarget = false;
-        slot.etiqueta = tmp;
-
-        return slot;
-    }
-
-    private void AplicarColorFoco(HerbarioSlot s)
-    {
-        var b = s.GetComponent<Button>();
-        if (b == null) return;
-        ColorBlock c = b.colors;
-        c.highlightedColor = colorFoco;
-        c.selectedColor = colorFoco;
-        b.colors = c;
-    }
-
-    private void PintarSlot(HerbarioSlot s, FloraDefinition f)
+    private void PintarSlot(CodiceSlot s, FloraDefinition f)
     {
         if (s == null) return;
-        if (f == null) { s.Pintar(null, Color.white, "", colorFondoDesconocida); return; }
+        s.escalaFoco = escalaFoco;   // permite ajustarlo en Play desde el Inspector
+        if (f == null) { s.Pintar(null, Color.white, "", colorEtiquetaDesconocida, colorFondoDesconocida); return; }
 
         EtapaHerbario etapa = HerbarioManager.GetEtapa(f);
         bool nombre = HerbarioManager.NombreRevelado(f);
@@ -219,14 +178,15 @@ public class HerbarioUI : MonoBehaviour, IPaginaCodice
         switch (etapa)
         {
             case EtapaHerbario.Desconocida:
-                s.Pintar(null, Color.white, "???", colorFondoDesconocida);
+                s.Pintar(null, Color.white, "???", colorEtiquetaDesconocida, colorFondoDesconocida);
                 break;
             case EtapaHerbario.Avistada:
-                s.Pintar(f.ilustracion, colorSilueta, "?", colorFondoConocida);
+                s.Pintar(f.ilustracion, colorSilueta, "?", colorEtiqueta, colorFondoConocida);
                 break;
             default:
                 s.Pintar(f.ilustracion, Color.white,
                          nombre ? f.nombreNahuatl : "?",
+                         colorEtiqueta,
                          etapa == EtapaHerbario.Estudiada ? colorFondoEstudiada : colorFondoConocida);
                 break;
         }
