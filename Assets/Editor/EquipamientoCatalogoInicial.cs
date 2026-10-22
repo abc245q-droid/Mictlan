@@ -15,8 +15,12 @@ using UnityEngine;
 //
 //  Seguro de correr varias veces: no pisa piezas que ya existen.
 //
-//  Textos de Tláloc, Tepeyollotl y los dones de movimiento son
-//  provisionales: sus specs aún no están cerradas. Edítalos en el
+//  No hay sección de dones: la reliquia es la que permite usar el don.
+//  Cada habilidad de movimiento entrará como la Reliquia que la concede
+//  (con requisito Correr, Dash...), cuando se diseñe.
+//
+//  Textos de Tláloc y Tepeyollotl son provisionales: sus specs aún
+//  no están cerradas. Edítalos en el
 //  asset cuando se definan; la notaDiseno lo recuerda.
 //
 //  Este archivo DEBE vivir en una carpeta llamada "Editor".
@@ -59,8 +63,8 @@ public static class EquipamientoCatalogoInicial
 
             // ── Reliquias ──────────────────────────────────────────
             P("jicara_tonalli", CategoriaEquipo.Reliquia, RequisitoEquipo.JicaraTonalli,
-              "Jícara de Tonalli", "Don de Tlacua",
-              "Regalo de Tlacua, emisario de Huehueteotl. Permite materializar y guardar el tonalli: el propio y el que dejan los enemigos al caer.",
+              "Jícara de Tonalli", "regalo de Tlacua",
+              "Regalo de Tlacua, emisario de Huehueteotl. Concede el don de materializar y guardar el tonalli: el propio y el que dejan los enemigos al caer.",
               "El tonalli se recupera venciendo enemigos y se gasta en los Favores."),
 
             // ── Favores ────────────────────────────────────────────
@@ -85,37 +89,6 @@ public static class EquipamientoCatalogoInicial
               "Texto provisional: completar con la habilidad cuando se implemente.",
               RomeritoCombat.GodFavor.Tepeyollotl),
 
-            // ── Dones (movimiento) ─────────────────────────────────
-            P("don_correr", CategoriaEquipo.Don, RequisitoEquipo.Correr,
-              "Carrera", "",
-              "Romerito puede correr.",
-              "",
-              "Texto provisional: definir de dónde viene el don y su botón."),
-
-            P("don_doble_salto", CategoriaEquipo.Don, RequisitoEquipo.DobleSalto,
-              "Salto doble", "",
-              "Un segundo impulso en el aire.",
-              "A en el aire.",
-              "Texto provisional: definir de dónde viene el don."),
-
-            P("don_dash", CategoriaEquipo.Don, RequisitoEquipo.Dash,
-              "Impulso", "",
-              "Un movimiento rápido y corto hacia adelante.",
-              "RB.",
-              "Texto provisional: definir de dónde viene el don."),
-
-            P("don_trepar", CategoriaEquipo.Don, RequisitoEquipo.TreparMuros,
-              "Trepar", "",
-              "Romerito se sostiene y sube por las paredes.",
-              "",
-              "Texto provisional: definir de dónde viene el don y su botón."),
-
-            P("don_salto_pared", CategoriaEquipo.Don, RequisitoEquipo.SaltoPared,
-              "Salto de pared", "",
-              "Romerito salta desde una pared hacia el lado contrario.",
-              "A junto a una pared.",
-              "Texto provisional: definir de dónde viene el don."),
-
             // ── Compañeros ─────────────────────────────────────────
             P("companero_tlacua", CategoriaEquipo.Companero, RequisitoEquipo.JicaraTonalli,
               "Tlacua", "emisario de Huehueteotl",
@@ -136,6 +109,13 @@ public static class EquipamientoCatalogoInicial
         };
     }
 
+    // Piezas que generaron versiones anteriores y ya no existen en el
+    // diseño. Crear() las borra del disco y del catálogo.
+    private static readonly string[] OBSOLETAS =
+    {
+        "don_correr", "don_doble_salto", "don_dash", "don_trepar", "don_salto_pared"
+    };
+
     [MenuItem("Mictlan/Equipamiento/Crear catálogo inicial")]
     public static void Crear()
     {
@@ -149,7 +129,18 @@ public static class EquipamientoCatalogoInicial
         }
         if (catalogo.piezas == null) catalogo.piezas = new List<EquipoDefinition>();
 
-        int creadas = 0, agregadas = 0;
+        int creadas = 0, agregadas = 0, borradas = 0;
+
+        foreach (string id in OBSOLETAS)
+        {
+            string ruta = CARPETA_PIEZAS + "/equipo_" + id + ".asset";
+            var vieja = AssetDatabase.LoadAssetAtPath<EquipoDefinition>(ruta);
+            if (vieja == null) continue;
+            catalogo.piezas.Remove(vieja);
+            AssetDatabase.DeleteAsset(ruta);
+            borradas++;
+        }
+        catalogo.piezas.RemoveAll(p => p == null);
 
         foreach (var d in Piezas())
         {
@@ -186,7 +177,7 @@ public static class EquipamientoCatalogoInicial
         Selection.activeObject = catalogo;
         EditorGUIUtility.PingObject(catalogo);
         Debug.Log("[Equipamiento] Catálogo listo en " + RUTA_CATALOGO + ": " + creadas +
-                  " pieza(s) creada(s), " + agregadas + " agregada(s), " +
+                  " pieza(s) creada(s), " + agregadas + " agregada(s), " + borradas + " obsoleta(s) borrada(s), " +
                   catalogo.piezas.Count + " en total.");
     }
 

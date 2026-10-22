@@ -14,17 +14,21 @@
 //
 // ============================================================
 
+// Valores explícitos: se serializan como número en los assets. El 3 era
+// "Don" (eliminado: la reliquia es la que permite usar el don). No reusar
+// el 3 ni renumerar, o los assets existentes cambiarían de categoría.
 public enum CategoriaEquipo
 {
-    Arma,
-    Reliquia,
-    Favor,
-    Don,
-    Companero
+    Arma      = 0,
+    Reliquia  = 1,
+    Favor     = 2,
+    Companero = 4
 }
 
 /// <summary>
-/// Qué flag del juego decide si Romerito ya tiene la pieza. Para añadir
+/// Qué flag del juego decide si Romerito ya tiene la pieza. Las
+/// habilidades de movimiento (Correr, Dash...) se usan como requisito de
+/// la RELIQUIA que concede ese don, no como pieza propia. Para añadir
 /// algo nuevo (un Tecpatl, Ehécatl...), agrega el valor aquí y su lectura
 /// en EquipamientoEstado.Tiene().
 /// </summary>

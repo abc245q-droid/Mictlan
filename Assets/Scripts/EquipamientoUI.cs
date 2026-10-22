@@ -9,7 +9,8 @@ using TMPro;
 //
 //  Izquierda: secciones creadas por código, una por categoría que
 //  tenga piezas en el catálogo:
-//      Arma · Reliquias · Favores de los dioses · Dones · Compañeros
+//      Arma · Reliquias · Favores de los dioses · Compañeros
+//  (Los dones no tienen sección: la reliquia es la que permite el don.)
 //  Cada sección = título ("Favores de los dioses · 1/3") + fila de
 //  casillas. Derecha: detalle de la casilla con foco.
 //
@@ -228,7 +229,6 @@ public class EquipamientoUI : MonoBehaviour, IPaginaCodice
             case CategoriaEquipo.Arma:      return "Arma";
             case CategoriaEquipo.Reliquia:  return "Reliquias";
             case CategoriaEquipo.Favor:     return "Favores de los dioses";
-            case CategoriaEquipo.Don:       return "Dones";
             case CategoriaEquipo.Companero: return "Compañeros";
         }
         return cat.ToString();
