@@ -39,9 +39,15 @@ using System.Collections;
 //          IGolpeableMacahuitl). NO usar la layer Enemy: no es enemigo,
 //          no tiene EnemyDummy y no debe dar Tonalli.
 //    • Hijo "Visual": SpriteRenderer de la bola (+ glow con
-//      Mictlan/SpriteGlowHDR como capa separada) + estela de
-//      partículas corta. Arrástralo al campo 'visual'.
-//    • (Opcional) prefab de chispas al dispersarse → 'efectoDispersion'.
+//      Mictlan/SpriteGlowHDR como capa separada). Arrástralo al
+//      campo 'visual'. El script lo escala para el pop/aparición.
+//    • Hijo "Estela" (Particle System, hermano de Visual, NO dentro):
+//      Simulation Space = World, Rate over Distance. Campo 'estela'.
+//      Al dispersarse deja de emitir pero sus chispas se apagan solas.
+//    • Hijo "ChispasDispersion" (Particle System, hermano de Visual):
+//      Play On Awake OFF, Looping OFF, un Burst. Campo
+//      'chispasDispersion'. El script lo dispara al golpearla.
+//    • (Alternativa) prefab de chispas → 'efectoDispersion'.
 //    • Selecciona el objeto en la escena para ver el círculo de
 //      patrulla (Gizmo naranja) y evitar que dos bolas se encimen.
 //
@@ -75,11 +81,23 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
     public bool destructible = true;
     [Tooltip("Segundos hasta reaparecer en el ancla.")]
     public float tiempoReaparicion = 5f;
-    [Tooltip("Hijo con el sprite, glow y estela.")]
+    [Tooltip("Hijo con el sprite y el glow.")]
     public GameObject visual;
-    [Tooltip("Efecto de chispas al dispersarse (opcional).")]
+    [Tooltip("Particle System hijo (hermano de Visual) con un Burst de chispas.")]
+    public ParticleSystem chispasDispersion;
+    [Tooltip("Particle System de la estela (hermano de Visual). Opcional.")]
+    public ParticleSystem estela;
+    [Tooltip("Alternativa: prefab de chispas que se instancia al dispersarse.")]
     public GameObject efectoDispersion;
     public float duracionEfecto = 0.6f;
+
+    [Header("Feedback visual")]
+    [Tooltip("Escala máxima del 'pop' al recibir el golpe.")]
+    public float escalaPop = 1.35f;
+    [Tooltip("Duración del pop antes de dispersarse (s).")]
+    public float duracionPop = 0.08f;
+    [Tooltip("Duración del crecimiento al reaparecer (s). Sin hitbox mientras crece.")]
+    public float duracionAparicion = 0.4f;
 
     [Header("Vínculo con brasero (opcional)")]
     [Tooltip("Si este brasero está encendido, la brasa se extingue para siempre.")]
@@ -94,6 +112,7 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
     private float tiempoRuido;
     private bool dispersa;
     private bool extinta;
+    private Vector3 escalaVisualOriginal = Vector3.one;
 
     void Awake()
     {
@@ -106,6 +125,7 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
         hitbox.isTrigger = true;
 
         ancla = transform.position;
+        if (visual != null) escalaVisualOriginal = visual.transform.localScale;
 
         // Cada bola con su propio patrón aunque compartan prefab.
         semillaX = Random.value * 100f;
@@ -188,8 +208,24 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
     private IEnumerator RutinaReaparecer()
     {
         dispersa = true;
+        if (hitbox != null) hitbox.enabled = false;   // ya no daña durante el pop
+
+        // ── Pop: se hincha un instante (lee como "le di") ──
+        if (visual != null && duracionPop > 0f)
+        {
+            float p = 0f;
+            while (p < duracionPop)
+            {
+                if (!PausaMundo.Activa) p += Time.deltaTime;
+                float k = Mathf.Clamp01(p / duracionPop);
+                visual.transform.localScale = escalaVisualOriginal * Mathf.Lerp(1f, escalaPop, k);
+                yield return null;
+            }
+        }
+
         SpawnEfecto();
         SetVisible(false);
+        if (visual != null) visual.transform.localScale = escalaVisualOriginal;
 
         // Tiempo de juego (no realtime): durante una pausa no reaparece.
         float t = 0f;
@@ -204,6 +240,24 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
         rb.position = ancla;
         transform.position = ancla;
         direccionActual = Random.insideUnitCircle.normalized;
+
+        // ── Aparición gradual: crece desde 0, todavía SIN hitbox ──
+        // Así nunca "aparece encima" de Romerito sin aviso.
+        if (visual != null)
+        {
+            visual.SetActive(true);
+            float a = 0f;
+            while (a < duracionAparicion)
+            {
+                if (extinta) yield break;
+                if (!PausaMundo.Activa) a += Time.deltaTime;
+                float k = Mathf.Clamp01(a / Mathf.Max(duracionAparicion, 0.0001f));
+                visual.transform.localScale = escalaVisualOriginal * Mathf.SmoothStep(0f, 1f, k);
+                yield return null;
+            }
+            visual.transform.localScale = escalaVisualOriginal;
+        }
+
         SetVisible(true);
         dispersa = false;
     }
@@ -227,13 +281,29 @@ public class BolaDeFuegoErrante : MonoBehaviour, IGolpeableMacahuitl
     {
         if (visual != null) visual.SetActive(valor);
         if (hitbox != null) hitbox.enabled = valor;
+
+        // La estela deja de emitir pero conserva sus chispas vivas,
+        // que se apagan solas (World space) en vez de desaparecer de golpe.
+        if (estela != null)
+        {
+            if (valor) { if (!estela.isPlaying) estela.Play(true); }
+            else estela.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
     }
 
     private void SpawnEfecto()
     {
-        if (efectoDispersion == null) return;
-        GameObject fx = Instantiate(efectoDispersion, transform.position, Quaternion.identity);
-        Destroy(fx, duracionEfecto);
+        if (chispasDispersion != null)
+        {
+            chispasDispersion.Clear(true);
+            chispasDispersion.Play(true);
+        }
+
+        if (efectoDispersion != null)
+        {
+            GameObject fx = Instantiate(efectoDispersion, transform.position, Quaternion.identity);
+            Destroy(fx, duracionEfecto);
+        }
     }
 
 #if UNITY_EDITOR
