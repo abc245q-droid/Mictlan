@@ -1,17 +1,23 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Unity.Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 
 // ============================================================
-//  CuauhcalliPolea — la jaula del Pochtecah colgada del tzompantli
+//  CuauhcalliColgante — la jaula del Pochtecah colgada del tzompantli
 // ============================================================
 //
 //  El cuauhcalli ("casa de madera", jaula de vigas amarradas donde
-//  los mexicas guardaban prisioneros) cuelga de una cuerda que pasa
-//  por el travesaño más alto del tzompantli. El otro extremo baja al
-//  suelo, al ANCLAJE, donde los Mictecah jaladores tiran de ella.
+//  los mexicas guardaban prisioneros) cuelga de una cuerda echada
+//  por ENCIMA del travesaño más alto del tzompantli. El otro extremo
+//  baja al suelo, al ANCLAJE, donde los Mictecah jaladores tiran.
+//
+//  SIN POLEA: en Mesoamérica no hubo rueda con eje ni roldana. La
+//  cuerda simplemente se desliza sobre la viga de madera por
+//  fricción — por eso un jalador solo la sube despacio y cada uno
+//  extra la acelera.
 //
 //  REGLAS (fuente de verdad del evento)
 //   • Amarrada  → al inicio la cuerda está atada a una estaca: la jaula
@@ -40,7 +46,7 @@ using System.Collections.Generic;
 //  SETUP EN UNITY → ver la guía de setup del Encuentro del Pochtecah.
 // ============================================================
 
-public class CuauhcalliPolea : MonoBehaviour, IGolpeableMacahuitl
+public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
 {
     public enum EstadoJaula { Amarrada, Subiendo, Cayendo, EnSuelo, Liberada }
 
@@ -93,12 +99,13 @@ public class CuauhcalliPolea : MonoBehaviour, IGolpeableMacahuitl
     public float balanceoColgada = 3f;
     public float frecuenciaBalanceo = 1.4f;
 
-    [Header("Cuerda (LineRenderer: gancho → polea → anclaje)")]
+    [Header("Cuerda (LineRenderer: gancho → travesaño → anclaje)")]
     public LineRenderer cuerda;
     [Tooltip("Hijo de la jaula donde se amarra la cuerda (arriba al centro).")]
     public Transform gancho;
-    [Tooltip("Punto en el travesaño del tzompantli por donde pasa la cuerda.")]
-    public Transform puntoPolea;
+    [Tooltip("Punto del travesaño del tzompantli sobre el que se desliza la cuerda.")]
+    [FormerlySerializedAs("puntoTravesano")]
+    public Transform puntoTravesano;
     [Tooltip("Punto en el suelo donde los jaladores toman la cuerda.")]
     public Transform anclaje;
 
@@ -143,9 +150,9 @@ public class CuauhcalliPolea : MonoBehaviour, IGolpeableMacahuitl
     public float Altura => altura;
     public bool EsGolpeable => Estado == EstadoJaula.EnSuelo && !Bloqueada;
 
-    /// <summary>Dirección x (±1) hacia la que miran los jaladores (hacia la polea).</summary>
-    public int DireccionHaciaPolea =>
-        (puntoPolea != null && anclaje != null && puntoPolea.position.x < anclaje.position.x) ? -1 : 1;
+    /// <summary>Dirección x (±1) hacia la que miran los jaladores (hacia el tzompantli).</summary>
+    public int DireccionHaciaTravesano =>
+        (puntoTravesano != null && anclaje != null && puntoTravesano.position.x < anclaje.position.x) ? -1 : 1;
 
     private readonly HashSet<MictecahJalador> jaladores = new HashSet<MictecahJalador>();
     private float altura;
@@ -299,13 +306,13 @@ public class CuauhcalliPolea : MonoBehaviour, IGolpeableMacahuitl
     void ActualizarCuerda()
     {
         if (cuerda == null) return;
-        bool visible = Estado != EstadoJaula.Liberada && gancho != null && puntoPolea != null;
+        bool visible = Estado != EstadoJaula.Liberada && gancho != null && puntoTravesano != null;
         cuerda.enabled = visible;
         if (!visible) return;
 
         cuerda.positionCount = anclaje != null ? 3 : 2;
         cuerda.SetPosition(0, gancho.position);
-        cuerda.SetPosition(1, puntoPolea.position);
+        cuerda.SetPosition(1, puntoTravesano.position);
         if (anclaje != null) cuerda.SetPosition(2, anclaje.position);
     }
 
@@ -513,11 +520,11 @@ public class CuauhcalliPolea : MonoBehaviour, IGolpeableMacahuitl
         Gizmos.DrawLine(b, tp);
 
         // Cuerda
-        if (puntoPolea != null)
+        if (puntoTravesano != null)
         {
             Gizmos.color = new Color(0.85f, 0.7f, 0.4f);
-            Gizmos.DrawLine(i, puntoPolea.position);
-            if (anclaje != null) Gizmos.DrawLine(puntoPolea.position, anclaje.position);
+            Gizmos.DrawLine(i, puntoTravesano.position);
+            if (anclaje != null) Gizmos.DrawLine(puntoTravesano.position, anclaje.position);
         }
     }
 }

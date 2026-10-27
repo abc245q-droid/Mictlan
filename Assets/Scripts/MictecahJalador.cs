@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 // ============================================================
 //  MictecahJalador — el cráneo que tira de la cuerda del cuauhcalli
@@ -9,14 +10,14 @@
 //  jaula hacia el tope del tzompantli.
 //
 //  • Camina hacia el anclaje (a su "lugar" en la cuerda).
-//  • Al llegar se ENGANCHA: se queda quieto mirando hacia la polea y
-//    se registra en CuauhcalliPolea (cuenta para la velocidad de subida).
+//  • Al llegar se ENGANCHA: se queda quieto mirando hacia el
+//    tzompantli y se registra en CuauhcalliColgante (cuenta para la velocidad de subida).
 //  • Si recibe un golpe SUELTA la cuerda (el knockback lo aleja) y
 //    vuelve a caminar hacia ella al recuperarse. Golpear jaladores
 //    compra tiempo aunque no los mates.
 //  • Daño por contacto normal (heredado de MictecahBase).
 //
-//  El EncuentroPochtecah le inyecta 'polea' al instanciarlo; en un
+//  El EncuentroPochtecah le inyecta 'jaula' al instanciarlo; en un
 //  prefab suelto puedes asignarla a mano.
 //
 //  ANIMATOR (opcional): bool "Jalando", float "Speed".
@@ -26,7 +27,8 @@ public class MictecahJalador : MictecahBase
 {
     [Header("── Jalador ──")]
     [Tooltip("La jaula. La inyecta EncuentroPochtecah al instanciarlo.")]
-    public CuauhcalliPolea polea;
+    [FormerlySerializedAs("polea")]
+    public CuauhcalliColgante jaula;
     public float velocidadAlCabo = 3f;
     [Tooltip("Distancia horizontal a su lugar en la cuerda para engancharse.")]
     public float distanciaEnganche = 0.15f;
@@ -79,8 +81,8 @@ public class MictecahJalador : MictecahBase
 
     protected override void LogicaPersecucion()
     {
-        if (polea == null || polea.anclaje == null ||
-            polea.Estado == CuauhcalliPolea.EstadoJaula.Liberada)
+        if (jaula == null || jaula.anclaje == null ||
+            jaula.Estado == CuauhcalliColgante.EstadoJaula.Liberada)
         {
             Soltar();
             targetVelocity = Vector2.zero;
@@ -93,7 +95,7 @@ public class MictecahJalador : MictecahBase
         if (enganchado)
         {
             targetVelocity = Vector2.zero;
-            MirarHacia(polea.DireccionHaciaPolea);
+            MirarHacia(jaula.DireccionHaciaTravesano);
             // Si algo lo empujó lejos de su lugar, suelta.
             if (Mathf.Abs(dx) > distanciaEnganche * 4f) Soltar();
             return;
@@ -125,9 +127,9 @@ public class MictecahJalador : MictecahBase
 
     float PosicionEnCuerda()
     {
-        // Su lugar queda DETRÁS del anclaje (alejándose de la polea).
-        int haciaAtras = -polea.DireccionHaciaPolea;
-        return polea.anclaje.position.x + haciaAtras * offsetEnCuerda;
+        // Su lugar queda DETRÁS del anclaje (alejándose del tzompantli).
+        int haciaAtras = -jaula.DireccionHaciaTravesano;
+        return jaula.anclaje.position.x + haciaAtras * offsetEnCuerda;
     }
 
     void Enganchar()
@@ -135,14 +137,14 @@ public class MictecahJalador : MictecahBase
         if (enganchado) return;
         enganchado = true;
         targetVelocity = Vector2.zero;
-        polea.RegistrarJalador(this);
+        jaula.RegistrarJalador(this);
     }
 
     void Soltar()
     {
         if (!enganchado) return;
         enganchado = false;
-        if (polea != null) polea.DesregistrarJalador(this);
+        if (jaula != null) jaula.DesregistrarJalador(this);
         if (visualJalon != null) visualJalon.localRotation = rotVisualOriginal;
     }
 
@@ -153,7 +155,7 @@ public class MictecahJalador : MictecahBase
         if (anim != null) anim.SetBool("Jalando", enganchado);
         if (visualJalon == null || !enganchado) return;
 
-        // Se inclina hacia atrás (lejos de la polea) con un ritmo de jalón.
+        // Se inclina hacia atrás (lejos del tzompantli) con un ritmo de jalón.
         float k = Mathf.Abs(Mathf.Sin(Time.time * frecuenciaJalon * Mathf.PI));
         visualJalon.localRotation = rotVisualOriginal * Quaternion.Euler(0f, 0f, anguloJalon * k);
     }
@@ -161,8 +163,8 @@ public class MictecahJalador : MictecahBase
     protected override void OnDrawGizmosSelected()
     {
         base.OnDrawGizmosSelected();
-        if (polea == null || polea.anclaje == null) return;
+        if (jaula == null || jaula.anclaje == null) return;
         Gizmos.color = new Color(0.85f, 0.7f, 0.4f);
-        Gizmos.DrawLine(transform.position, polea.anclaje.position);
+        Gizmos.DrawLine(transform.position, jaula.anclaje.position);
     }
 }

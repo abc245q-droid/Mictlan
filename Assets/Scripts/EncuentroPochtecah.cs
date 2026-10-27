@@ -9,7 +9,7 @@ using System.Collections.Generic;
 //
 //  Los Mictecah capturaron al Pochtecah y lo quieren llevar al
 //  tzompantli. Lo tienen encerrado en un cuauhcalli que cuelga de la
-//  cuerda del tzompantli (CuauhcalliPolea). No hay jefe: el rival es
+//  cuerda echada sobre el travesaño del tzompantli (CuauhcalliColgante). No hay jefe: el rival es
 //  el propio tzompantli, que suelta oleadas de cráneos.
 //
 //  CICLO (se repite hasta liberar las 3 etapas)
@@ -85,7 +85,7 @@ public class EncuentroPochtecah : MonoBehaviour
     public string eventoID = "evento_pochtecah_n1";
 
     [Header("Referencias")]
-    public CuauhcalliPolea jaula;
+    public CuauhcalliColgante jaula;
     [Tooltip("Puntos de aparición con TzompantliPresagio (cráneos del rack).")]
     public Transform[] puntosAparicion;
     [Tooltip("Opcional: puntos solo para jaladores (los más cercanos al anclaje). Vacío = puntosAparicion.")]
@@ -248,7 +248,7 @@ public class EncuentroPochtecah : MonoBehaviour
         // 3. Ciclos oleada → ventana
         bool falloUltimaVentana = false;
 
-        while (jaula != null && jaula.Estado != CuauhcalliPolea.EstadoJaula.Liberada)
+        while (jaula != null && jaula.Estado != CuauhcalliColgante.EstadoJaula.Liberada)
         {
             int etapasAlInicio = jaula.EtapasRotas;
 
@@ -344,7 +344,7 @@ public class EncuentroPochtecah : MonoBehaviour
         jaula.SoltarAmarre();
 
         // Esperar a que la jaula termine de caer.
-        while (!Liberada() && jaula.Estado != CuauhcalliPolea.EstadoJaula.EnSuelo)
+        while (!Liberada() && jaula.Estado != CuauhcalliColgante.EstadoJaula.EnSuelo)
             yield return null;
         if (Liberada()) yield break;
 
@@ -407,7 +407,7 @@ public class EncuentroPochtecah : MonoBehaviour
         {
             jaladoresVivos++;
             MictecahJalador j = e.GetComponent<MictecahJalador>();
-            if (j != null) j.polea = jaula;
+            if (j != null) j.jaula = jaula;
             else Debug.LogWarning($"[EncuentroPochtecah] '{prefab.name}' no tiene MictecahJalador.");
         }
         else combatientesVivos++;
@@ -645,7 +645,7 @@ public class EncuentroPochtecah : MonoBehaviour
 
     // ── Utilidades ───────────────────────────────────────────
 
-    bool Liberada() => jaula == null || jaula.Estado == CuauhcalliPolea.EstadoJaula.Liberada;
+    bool Liberada() => jaula == null || jaula.Estado == CuauhcalliColgante.EstadoJaula.Liberada;
 
     static bool TieneContenido(OleadaPochtecah o) =>
         o.jaladoresIniciales > 0 || (o.combatientes != null && o.combatientes.Count > 0);
