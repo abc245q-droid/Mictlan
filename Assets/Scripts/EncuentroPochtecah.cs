@@ -131,6 +131,10 @@ public class EncuentroPochtecah : MonoBehaviour
     [Tooltip("No elegir un cráneo que ya está temblando si hay otro libre.")]
     public bool evitarPuntoOcupado = true;
 
+    [Header("Diagnóstico")]
+    [Tooltip("Escribe en consola por qué el evento arranca o no (desactívalo al terminar el setup).")]
+    public bool logsDiagnostico = true;
+
     [Header("Eventos para diseño")]
     public UnityEvent OnSellada;
     public UnityEvent OnOleadaIniciada;
@@ -171,9 +175,14 @@ public class EncuentroPochtecah : MonoBehaviour
 
         if (YaResuelto())
         {
+            if (logsDiagnostico)
+                Debug.LogWarning($"[EncuentroPochtecah] '{eventoID}' ya está en collectedItems: " +
+                                 "el evento se da por resuelto y NO arrancará. Borra el save o cambia eventoID para probar.", this);
             AplicarResuelto();
             return;
         }
+
+        if (logsDiagnostico) DiagnosticarSetup();
 
         if (jaula != null)
         {
@@ -200,13 +209,25 @@ public class EncuentroPochtecah : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (logsDiagnostico)
+            Debug.Log($"[EncuentroPochtecah] Trigger tocado por '{other.name}' " +
+                      $"(tag '{other.tag}', capa '{LayerMask.LayerToName(other.gameObject.layer)}', " +
+                      $"isTrigger {other.isTrigger}). Fase: {FaseActual}", this);
+
         if (!other.CompareTag("Player") || other.isTrigger) return;
         if (FaseActual == Fase.Resuelto) return;
 
         VincularJugador(other.GetComponentInParent<RomeritoHealth>(), registrarReset: true);
         jugadorEnSala = true;
 
-        if (FaseActual != Fase.Inactivo || reseteando) return;
+        if (FaseActual != Fase.Inactivo || reseteando)
+        {
+            if (logsDiagnostico)
+                Debug.Log($"[EncuentroPochtecah] Romerito entró pero no arranca: fase {FaseActual}, reseteando {reseteando}.", this);
+            return;
+        }
+
+        if (logsDiagnostico) Debug.Log("[EncuentroPochtecah] ¡Arranca el evento!", this);
 
         if (puntoReaparicion != null && GameManager01.instance != null)
             GameManager01.instance.UpdateCheckPoint(puntoReaparicion.position);
@@ -238,11 +259,24 @@ public class EncuentroPochtecah : MonoBehaviour
         Debug.Log("[EncuentroPochtecah] Sala sellada.");
 
         // 2. Súplica del Pochtecah
+        // FIX: StartConversation puede rechazar la conversación (vacía, o
+        // ya hay otra activa) SIN llamar al callback: antes el evento se
+        // quedaba atorado aquí con la sala sellada.
         if (dialogoIntro != null && DialogueManager.Instance != null)
         {
+            while (DialogueManager.IsActive) yield return null;
+
             bool termino = false;
             DialogueManager.Instance.StartConversation(dialogoIntro, () => termino = true);
-            while (!termino) yield return null;
+
+            if (!DialogueManager.IsActive)
+                Debug.LogWarning("[EncuentroPochtecah] dialogoIntro no pudo iniciar (¿vacío?). Se continúa sin él.", this);
+            else
+                while (!termino) yield return null;
+        }
+        else if (dialogoIntro != null)
+        {
+            Debug.LogWarning("[EncuentroPochtecah] Hay dialogoIntro pero no DialogueManager en la escena.", this);
         }
 
         // 3. Ciclos oleada → ventana
@@ -641,6 +675,65 @@ public class EncuentroPochtecah : MonoBehaviour
         if (puertaSalida != null) puertaSalida.Abrir();
         if (pochtecahLibre != null) pochtecahLibre.SetActive(true);
         Debug.Log($"[EncuentroPochtecah] '{eventoID}' ya resuelto.");
+    }
+
+    // ── Diagnóstico ──────────────────────────────────────────
+
+    void DiagnosticarSetup()
+    {
+        string n = "[EncuentroPochtecah] ";
+        Collider2D c = GetComponent<Collider2D>();
+        if (c == null) Debug.LogError(n + "Falta un Collider2D en este objeto.", this);
+        else
+        {
+            if (!c.isTrigger) Debug.LogError(n + "El Collider2D NO está en Is Trigger: nunca detectará la entrada.", this);
+            if (!c.enabled) Debug.LogError(n + "El Collider2D está desactivado.", this);
+        }
+
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p == null) Debug.LogWarning(n + "No hay ningún objeto con tag 'Player' en la escena (aún).", this);
+        else if (Physics2D.GetIgnoreLayerCollision(gameObject.layer, p.layer))
+            Debug.LogError(n + $"La capa '{LayerMask.LayerToName(gameObject.layer)}' de este objeto NO colisiona con " +
+                           $"la capa '{LayerMask.LayerToName(p.layer)}' de Romerito (Layer Collision Matrix). " +
+                           "Ponlo en Default.", this);
+
+        if (jaula == null) Debug.LogError(n + "Falta asignar 'jaula'.", this);
+        else
+        {
+            if (jaula.puntoSuelo == null) Debug.LogError(n + "La jaula no tiene 'puntoSuelo'.", jaula);
+            if (jaula.anclaje == null) Debug.LogError(n + "La jaula no tiene 'anclaje': los jaladores no sabrán a dónde ir.", jaula);
+        }
+
+        if (puntosAparicion == null || puntosAparicion.Length == 0)
+            Debug.LogError(n + "No hay 'puntosAparicion'.", this);
+
+        if (oleadas == null || oleadas.Length == 0)
+            Debug.LogError(n + "No hay oleadas configuradas.", this);
+        else
+            for (int i = 0; i < oleadas.Length; i++)
+            {
+                var o = oleadas[i];
+                if (o == null) { Debug.LogError(n + $"Oleada {i} vacía.", this); continue; }
+                if (o.jaladoresIniciales > 0 && o.prefabJalador == null)
+                    Debug.LogError(n + $"Oleada {i}: falta prefabJalador.", this);
+                if (o.combatientes != null)
+                    foreach (var g in o.combatientes)
+                        if (g != null && g.prefab == null)
+                            Debug.LogError(n + $"Oleada {i}: un grupo de combatientes no tiene prefab.", this);
+            }
+
+        if (pochtecahLibre != null && pochtecahLibre.GetComponentInChildren<PochtecahNPC>(true) == null)
+            Debug.LogWarning(n + "'pochtecahLibre' no tiene PochtecahNPC: no entregará el Códice.", this);
+    }
+
+    /// <summary>Arranca el evento sin pasar por el trigger (clic derecho en el componente, en Play).</summary>
+    [ContextMenu("Debug: Iniciar evento")]
+    void IniciarDesdeMenu()
+    {
+        if (!Application.isPlaying || FaseActual != Fase.Inactivo) return;
+        VincularJugador(ResolverJugador(), registrarReset: true);
+        jugadorEnSala = true;
+        rutinaPrincipal = StartCoroutine(RutinaEncuentro());
     }
 
     // ── Utilidades ───────────────────────────────────────────
