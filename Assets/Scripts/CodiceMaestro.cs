@@ -4,8 +4,9 @@
 //  CodiceMaestro — Servicio del Códice Maestro (desbloqueo)
 // ============================================================
 //
-//  El Códice Maestro es el amoxtli que el Pochtecah del Nivel 0
-//  le REGALA a Romerito la primera vez que hablan. Es el libro en
+//  El Códice Maestro es el amoxtli que el Pochtecah le REGALA a
+//  Romerito en agradecimiento por liberarlo del cuauhcalli en el
+//  Nivel 1 (EncuentroPochtecah). Es el libro en
 //  blanco que se convertirá en el Códice de Romerito: al recibirlo
 //  se desbloquea, de una sola vez, todo el menú de progreso
 //  (CodiceUI): mapa, inventario, equipamiento, bestiario y herbario.

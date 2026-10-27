@@ -34,7 +34,8 @@ public class PochtecahNPC : MonoBehaviour
     [Header("Regalo: Códice Maestro")]
     [Tooltip("La PRIMERA vez que Romerito habla con este Pochtecah recibe el " +
              "Códice Maestro (mapa, inventario, equipamiento, bestiario, herbario). " +
-             "Actívalo solo en el Pochtecah del Nivel 0.")]
+             "Actívalo solo en el Pochtecah que Romerito libera del cuauhcalli " +
+             "en el Nivel 1 (EncuentroPochtecah).")]
     public bool regalaCodiceMaestro = false;
     [Tooltip("Diálogo de la entrega. Si se deja vacío se usa dialogoLore.")]
     public Conversation dialogoRegalo;
@@ -77,6 +78,16 @@ public class PochtecahNPC : MonoBehaviour
 
         if (Input.GetKeyDown(botonInteraccion) || Input.GetKeyDown(teclaAlterna))
             Interactuar();
+    }
+
+    /// <summary>
+    /// Arranca la interacción sin esperar al botón (p. ej. EncuentroPochtecah
+    /// al liberarlo: entrega del Códice Maestro). Respeta los mismos bloqueos.
+    /// </summary>
+    public void ForzarInteraccion()
+    {
+        if (DialogueManager.IsActive || PochtecahShopUI.IsOpen || ocupado) return;
+        Interactuar();
     }
 
     private void Interactuar()
