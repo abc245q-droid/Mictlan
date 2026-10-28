@@ -139,6 +139,9 @@ public class EncuentroPochtecah : MonoBehaviour
     [Tooltip("Al romperse una etapa el tzompantli suelta DE INMEDIATO un jalador desde el cráneo " +
              "más cercano al anclaje, para que la jaula rota no se quede en el suelo.")]
     public bool jaladorDeRespuesta = true;
+    [Tooltip("TODOS los jaladores salen del cráneo libre más cercano al anclaje (llegan rápido " +
+             "a la cuerda, el reemplazo se nota). Falso = cráneo al azar.")]
+    public bool jaladoresDesdeAnclaje = true;
 
     [Header("Ventana")]
     public float duracionVentana = 5f;
@@ -185,6 +188,8 @@ public class EncuentroPochtecah : MonoBehaviour
     private int jaladoresPendientes;
     private bool oleadaTerminoDeSoltar;
     private float ultimaMuerteJalador = -999f;
+    private OleadaPochtecah oleadaActual;
+    private bool reposicionActiva => rutinaReposicion != null;
 
     // ── Unity ────────────────────────────────────────────────
 
@@ -399,6 +404,7 @@ public class EncuentroPochtecah : MonoBehaviour
         OnOleadaIniciada?.Invoke();
         Debug.Log($"[EncuentroPochtecah] {oleada.nombre} (etapas rotas: {jaula.EtapasRotas})");
 
+        oleadaActual = oleada;
         if (oleada.retrasoInicial > 0f) yield return new WaitForSeconds(oleada.retrasoInicial);
 
         // Jaladores primero: la amenaza principal arranca de inmediato.
@@ -498,7 +504,20 @@ public class EncuentroPochtecah : MonoBehaviour
             Debug.LogError("[EncuentroPochtecah] No hay puntos de aparición.");
             return;
         }
-        StartCoroutine(PresagiarYSoltar(prefab, ElegirPunto(lista), esJalador));
+        Transform punto = (esJalador && jaladoresDesdeAnclaje) ? PuntoMasCercanoAlAnclaje(lista) : ElegirPunto(lista);
+        StartCoroutine(PresagiarYSoltar(prefab, punto, esJalador));
+    }
+
+    void ReportarMuerteJalador()
+    {
+        if (!logsDiagnostico || oleadaActual == null) return;
+        string n = "[EncuentroPochtecah] Jalador eliminado → ";
+        if (!oleadaActual.reponerJaladores)
+            Debug.Log(n + $"sin reemplazo: '{oleadaActual.nombre}' tiene reponerJaladores desactivado.", this);
+        else if (!reposicionActiva)
+            Debug.Log(n + "sin reemplazo: ya no quedan combatientes en la oleada (la reposición terminó).", this);
+        else
+            Debug.Log(n + $"reemplazo en {oleadaActual.cooldownReposicion:0.#} s + presagio.", this);
     }
 
     IEnumerator PresagiarYSoltar(GameObject prefab, Transform punto, bool esJalador)
@@ -538,6 +557,7 @@ public class EncuentroPochtecah : MonoBehaviour
                 {
                     jaladoresVivos = Mathf.Max(0, jaladoresVivos - 1);
                     ultimaMuerteJalador = Time.time;
+                    ReportarMuerteJalador();
                 }
                 else combatientesVivos = Mathf.Max(0, combatientesVivos - 1);
             };
