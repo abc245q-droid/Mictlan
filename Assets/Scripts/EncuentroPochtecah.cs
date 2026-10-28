@@ -23,9 +23,8 @@ using System.Collections.Generic;
 //                 siguiente etapa. Si NO: 'oleadaExtra' (corta) y
 //                 otra ventana. El daño de la etapa se conserva.
 //
-//  La composición de cada oleada sale de 'oleadas[EtapasRotas]', así
-//  que si los Mictecah reclaman la jaula (pierdes una etapa) la
-//  siguiente oleada también "retrocede".
+//  La composición de cada oleada sale de 'oleadas[EtapasRotas]'. Las
+//  etapas rotas NUNCA se pierden: la jaula solo sube hasta su tope.
 //
 //  Las mini-ventanas son emergentes: si matas a todos los jaladores
 //  a media oleada la jaula cae y se puede golpear hasta que llegue
@@ -366,24 +365,13 @@ public class EncuentroPochtecah : MonoBehaviour
         if (congelarRomeritoEnIntro) CongelarRomerito(false);
 
         // 4. Ciclos oleada → ventana
-        // FIX bucle de oleadas extra: el éxito del ciclo se mide CONTANDO
-        // rupturas (evento OnEtapaRota), no comparando EtapasRotas con su
-        // valor inicial. Si los Mictecah reclamaban la jaula a media
-        // oleada (EtapasRotas--), romper una etapa en la ventana solo
-        // devolvía el total al valor inicial y contaba como FALLO →
-        // oleada extra → reclamo → fallo… sin fin.
+        // El éxito del ciclo se mide CONTANDO rupturas (OnEtapaRota).
         bool falloUltimaVentana = false;
         fallosSeguidos = 0;
-
-        int etapasCicloAnterior = jaula != null ? jaula.EtapasRotas : 0;
 
         while (jaula != null && jaula.Estado != CuauhcalliColgante.EstadoJaula.Liberada)
         {
             rupturasEnCiclo = 0;
-            if (jaula.EtapasRotas < etapasCicloAnterior)
-                Debug.Log($"[EncuentroPochtecah] La jaula fue reclamada (etapas {etapasCicloAnterior} → {jaula.EtapasRotas}): " +
-                          "se repite la oleada de esa etapa.", this);
-            etapasCicloAnterior = jaula.EtapasRotas;
 
             OleadaPochtecah oleada = (falloUltimaVentana && oleadaExtra != null && TieneContenido(oleadaExtra))
                 ? oleadaExtra
