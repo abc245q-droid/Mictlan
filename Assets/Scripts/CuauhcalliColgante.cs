@@ -77,6 +77,10 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     public float gravedadCaida = 30f;
     [Tooltip("Tras ser reclamada baja a alturaFueraDeAlcance en este tiempo y se queda quieta un momento.")]
     public float pausaTrasReclamar = 1.2f;
+    [Tooltip("Tras romper una etapa, la siguiente vez que la icen se queda QUIETA a alturaFueraDeAlcance " +
+             "estos segundos antes de seguir subiendo. Evita que la etapa recién ganada se pierda " +
+             "de inmediato porque el jalador de respuesta y los de la nueva oleada la llevan al tope.")]
+    public float graciaTrasRuptura = 8f;
 
     // ── Etapas ───────────────────────────────────────────────
     [Header("Etapas (golpes por etapa)")]
@@ -180,6 +184,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         (golpesPorEtapa != null && EtapasRotas < golpesPorEtapa.Length) ? golpesPorEtapa[EtapasRotas] : 0;
     private float proximoGolpeT;
     private float pausaRestante;
+    private bool graciaPendiente;
     private Vector3 visualPosOriginal;
     private Quaternion visualRotOriginal;
     private Coroutine temblorRutina;
@@ -240,12 +245,18 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
             return;
         }
 
+        // 1. Izado rápido: siempre, sin pausas (la ventana se cierra limpia).
+        if (altura < alturaFueraDeAlcance)
+        {
+            altura = Mathf.Min(alturaFueraDeAlcance, altura + velocidadIzado * Time.deltaTime);
+            return;
+        }
+
+        // 2. Pausa (tras reclamar o gracia tras ruptura): fuera de alcance, quieta.
         if (pausaRestante > 0f) { pausaRestante -= Time.deltaTime; return; }
 
-        float vel = altura < alturaFueraDeAlcance
-            ? velocidadIzado
-            : velocidadSubidaBase + velocidadPorJaladorExtra * (jaladores.Count - 1);
-
+        // 3. Subida lenta hacia el tope.
+        float vel = velocidadSubidaBase + velocidadPorJaladorExtra * (jaladores.Count - 1);
         altura = Mathf.Min(alturaTope, altura + vel * Time.deltaTime);
 
         if (altura >= alturaTope) Reclamar();
@@ -276,6 +287,11 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         // Se acabó el bloqueo: la próxima vez que caiga, la siguiente
         // etapa ya acepta golpes.
         Bloqueada = false;
+        if (graciaPendiente)
+        {
+            pausaRestante = Mathf.Max(pausaRestante, graciaTrasRuptura);
+            graciaPendiente = false;
+        }
         OnIzada?.Invoke();
     }
 
@@ -296,6 +312,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         // de la etapa en curso solo se borran si así se configura (doble
         // castigo: hacía que la jaula pareciera irrompible).
         if (EtapasRotas > 0) EtapasRotas--;
+        graciaPendiente = false;
         if (reclamarBorraGolpes) golpesEnEtapa = 0;
         Bloqueada = false;
         ActualizarSprite();
@@ -395,6 +412,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         }
 
         Bloqueada = true;
+        graciaPendiente = true;
         ActualizarSprite();
         Sonar(sonidoEtapaRota);
         Instanciar(efectoEtapaRota);
@@ -417,6 +435,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         altura = alturaInicial;
         velCaida = 0f;
         pausaRestante = 0f;
+        graciaPendiente = false;
         if (temblorRutina != null) { StopCoroutine(temblorRutina); temblorRutina = null; }
         if (visual != null)
         {

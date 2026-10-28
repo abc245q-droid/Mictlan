@@ -375,9 +375,15 @@ public class EncuentroPochtecah : MonoBehaviour
         bool falloUltimaVentana = false;
         fallosSeguidos = 0;
 
+        int etapasCicloAnterior = jaula != null ? jaula.EtapasRotas : 0;
+
         while (jaula != null && jaula.Estado != CuauhcalliColgante.EstadoJaula.Liberada)
         {
             rupturasEnCiclo = 0;
+            if (jaula.EtapasRotas < etapasCicloAnterior)
+                Debug.Log($"[EncuentroPochtecah] La jaula fue reclamada (etapas {etapasCicloAnterior} → {jaula.EtapasRotas}): " +
+                          "se repite la oleada de esa etapa.", this);
+            etapasCicloAnterior = jaula.EtapasRotas;
 
             OleadaPochtecah oleada = (falloUltimaVentana && oleadaExtra != null && TieneContenido(oleadaExtra))
                 ? oleadaExtra
