@@ -115,6 +115,11 @@ public class EncuentroPochtecah : MonoBehaviour
     [Tooltip("Se usa cuando la ventana termina SIN romper etapa.")]
     public OleadaPochtecah oleadaExtra;
 
+    [Header("Respuesta al romper una etapa")]
+    [Tooltip("Al romperse una etapa el tzompantli suelta DE INMEDIATO un jalador desde el cráneo " +
+             "más cercano al anclaje, para que la jaula rota no se quede en el suelo.")]
+    public bool jaladorDeRespuesta = true;
+
     [Header("Ventana")]
     public float duracionVentana = 5f;
     [Tooltip("Pausa tras romper una etapa antes de la siguiente oleada.")]
@@ -188,6 +193,7 @@ public class EncuentroPochtecah : MonoBehaviour
         {
             jaula.ReiniciarCompleta();
             jaula.OnLiberada += AlLiberarse;
+            jaula.OnEtapaRota += AlRomperEtapa;
         }
         if (puertaEntrada != null) puertaEntrada.Abrir();
         if (puertaSalida != null) puertaSalida.Bloquear();
@@ -197,7 +203,11 @@ public class EncuentroPochtecah : MonoBehaviour
 
     void OnDestroy()
     {
-        if (jaula != null) jaula.OnLiberada -= AlLiberarse;
+        if (jaula != null)
+        {
+            jaula.OnLiberada -= AlLiberarse;
+            jaula.OnEtapaRota -= AlRomperEtapa;
+        }
         if (playerHealth != null)
         {
             playerHealth.OnPlayerDied -= AlMorirRomerito;
@@ -490,6 +500,41 @@ public class EncuentroPochtecah : MonoBehaviour
     }
 
     // ── Final ────────────────────────────────────────────────
+
+    void AlRomperEtapa(int etapasRotas)
+    {
+        if (FaseActual != Fase.Oleada && FaseActual != Fase.Ventana) return;
+
+        // La reposición normal no espera su cooldown tras una etapa rota.
+        ultimaMuerteJalador = -999f;
+
+        if (!jaladorDeRespuesta) return;
+        OleadaPochtecah o = oleadas[Mathf.Clamp(etapasRotas, 0, oleadas.Length - 1)];
+        if (o == null || o.prefabJalador == null) return;
+
+        Transform[] lista = (puntosJaladores != null && puntosJaladores.Length > 0) ? puntosJaladores : puntosAparicion;
+        Transform punto = PuntoMasCercanoAlAnclaje(lista);
+        if (punto == null) return;
+
+        if (logsDiagnostico) Debug.Log("[EncuentroPochtecah] Etapa rota → jalador de respuesta.", this);
+        StartCoroutine(PresagiarYSoltar(o.prefabJalador, punto, esJalador: true));
+    }
+
+    Transform PuntoMasCercanoAlAnclaje(Transform[] lista)
+    {
+        if (lista == null || lista.Length == 0) return null;
+        Vector3 anc = (jaula != null && jaula.anclaje != null) ? jaula.anclaje.position : transform.position;
+        Transform mejor = null;
+        float mejorD = float.MaxValue;
+        foreach (Transform p in lista)
+        {
+            if (p == null) continue;
+            TzompantliPresagio tp = p.GetComponent<TzompantliPresagio>();
+            float d = Mathf.Abs(p.position.x - anc.x) + ((tp != null && tp.Ocupado) ? 1000f : 0f);
+            if (d < mejorD) { mejorD = d; mejor = p; }
+        }
+        return mejor;
+    }
 
     void AlLiberarse()
     {

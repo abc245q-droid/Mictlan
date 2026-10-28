@@ -95,6 +95,10 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     public SpriteRenderer pochtecahEnJaula;
     public float duracionTemblor = 0.14f;
     public float amplitudTemblor = 0.07f;
+    [Tooltip("Tinte de la jaula mientras está BLOQUEADA (etapa recién rota, no acepta golpes).")]
+    public Color colorBloqueada = new Color(0.55f, 0.55f, 0.6f, 1f);
+    [Tooltip("Escribe en consola cada golpe: etapa y golpes contados.")]
+    public bool logsGolpes = true;
     [Tooltip("Balanceo leve mientras cuelga (grados).")]
     public float balanceoColgada = 3f;
     public float frecuenciaBalanceo = 1.4f;
@@ -145,7 +149,18 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     public EstadoJaula Estado { get; private set; } = EstadoJaula.Amarrada;
     public int EtapasRotas { get; private set; } = 0;
     public int TotalEtapas => golpesPorEtapa != null ? golpesPorEtapa.Length : 0;
-    public bool Bloqueada { get; private set; } = false;
+    private bool bloqueada = false;
+    private Color colorJaulaOriginal = Color.white;
+    public bool Bloqueada
+    {
+        get => bloqueada;
+        private set
+        {
+            bloqueada = value;
+            // Lectura inmediata: gris = "ahora no sirve golpearla".
+            if (spriteJaula != null) spriteJaula.color = value ? colorBloqueada : colorJaulaOriginal;
+        }
+    }
     public int JaladoresEnCuerda => jaladores.Count;
     public float Altura => altura;
     public bool EsGolpeable => Estado == EstadoJaula.EnSuelo && !Bloqueada;
@@ -169,6 +184,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     void Awake()
     {
         if (spriteJaula == null) spriteJaula = GetComponentInChildren<SpriteRenderer>();
+        if (spriteJaula != null) colorJaulaOriginal = spriteJaula.color;
         if (visual == null && spriteJaula != null) visual = spriteJaula.transform;
         if (visual != null)
         {
@@ -343,6 +359,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         // Etapa recién rota: rebota hasta que la vuelvan a izar.
         if (Bloqueada)
         {
+            if (logsGolpes) Debug.Log("[Cuauhcalli] Golpe IGNORADO: etapa recién rota, espera a que la vuelvan a izar.", this);
             Sonar(sonidoBloqueado);
             Temblar(0.5f);
             return true;
@@ -355,6 +372,7 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         Temblar();
 
         int necesarios = (EtapasRotas < TotalEtapas) ? golpesPorEtapa[EtapasRotas] : 1;
+        if (logsGolpes) Debug.Log($"[Cuauhcalli] Golpe {golpesEnEtapa}/{necesarios} (etapa {EtapasRotas + 1}/{TotalEtapas}).", this);
         if (golpesEnEtapa >= necesarios) RomperEtapa();
         return true;
     }
