@@ -254,6 +254,7 @@ public class EncuentroPochtecah : MonoBehaviour
         // 1. Sello
         FaseActual = Fase.Intro;
         if (puertaEntrada != null) puertaEntrada.Cerrar();
+        else Debug.LogWarning("[EncuentroPochtecah] No hay 'puertaEntrada' asignada: la sala no se sella.", this);
         if (puertaSalida != null) puertaSalida.Bloquear();
         OnSellada?.Invoke();
         Debug.Log("[EncuentroPochtecah] Sala sellada.");
@@ -289,6 +290,10 @@ public class EncuentroPochtecah : MonoBehaviour
             OleadaPochtecah oleada = (falloUltimaVentana && oleadaExtra != null && TieneContenido(oleadaExtra))
                 ? oleadaExtra
                 : oleadas[Mathf.Clamp(jaula.EtapasRotas, 0, oleadas.Length - 1)];
+
+            // La oleada extra hereda el jalador de la etapa actual si no tiene uno propio.
+            if (oleada == oleadaExtra && oleada.prefabJalador == null)
+                oleada.prefabJalador = oleadas[Mathf.Clamp(jaula.EtapasRotas, 0, oleadas.Length - 1)].prefabJalador;
 
             yield return StartCoroutine(RutinaOleada(oleada));
             if (Liberada()) break;
@@ -362,7 +367,7 @@ public class EncuentroPochtecah : MonoBehaviour
             if (!quedanCombatientes) break;
 
             int jaladoresTotales = jaladoresVivos + jaladoresPendientes;
-            if (jaladoresTotales < oleada.jaladoresSimultaneos &&
+            if (jaladoresTotales < Mathf.Max(1, oleada.jaladoresSimultaneos) &&
                 Time.time - ultimaMuerteJalador >= oleada.cooldownReposicion)
             {
                 SoltarJalador(oleada.prefabJalador);
@@ -442,7 +447,9 @@ public class EncuentroPochtecah : MonoBehaviour
             jaladoresVivos++;
             MictecahJalador j = e.GetComponent<MictecahJalador>();
             if (j != null) j.jaula = jaula;
-            else Debug.LogWarning($"[EncuentroPochtecah] '{prefab.name}' no tiene MictecahJalador.");
+            else Debug.LogError($"[EncuentroPochtecah] '{prefab.name}' NO tiene MictecahJalador: no irá a la cuerda.", this);
+            if (logsDiagnostico)
+                Debug.Log($"[EncuentroPochtecah] Jalador '{e.name}' soltado en {punto.name} {punto.position}.", e);
         }
         else combatientesVivos++;
 
@@ -716,11 +723,32 @@ public class EncuentroPochtecah : MonoBehaviour
                 if (o == null) { Debug.LogError(n + $"Oleada {i} vacía.", this); continue; }
                 if (o.jaladoresIniciales > 0 && o.prefabJalador == null)
                     Debug.LogError(n + $"Oleada {i}: falta prefabJalador.", this);
+                if (o.prefabJalador != null && o.prefabJalador.GetComponent<MictecahJalador>() == null)
+                    Debug.LogError(n + $"Oleada {i}: el prefabJalador '{o.prefabJalador.name}' no tiene MictecahJalador.", this);
+                if (o.jaladoresIniciales <= 0 && !(o.reponerJaladores && o.jaladoresSimultaneos > 0))
+                    Debug.LogError(n + $"Oleada {i}: jaladoresIniciales = 0 y sin reposición → NINGÚN jalador " +
+                                   "(los elementos nuevos de una lista en el Inspector nacen en 0).", this);
+                if (o.prefabJalador != null && o.prefabJalador.GetComponent<Mictecah1_Patrullero>() != null)
+                    Debug.LogError(n + $"Oleada {i}: el prefabJalador aún tiene Mictecah1_Patrullero; quítalo.", this);
                 if (o.combatientes != null)
                     foreach (var g in o.combatientes)
                         if (g != null && g.prefab == null)
                             Debug.LogError(n + $"Oleada {i}: un grupo de combatientes no tiene prefab.", this);
             }
+
+        if (puertaEntrada == null)
+            Debug.LogError(n + "Falta asignar 'puertaEntrada': la sala no se sellará.", this);
+        else
+        {
+            Collider2D pc = puertaEntrada.GetComponent<Collider2D>();
+            if (pc == null)
+                Debug.LogError(n + $"La puerta '{puertaEntrada.name}' no tiene Collider2D en el MISMO objeto que RoomDoor " +
+                               "(RoomDoor no busca en hijos): no bloqueará el paso.", puertaEntrada);
+            else if (pc.isTrigger)
+                Debug.LogError(n + $"El Collider2D de '{puertaEntrada.name}' está en Is Trigger: Romerito la atraviesa.", puertaEntrada);
+            if (puertaEntrada.GetComponent<SpriteRenderer>() == null)
+                Debug.LogWarning(n + $"La puerta '{puertaEntrada.name}' no tiene SpriteRenderer en el mismo objeto: no se verá.", puertaEntrada);
+        }
 
         if (pochtecahLibre != null && pochtecahLibre.GetComponentInChildren<PochtecahNPC>(true) == null)
             Debug.LogWarning(n + "'pochtecahLibre' no tiene PochtecahNPC: no entregará el Códice.", this);

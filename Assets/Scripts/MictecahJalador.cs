@@ -60,6 +60,10 @@ public class MictecahJalador : MictecahBase
     {
         base.Start();
         estado = Estado.Persiguiendo;   // nace yendo directo a la cuerda
+        if (jaula == null)
+            Debug.LogWarning($"[MictecahJalador] '{name}' sin jaula asignada: no sabe a qué cuerda ir.", this);
+        else if (jaula.anclaje == null)
+            Debug.LogWarning($"[MictecahJalador] La jaula no tiene 'anclaje'.", this);
     }
 
     protected override void OnDisable()
@@ -138,6 +142,7 @@ public class MictecahJalador : MictecahBase
         enganchado = true;
         targetVelocity = Vector2.zero;
         jaula.RegistrarJalador(this);
+        Debug.Log($"[MictecahJalador] '{name}' enganchado a la cuerda ({jaula.JaladoresEnCuerda} jalando).", this);
     }
 
     void Soltar()
