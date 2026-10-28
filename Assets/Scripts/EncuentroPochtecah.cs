@@ -192,6 +192,14 @@ public class EncuentroPochtecah : MonoBehaviour
     private bool oleadaTerminoDeSoltar;
     private float ultimaMuerteJalador = -999f;
     private OleadaPochtecah oleadaActual;
+
+    /// <summary>
+    /// true mientras la oleada en curso tenga combatientes vivos o por
+    /// salir. Los jaladores se entierran (invulnerables) mientras sea true.
+    /// </summary>
+    public bool CombatientesEnJuego =>
+        FaseActual == Fase.Oleada &&
+        (!oleadaTerminoDeSoltar || combatientesVivos > 0 || (presagiosPendientes - jaladoresPendientes) > 0);
     private int rupturasEnCiclo;      // etapas rotas desde que empezó el ciclo actual
     private int fallosSeguidos;       // ventanas seguidas sin romper etapa
     private bool reposicionActiva => rutinaReposicion != null;
@@ -344,6 +352,7 @@ public class EncuentroPochtecah : MonoBehaviour
             if (prefab != null && punto != null)
             {
                 FaseActual = Fase.Oleada;   // para que PresagiarYSoltar instancie
+                oleadaTerminoDeSoltar = true; // sin combatientes aún: el jalador de intro se VE (no se entierra)
                 yield return StartCoroutine(PresagiarYSoltar(prefab, punto, esJalador: true));
                 jaladoresEnCampo = 1;
 
@@ -490,6 +499,7 @@ public class EncuentroPochtecah : MonoBehaviour
         if (Liberada()) yield break;
 
         FaseActual = Fase.Ventana;
+        jaula.Desbloquear();   // oleada limpia → la siguiente etapa acepta golpes
         OnVentanaAbierta?.Invoke();
         Debug.Log("[EncuentroPochtecah] Ventana abierta.");
 
@@ -562,7 +572,7 @@ public class EncuentroPochtecah : MonoBehaviour
         {
             jaladoresVivos++;
             MictecahJalador j = e.GetComponent<MictecahJalador>();
-            if (j != null) j.jaula = jaula;
+            if (j != null) { j.jaula = jaula; j.encuentro = this; }
             else Debug.LogError($"[EncuentroPochtecah] '{prefab.name}' NO tiene MictecahJalador: no irá a la cuerda.", this);
             if (logsDiagnostico)
                 Debug.Log($"[EncuentroPochtecah] Jalador '{e.name}' soltado en {punto.name} {punto.position}.", e);

@@ -35,8 +35,9 @@ using System.Collections.Generic;
 //
 //  ETAPAS (medidas en golpes)
 //   golpesPorEtapa = {6, 8, 10} → 3 etapas. Al romperse una etapa la
-//   jaula queda BLOQUEADA (rebota los golpes) hasta que vuelva a ser
-//   izada: así un solo descenso nunca rompe dos etapas seguidas.
+//   jaula queda BLOQUEADA (rebota los golpes) hasta que el evento la
+//   desbloquee al abrir la SIGUIENTE ventana (Desbloquear()): cada
+//   etapa exige limpiar una oleada.
 //   Al romperse la última: LIBERADA.
 //
 //  El Pochtecah NUNCA recibe daño: nada en este script ni en el
@@ -265,9 +266,6 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     void Izar()
     {
         Estado = EstadoJaula.Subiendo;
-        // Se acabó el bloqueo: la próxima vez que caiga, la siguiente
-        // etapa ya acepta golpes.
-        Bloqueada = false;
         OnIzada?.Invoke();
     }
 
@@ -396,6 +394,16 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
         if (pochtecahEnJaula != null) pochtecahEnJaula.enabled = true;
         ActualizarSprite();
         AplicarPosicion();
+    }
+
+    /// <summary>
+    /// La siguiente etapa acepta golpes. Lo llama el evento al abrir una
+    /// ventana (tras limpiar una oleada completa).
+    /// </summary>
+    public void Desbloquear()
+    {
+        if (Estado == EstadoJaula.Liberada) return;
+        Bloqueada = false;
     }
 
     /// <summary>

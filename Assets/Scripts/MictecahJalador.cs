@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Serialization;
+using System.Collections;
+using System.Collections.Generic;
 
 // ============================================================
 //  MictecahJalador — el cráneo que tira de la cuerda del cuauhcalli
@@ -16,6 +18,14 @@ using UnityEngine.Serialization;
 //    vuelve a caminar hacia ella al recuperarse. Golpear jaladores
 //    compra tiempo aunque no los mates.
 //  • Daño por contacto normal (heredado de MictecahBase).
+//
+//  ENTERRADO (mientras queden combatientes en la oleada)
+//  • Se mete bajo tierra: INVULNERABLE, sin contacto con Romerito,
+//    solo se ve un montículo de tierra. Sigue caminando hacia la
+//    cuerda y sigue jalando desde abajo.
+//  • Cuando el último combatiente cae, EMERGE: vuelve a ser visible
+//    y vulnerable. Hay que matarlo para que la jaula caiga.
+//  • Quien decide es EncuentroPochtecah.CombatientesEnJuego.
 //
 //  El EncuentroPochtecah le inyecta 'jaula' al instanciarlo; en un
 //  prefab suelto puedes asignarla a mano.
@@ -35,6 +45,23 @@ public class MictecahJalador : MictecahBase
     [Tooltip("Cada jalador toma un lugar aleatorio detrás del anclaje (0 .. este valor).")]
     public float dispersionEnCuerda = 1.2f;
 
+    [Tooltip("La inyecta EncuentroPochtecah. Sin encuentro, nunca se entierra.")]
+    public EncuentroPochtecah encuentro;
+
+    [Header("── Enterrado ──")]
+    [Tooltip("Hijo con el sprite de un montículo de tierra. Se muestra mientras está enterrado.")]
+    public GameObject monticulo;
+    [Tooltip("Hijo con el sprite del cuerpo. Se hunde al enterrarse. Vacío = solo se desvanece " +
+             "(si el sprite está en la raíz no se puede mover sin mover la física).")]
+    public Transform visualCuerpo;
+    public float profundidadEntierro = 0.6f;
+    public float duracionTransicion = 0.25f;
+    [Tooltip("Polvo/tierra al enterrarse y al emerger (opcional).")]
+    public GameObject efectoTierra;
+    public AudioSource fuenteAudio;
+    public AudioClip sonidoEnterrar;
+    public AudioClip sonidoEmerger;
+
     [Header("── Jalón (feedback visual sin Animator) ──")]
     [Tooltip("Hijo con el sprite. Se inclina hacia atrás en cada jalón.")]
     public Transform visualJalon;
@@ -45,7 +72,16 @@ public class MictecahJalador : MictecahBase
     private float offsetEnCuerda;
     private Quaternion rotVisualOriginal;
 
+    private bool enterrado = false;
+    private Coroutine transicionRutina;
+    private SpriteRenderer[] spritesCuerpo;
+    private Color[] coloresOriginales;
+    private Vector3 posCuerpoOriginal;
+    private Collider2D[] misColliders;
+    private Collider2D[] collidersJugador;
+
     public bool Enganchado => enganchado;
+    public bool Enterrado => enterrado;
 
     protected override bool ReaccionaAlJugador => false;
 
@@ -54,6 +90,20 @@ public class MictecahJalador : MictecahBase
         base.Awake();
         offsetEnCuerda = Random.Range(0f, dispersionEnCuerda);
         if (visualJalon != null) rotVisualOriginal = visualJalon.localRotation;
+
+        if (visualCuerpo == transform) visualCuerpo = null;
+        if (visualCuerpo != null) posCuerpoOriginal = visualCuerpo.localPosition;
+
+        // Sprites del cuerpo = todos menos los del montículo.
+        var lista = new List<SpriteRenderer>();
+        foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>(true))
+            if (monticulo == null || !sr.transform.IsChildOf(monticulo.transform)) lista.Add(sr);
+        spritesCuerpo = lista.ToArray();
+        coloresOriginales = new Color[spritesCuerpo.Length];
+        for (int i = 0; i < spritesCuerpo.Length; i++) coloresOriginales[i] = spritesCuerpo[i].color;
+
+        misColliders = GetComponentsInChildren<Collider2D>(true);
+        if (monticulo != null) monticulo.SetActive(false);
     }
 
     protected override void Start()
@@ -69,6 +119,7 @@ public class MictecahJalador : MictecahBase
     protected override void OnDisable()
     {
         Soltar();
+        if (enterrado) IgnorarJugador(false);
         base.OnDisable();
     }
 
@@ -123,8 +174,118 @@ public class MictecahJalador : MictecahBase
 
     protected override void Update()
     {
+        bool debeEnterrarse = encuentro != null && encuentro.CombatientesEnJuego;
+        if (debeEnterrarse != enterrado)
+        {
+            if (debeEnterrarse) Enterrar(); else Emerger();
+        }
+
         base.Update();
         ActualizarJalon();
+    }
+
+    // Enterrado no hace daño por contacto (además, las colisiones con
+    // Romerito están ignoradas).
+    protected override void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (enterrado) return;
+        base.OnCollisionEnter2D(collision);
+    }
+
+    // ── Enterrar / emerger ───────────────────────────────────
+
+    void Enterrar()
+    {
+        enterrado = true;
+        if (dummy != null) dummy.SetInvulnerable(true);
+        IgnorarJugador(true);
+        Efecto(sonidoEnterrar);
+        if (anim != null) anim.SetBool("Enterrado", true);
+        IniciarTransicion(haciaAbajo: true);
+    }
+
+    void Emerger()
+    {
+        enterrado = false;
+        if (dummy != null) dummy.SetInvulnerable(false);
+        IgnorarJugador(false);
+        Efecto(sonidoEmerger);
+        if (anim != null) anim.SetBool("Enterrado", false);
+        IniciarTransicion(haciaAbajo: false);
+    }
+
+    void IgnorarJugador(bool ignorar)
+    {
+        if (collidersJugador == null || collidersJugador.Length == 0)
+        {
+            GameObject p = player != null ? player.gameObject : GameObject.FindGameObjectWithTag("Player");
+            if (p != null) collidersJugador = p.GetComponentsInChildren<Collider2D>(true);
+        }
+        if (collidersJugador == null || misColliders == null) return;
+
+        foreach (Collider2D mio in misColliders)
+            foreach (Collider2D suyo in collidersJugador)
+                if (mio != null && suyo != null) Physics2D.IgnoreCollision(mio, suyo, ignorar);
+    }
+
+    void Efecto(AudioClip clip)
+    {
+        if (efectoTierra != null) Instantiate(efectoTierra, transform.position, Quaternion.identity);
+        if (fuenteAudio != null && clip != null) fuenteAudio.PlayOneShot(clip);
+    }
+
+    void IniciarTransicion(bool haciaAbajo)
+    {
+        if (transicionRutina != null) StopCoroutine(transicionRutina);
+        if (!isActiveAndEnabled) { AplicarTransicion(haciaAbajo ? 1f : 0f); FinTransicion(haciaAbajo); return; }
+        transicionRutina = StartCoroutine(RutinaTransicion(haciaAbajo));
+    }
+
+    IEnumerator RutinaTransicion(bool haciaAbajo)
+    {
+        if (!haciaAbajo)
+        {
+            // Al emerger: el cuerpo reaparece desde abajo y el montículo se va.
+            foreach (SpriteRenderer sr in spritesCuerpo) if (sr != null) sr.enabled = true;
+            if (monticulo != null) monticulo.SetActive(false);
+        }
+        else if (monticulo != null) monticulo.SetActive(true);
+
+        float t = 0f;
+        while (t < duracionTransicion)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / Mathf.Max(0.0001f, duracionTransicion));
+            AplicarTransicion(haciaAbajo ? k : 1f - k);
+            yield return null;
+        }
+        AplicarTransicion(haciaAbajo ? 1f : 0f);
+        FinTransicion(haciaAbajo);
+        transicionRutina = null;
+    }
+
+    // 0 = en la superficie, 1 = enterrado
+    void AplicarTransicion(float k)
+    {
+        if (visualCuerpo != null)
+            visualCuerpo.localPosition = posCuerpoOriginal + Vector3.down * profundidadEntierro * k;
+
+        for (int i = 0; i < spritesCuerpo.Length; i++)
+        {
+            if (spritesCuerpo[i] == null) continue;
+            Color c = coloresOriginales[i];
+            c.a *= 1f - k;
+            spritesCuerpo[i].color = c;
+        }
+    }
+
+    void FinTransicion(bool enterradoAhora)
+    {
+        foreach (SpriteRenderer sr in spritesCuerpo) if (sr != null) sr.enabled = !enterradoAhora;
+        if (monticulo != null) monticulo.SetActive(enterradoAhora);
+        if (!enterradoAhora)
+            for (int i = 0; i < spritesCuerpo.Length; i++)
+                if (spritesCuerpo[i] != null) spritesCuerpo[i].color = coloresOriginales[i];
     }
 
     // ── Cuerda ───────────────────────────────────────────────
