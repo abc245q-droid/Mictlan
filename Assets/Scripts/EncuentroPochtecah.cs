@@ -106,9 +106,29 @@ public class EncuentroPochtecah : MonoBehaviour
     public bool entregarCodiceAutomaticamente = true;
     public float retrasoEntrega = 1.5f;
 
-    [Header("Diálogos (opcionales)")]
-    [Tooltip("Al sellarse la sala, antes de la primera oleada (súplica del Pochtecah).")]
+    [Header("Diálogos")]
+    [Tooltip("Al sellarse la sala, antes de la primera oleada (súplica del Pochtecah). " +
+             "Si se deja vacío se usan las 'lineasIntro' de abajo.")]
     public Conversation dialogoIntro;
+    [Tooltip("Respaldo sin asset: se arma una conversación con estas líneas.")]
+    [TextArea(1, 3)]
+    public string[] lineasIntro =
+    {
+        "¡Ayuda! ¡Ayúdame, pequeño!",
+        "Estos mictecah me sorprendieron en el camino y me encerraron en este cuauhcalli.",
+        "¡Quieren llevarme al tzompantli! ¡No dejes que me suban!"
+    };
+    public string nombrePochtecah = "Pochtecah";
+    public Color colorNombrePochtecah = new Color(0.95f, 0.75f, 0.35f, 1f);
+
+    [Header("Intro")]
+    [Tooltip("Romerito no se puede mover desde que entra hasta que la jaula queda fuera de su alcance.")]
+    public bool congelarRomeritoEnIntro = true;
+    [Tooltip("Tras el diálogo sale un jalador desde el cráneo más cercano al anclaje y sube la jaula. " +
+             "Cuenta como uno de los jaladoresIniciales de la primera oleada.")]
+    public bool jaladorDeIntro = true;
+    [Tooltip("Seguro: si la jaula no sube en este tiempo, Romerito se libera igual.")]
+    public float tiempoMaximoIntro = 8f;
 
     [Header("Oleadas (índice = etapas rotas)")]
     public OleadaPochtecah[] oleadas = new OleadaPochtecah[3];
@@ -269,28 +289,72 @@ public class EncuentroPochtecah : MonoBehaviour
         OnSellada?.Invoke();
         Debug.Log("[EncuentroPochtecah] Sala sellada.");
 
+        // Romerito se detiene en cuanto cruza el umbral.
+        if (congelarRomeritoEnIntro) CongelarRomerito(true);
+
         // 2. Súplica del Pochtecah
         // FIX: StartConversation puede rechazar la conversación (vacía, o
         // ya hay otra activa) SIN llamar al callback: antes el evento se
         // quedaba atorado aquí con la sala sellada.
-        if (dialogoIntro != null && DialogueManager.Instance != null)
+        Conversation intro = dialogoIntro != null ? dialogoIntro : ConstruirIntroDeRespaldo();
+        if (intro != null && DialogueManager.Instance != null)
         {
             while (DialogueManager.IsActive) yield return null;
 
             bool termino = false;
-            DialogueManager.Instance.StartConversation(dialogoIntro, () => termino = true);
+            DialogueManager.Instance.StartConversation(intro, () =>
+            {
+                termino = true;
+                // DialogueManager devuelve el control al terminar: se
+                // vuelve a congelar en el MISMO frame (sin hueco).
+                if (congelarRomeritoEnIntro) CongelarRomerito(true);
+            });
 
             if (!DialogueManager.IsActive)
-                Debug.LogWarning("[EncuentroPochtecah] dialogoIntro no pudo iniciar (¿vacío?). Se continúa sin él.", this);
+                Debug.LogWarning("[EncuentroPochtecah] El diálogo de intro no pudo iniciar (¿vacío?). Se continúa sin él.", this);
             else
                 while (!termino) yield return null;
         }
-        else if (dialogoIntro != null)
+        else if (intro != null)
         {
-            Debug.LogWarning("[EncuentroPochtecah] Hay dialogoIntro pero no DialogueManager en la escena.", this);
+            Debug.LogWarning("[EncuentroPochtecah] Hay diálogo de intro pero no DialogueManager en la escena.", this);
         }
 
-        // 3. Ciclos oleada → ventana
+        // 3. Los mictecah se lo llevan: primer jalador desde el cráneo más
+        //    cercano al anclaje. Romerito recupera el control cuando la
+        //    jaula queda fuera de su alcance.
+        int jaladoresEnCampo = 0;
+        if (jaladorDeIntro && jaula != null)
+        {
+            GameObject prefab = oleadas != null && oleadas.Length > 0 && oleadas[0] != null
+                ? oleadas[0].prefabJalador : null;
+            Transform[] lista = (puntosJaladores != null && puntosJaladores.Length > 0) ? puntosJaladores : puntosAparicion;
+            Transform punto = PuntoMasCercanoAlAnclaje(lista);
+
+            if (prefab != null && punto != null)
+            {
+                FaseActual = Fase.Oleada;   // para que PresagiarYSoltar instancie
+                yield return StartCoroutine(PresagiarYSoltar(prefab, punto, esJalador: true));
+                jaladoresEnCampo = 1;
+
+                float t = 0f;
+                while (t < tiempoMaximoIntro && !Liberada() &&
+                       !(jaula.Estado == CuauhcalliColgante.EstadoJaula.Subiendo &&
+                         jaula.Altura >= jaula.alturaFueraDeAlcance))
+                {
+                    t += Time.deltaTime;
+                    yield return null;
+                }
+                if (t >= tiempoMaximoIntro)
+                    Debug.LogWarning("[EncuentroPochtecah] El jalador de intro no subió la jaula a tiempo " +
+                                     "(¿llega al anclaje?). Se libera a Romerito igual.", this);
+            }
+            else Debug.LogWarning("[EncuentroPochtecah] Sin prefabJalador en la oleada 0 o sin puntos: no hay jalador de intro.", this);
+        }
+
+        if (congelarRomeritoEnIntro) CongelarRomerito(false);
+
+        // 4. Ciclos oleada → ventana
         bool falloUltimaVentana = false;
 
         while (jaula != null && jaula.Estado != CuauhcalliColgante.EstadoJaula.Liberada)
@@ -305,7 +369,8 @@ public class EncuentroPochtecah : MonoBehaviour
             if (oleada == oleadaExtra && oleada.prefabJalador == null)
                 oleada.prefabJalador = oleadas[Mathf.Clamp(jaula.EtapasRotas, 0, oleadas.Length - 1)].prefabJalador;
 
-            yield return StartCoroutine(RutinaOleada(oleada));
+            yield return StartCoroutine(RutinaOleada(oleada, jaladoresEnCampo));
+            jaladoresEnCampo = 0;
             if (Liberada()) break;
 
             // ¿Ya rompió la etapa a media oleada (mini-ventana)?
@@ -327,7 +392,7 @@ public class EncuentroPochtecah : MonoBehaviour
         // El final lo dispara AlLiberarse (puede ocurrir en cualquier momento).
     }
 
-    IEnumerator RutinaOleada(OleadaPochtecah oleada)
+    IEnumerator RutinaOleada(OleadaPochtecah oleada, int jaladoresYaEnCampo = 0)
     {
         FaseActual = Fase.Oleada;
         oleadaTerminoDeSoltar = false;
@@ -337,7 +402,7 @@ public class EncuentroPochtecah : MonoBehaviour
         if (oleada.retrasoInicial > 0f) yield return new WaitForSeconds(oleada.retrasoInicial);
 
         // Jaladores primero: la amenaza principal arranca de inmediato.
-        for (int i = 0; i < oleada.jaladoresIniciales; i++)
+        for (int i = jaladoresYaEnCampo; i < oleada.jaladoresIniciales; i++)
         {
             SoltarJalador(oleada.prefabJalador);
             yield return new WaitForSeconds(0.35f);
@@ -545,6 +610,7 @@ public class EncuentroPochtecah : MonoBehaviour
     IEnumerator RutinaFinal()
     {
         FaseActual = Fase.Final;
+        LiberarRomeritoSiCongelado();
         Debug.Log("[EncuentroPochtecah] ¡Pochtecah liberado!");
 
         if (rutinaPrincipal != null) { StopCoroutine(rutinaPrincipal); rutinaPrincipal = null; }
@@ -613,6 +679,7 @@ public class EncuentroPochtecah : MonoBehaviour
         }
 
         reseteando = true;
+        LiberarRomeritoSiCongelado();
 
         if (rutinaPrincipal != null) { StopCoroutine(rutinaPrincipal); rutinaPrincipal = null; }
         DetenerReposicion();
@@ -728,6 +795,73 @@ public class EncuentroPochtecah : MonoBehaviour
         if (pochtecahLibre != null) pochtecahLibre.SetActive(true);
         Debug.Log($"[EncuentroPochtecah] '{eventoID}' ya resuelto.");
     }
+
+    // ── Intro: congelar a Romerito ───────────────────────────
+    //
+    //  Mismo método que DialogueManager: apagar RomeritoMovement y
+    //  RomeritoCombat y anular la velocidad. La gravedad sigue
+    //  actuando (si entra saltando, aterriza).
+
+    private RomeritoMovement movRomerito;
+    private RomeritoCombat combRomerito;
+    private bool romeritoCongelado;
+
+    void CongelarRomerito(bool congelar)
+    {
+        if (movRomerito == null || combRomerito == null)
+        {
+            GameObject p = playerHealth != null ? playerHealth.gameObject : GameObject.FindGameObjectWithTag("Player");
+            if (p != null)
+            {
+                movRomerito = p.GetComponentInChildren<RomeritoMovement>();
+                combRomerito = p.GetComponentInChildren<RomeritoCombat>();
+                if (congelar)
+                {
+                    Rigidbody2D rb = p.GetComponent<Rigidbody2D>();
+                    if (rb != null) rb.linearVelocity = new Vector2(0f, Mathf.Min(0f, rb.linearVelocity.y));
+                }
+            }
+        }
+        else if (congelar)
+        {
+            Rigidbody2D rb = movRomerito.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.linearVelocity = new Vector2(0f, Mathf.Min(0f, rb.linearVelocity.y));
+        }
+
+        if (movRomerito != null) movRomerito.enabled = !congelar;
+        if (combRomerito != null) combRomerito.enabled = !congelar;
+        romeritoCongelado = congelar;
+    }
+
+    void LiberarRomeritoSiCongelado()
+    {
+        if (romeritoCongelado) CongelarRomerito(false);
+    }
+
+    Conversation ConstruirIntroDeRespaldo()
+    {
+        if (lineasIntro == null || lineasIntro.Length == 0) return null;
+
+        var lineas = new List<DialogueLine>();
+        foreach (string texto in lineasIntro)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) continue;
+            lineas.Add(new DialogueLine
+            {
+                speaker = nombrePochtecah,
+                text = texto,
+                speakerColor = colorNombrePochtecah
+            });
+        }
+        if (lineas.Count == 0) return null;
+
+        Conversation c = ScriptableObject.CreateInstance<Conversation>();
+        c.name = "IntroPochtecah_Runtime";
+        c.nodes = new[] { new DialogueNode { nodeName = "Intro", lines = lineas.ToArray(), nextNode = -1 } };
+        return c;
+    }
+
+    void OnDisable() => LiberarRomeritoSiCongelado();
 
     // ── Diagnóstico ──────────────────────────────────────────
 
