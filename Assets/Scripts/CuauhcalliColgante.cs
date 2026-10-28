@@ -81,6 +81,8 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     // ── Etapas ───────────────────────────────────────────────
     [Header("Etapas (golpes por etapa)")]
     public int[] golpesPorEtapa = { 6, 8, 10 };
+    [Tooltip("Si es falso, al ser reclamada pierde una etapa rota pero CONSERVA los golpes de la etapa en curso.")]
+    public bool reclamarBorraGolpes = false;
     [Tooltip("Ignora golpes durante este tiempo tras uno (mismo swing tocando dos veces).")]
     public float invulnerabilidadTrasGolpe = 0.15f;
 
@@ -173,6 +175,9 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
     private float altura;
     private float velCaida;
     private int golpesEnEtapa;
+    public int GolpesEnEtapa => golpesEnEtapa;
+    public int GolpesNecesarios =>
+        (golpesPorEtapa != null && EtapasRotas < golpesPorEtapa.Length) ? golpesPorEtapa[EtapasRotas] : 0;
     private float proximoGolpeT;
     private float pausaRestante;
     private Vector3 visualPosOriginal;
@@ -287,10 +292,11 @@ public class CuauhcalliColgante : MonoBehaviour, IGolpeableMacahuitl
 
     void Reclamar()
     {
-        // Las amarras se rehacen: se pierde una etapa ya rota y los
-        // golpes de la etapa en curso.
+        // Las amarras se rehacen: se pierde una etapa ya rota. Los golpes
+        // de la etapa en curso solo se borran si así se configura (doble
+        // castigo: hacía que la jaula pareciera irrompible).
         if (EtapasRotas > 0) EtapasRotas--;
-        golpesEnEtapa = 0;
+        if (reclamarBorraGolpes) golpesEnEtapa = 0;
         Bloqueada = false;
         ActualizarSprite();
 

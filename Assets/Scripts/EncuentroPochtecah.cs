@@ -145,6 +145,10 @@ public class EncuentroPochtecah : MonoBehaviour
 
     [Header("Ventana")]
     public float duracionVentana = 5f;
+    [Tooltip("Cada ventana fallida seguida alarga la siguiente estos segundos (piedad acumulativa).")]
+    public float extensionPorFallo = 1.5f;
+    [Tooltip("Tope de la extensión acumulada.")]
+    public float extensionMaxima = 6f;
     [Tooltip("Pausa tras romper una etapa antes de la siguiente oleada.")]
     public float pausaTrasEtapa = 1.2f;
 
@@ -189,6 +193,8 @@ public class EncuentroPochtecah : MonoBehaviour
     private bool oleadaTerminoDeSoltar;
     private float ultimaMuerteJalador = -999f;
     private OleadaPochtecah oleadaActual;
+    private int rupturasEnCiclo;      // etapas rotas desde que empezó el ciclo actual
+    private int fallosSeguidos;       // ventanas seguidas sin romper etapa
     private bool reposicionActiva => rutinaReposicion != null;
 
     // ── Unity ────────────────────────────────────────────────
@@ -360,11 +366,18 @@ public class EncuentroPochtecah : MonoBehaviour
         if (congelarRomeritoEnIntro) CongelarRomerito(false);
 
         // 4. Ciclos oleada → ventana
+        // FIX bucle de oleadas extra: el éxito del ciclo se mide CONTANDO
+        // rupturas (evento OnEtapaRota), no comparando EtapasRotas con su
+        // valor inicial. Si los Mictecah reclamaban la jaula a media
+        // oleada (EtapasRotas--), romper una etapa en la ventana solo
+        // devolvía el total al valor inicial y contaba como FALLO →
+        // oleada extra → reclamo → fallo… sin fin.
         bool falloUltimaVentana = false;
+        fallosSeguidos = 0;
 
         while (jaula != null && jaula.Estado != CuauhcalliColgante.EstadoJaula.Liberada)
         {
-            int etapasAlInicio = jaula.EtapasRotas;
+            rupturasEnCiclo = 0;
 
             OleadaPochtecah oleada = (falloUltimaVentana && oleadaExtra != null && TieneContenido(oleadaExtra))
                 ? oleadaExtra
@@ -379,18 +392,29 @@ public class EncuentroPochtecah : MonoBehaviour
             if (Liberada()) break;
 
             // ¿Ya rompió la etapa a media oleada (mini-ventana)?
-            if (jaula.EtapasRotas > etapasAlInicio)
+            if (rupturasEnCiclo > 0)
             {
                 falloUltimaVentana = false;
+                fallosSeguidos = 0;
                 yield return new WaitForSeconds(pausaTrasEtapa);
                 continue;
             }
 
-            yield return StartCoroutine(RutinaVentana(etapasAlInicio));
+            yield return StartCoroutine(RutinaVentana());
             if (Liberada()) break;
 
-            falloUltimaVentana = jaula.EtapasRotas <= etapasAlInicio;
-            if (!falloUltimaVentana) yield return new WaitForSeconds(pausaTrasEtapa);
+            falloUltimaVentana = rupturasEnCiclo == 0;
+            if (falloUltimaVentana)
+            {
+                fallosSeguidos++;
+                Debug.Log($"[EncuentroPochtecah] Ventana sin romper etapa (golpes {jaula.GolpesEnEtapa}/{jaula.GolpesNecesarios}). " +
+                          $"Oleada extra; la próxima ventana dura {DuracionVentanaActual():0.#} s.", this);
+            }
+            else
+            {
+                fallosSeguidos = 0;
+                yield return new WaitForSeconds(pausaTrasEtapa);
+            }
         }
 
         rutinaPrincipal = null;
@@ -458,7 +482,10 @@ public class EncuentroPochtecah : MonoBehaviour
         rutinaReposicion = null;
     }
 
-    IEnumerator RutinaVentana(int etapasAlInicio)
+    float DuracionVentanaActual() =>
+        duracionVentana + Mathf.Min(extensionMaxima, fallosSeguidos * extensionPorFallo);
+
+    IEnumerator RutinaVentana()
     {
         // Si ningún jalador llegó a desatarla, la estaca cede ahora.
         jaula.SoltarAmarre();
@@ -473,7 +500,8 @@ public class EncuentroPochtecah : MonoBehaviour
         Debug.Log("[EncuentroPochtecah] Ventana abierta.");
 
         float t = 0f;
-        while (t < duracionVentana && !Liberada() && jaula.EtapasRotas <= etapasAlInicio)
+        float duracion = DuracionVentanaActual();
+        while (t < duracion && !Liberada() && rupturasEnCiclo == 0)
         {
             t += Time.deltaTime;
             yield return null;
@@ -589,6 +617,7 @@ public class EncuentroPochtecah : MonoBehaviour
     void AlRomperEtapa(int etapasRotas)
     {
         if (FaseActual != Fase.Oleada && FaseActual != Fase.Ventana) return;
+        rupturasEnCiclo++;
 
         // La reposición normal no espera su cooldown tras una etapa rota.
         ultimaMuerteJalador = -999f;
