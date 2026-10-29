@@ -171,6 +171,11 @@ public class MacahuitlRoomManager : MonoBehaviour
         // Cerrar la entrada — Romerito ya no puede salir por donde entró
         if (doorEntrada != null) doorEntrada.Cerrar();
 
+        // [TEYOLIA] Al tomar el Macahuitl el teyolía despierta: vida al 100%
+        // sin importar el daño previo, y los corazones aparecen uno a uno.
+        RomeritoHealth salud = playerHealth != null ? playerHealth : ResolverJugador();
+        if (salud != null) salud.DespertarTeyolia();
+
         // FIX — BUG C: Bloquear la salida explícitamente en cada inicio
         // de combate. No basta con confiar en RoomDoor.Start() porque
         // después de un reset la salida puede haber quedado en estado

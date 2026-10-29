@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro; // <--- IMPORTANTE: Necesario para usar textos modernos
 
@@ -75,6 +75,20 @@ public class Monedero : MonoBehaviour
 
         Debug.Log($"Cacao total: {cacaoSeeds}");
         UpdateUI(); // <--- Refrescamos la pantalla
+        DesbloquearHUDCacao();
+    }
+
+    // [HUD-N0] Primera semilla: el contador de cacao aparece en el HUD.
+    void DesbloquearHUDCacao()
+    {
+        var gm = GameManager01.instance;
+        if (gm != null && gm.currentData != null)
+        {
+            if (gm.currentData.hudCacaoDesbloqueado) return;
+            gm.currentData.hudCacaoDesbloqueado = true;
+        }
+        HUDCanvas hud = FindObjectOfType<HUDCanvas>(true);
+        if (hud != null) hud.RevelarCacao();
     }
 
     // Función para añadir Tajaderas

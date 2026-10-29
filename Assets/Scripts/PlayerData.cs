@@ -92,6 +92,15 @@ public class PlayerData
     // Vacío ("") = ningún Cihuacalli encendido todavía.
     public string cihuacalliActivoID = "";
 
+    // --- HUD PROGRESIVO Y CHECKPOINTS INVISIBLES (Nivel 0, Atlein) ---
+    // Los corazones aparecen con el primer combate (Macahuitl) y el cacao
+    // con la primera semilla. Saves anteriores: los campos llegan en
+    // false/0 y HeartSystem/HUDCanvas deducen el estado (Macahuitl, saldo).
+    public bool hudCorazonesDesbloqueado = false;
+    public bool hudCacaoDesbloqueado = false;
+    // Último CheckpointInvisible alcanzado (0 = ninguno). Solo avanza.
+    public int checkpointInvisibleOrden = 0;
+
     // Preparado para la próxima sesión de Braseros (estos sí son varios a la vez).
     public List<string> braserosEncendidos = new List<string>();
 

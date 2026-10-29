@@ -399,6 +399,38 @@ public class RomeritoHealth : MonoBehaviour
         resetRoutineFactory = null;
     }
 
+    // ── [TEYOLIA] Teyolía débil antes del Macahuitl ──────────
+    //
+    //  Antes de tomar el Macahuitl, el teyolía de Romerito aún no
+    //  sostiene su cuerpo: CUALQUIER daño lo deshace y reaparece en el
+    //  último checkpoint (invisible) alcanzado. Va de la mano con el HUD:
+    //  mientras los corazones no se han ganado, el teyolía es débil.
+
+    /// <summary>True mientras Romerito no ha despertado su teyolía (sin Macahuitl).</summary>
+    public static bool TeyoliaDebil => !HeartSystem.CorazonesDesbloqueados;
+
+    /// <summary>
+    /// Al tomar el Macahuitl: el teyolía despierta, la vida empieza al 100%
+    /// (sin importar el daño previo) y los corazones aparecen en el HUD.
+    /// </summary>
+    public void DespertarTeyolia()
+    {
+        var gm = GameManager01.instance;
+        if (gm != null && gm.currentData != null)
+            gm.currentData.hudCorazonesDesbloqueado = true;
+
+        currentHealth = maxHealth;
+
+        if (heartSystem == null) heartSystem = FindObjectOfType<HeartSystem>(true);
+        if (heartSystem != null)
+        {
+            heartSystem.UpdateHearts(currentHealth, false);
+            heartSystem.RevelarUnoAUno();
+        }
+
+        Debug.Log($"[Teyolía] Despierta con el Macahuitl. Vida: {currentHealth}/{maxHealth}");
+    }
+
     // ── Daño ─────────────────────────────────────────────────
 
     public void TakeDamage(int damage)
@@ -406,6 +438,9 @@ public class RomeritoHealth : MonoBehaviour
         if (isInvulnerable || invulnerableExterno || isDead) return;
         // Mundo en pausa (diálogo, tienda, modal): ningún daño entra.
         if (PausaMundo.Activa) return;
+
+        // [TEYOLIA] Sin Macahuitl, cualquier golpe deshace a Romerito.
+        if (TeyoliaDebil) damage = Mathf.Max(damage, currentHealth);
 
         currentHealth -= damage;
         if (heartSystem != null) heartSystem.UpdateHearts(currentHealth);
@@ -438,8 +473,8 @@ public class RomeritoHealth : MonoBehaviour
         // Mundo en pausa (diálogo, tienda, modal): ningún daño entra.
         if (PausaMundo.Activa) return;
 
-        // Si es el último corazón → muerte normal (DieRoutine)
-        if (currentHealth - 1 <= 0)
+        // Si es el último corazón (o el teyolía es débil) → muerte normal (DieRoutine)
+        if (TeyoliaDebil || currentHealth - 1 <= 0)
         {
             siguienteDanoEsTrampa = true;
             TakeDamage(1);

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 // ============================================================
 //  MacahuitlPickup — v5 (delega Recoger en ItemHabilidad)
@@ -32,6 +33,9 @@ public class MacahuitlPickup : MonoBehaviour, IInteractuable
     [Header("Tutorial")]
     [Tooltip("Mensaje modal que se muestra al obtener el Macahuitl.")]
     public MensajeTutorial mensajeMacahuitl;
+    [Tooltip("Pausa (s) entre cerrar el tutorial y el sello de la sala, " +
+             "para que el golpe de la puerta se lea como consecuencia.")]
+    public float pausaTrasTutorial = 0.25f;
 
     [Header("Prompt")]
     public string textoPrompt = "Presiona B";
@@ -90,19 +94,37 @@ public class MacahuitlPickup : MonoBehaviour, IInteractuable
         if (pickupSound != null && audioSource != null)
             audioSource.PlayOneShot(pickupSound);
 
-        // 3. Notificar al RoomManager que empieza el combate
-        if (roomManager != null)
-            roomManager.NotifyCombatStarted();
-
-        // 4. Iniciar oleadas
-        if (waveSpawner != null)
-            waveSpawner.StartWaves();
-        else
-            Debug.LogWarning("[MacahuitlPickup] No hay WaveSpawner asignado.");
-
-        // 5. Mensaje tutorial modal (pausa el juego, botón Aceptar)
+        // 3. Mensaje tutorial modal PRIMERO (pausa el juego, botón Aceptar).
+        //    Si ya se vio (reintento tras morir), Mostrar no abre nada.
         if (mensajeMacahuitl != null && TutorialManager.Instance != null)
             TutorialManager.Instance.Mostrar(mensajeMacahuitl);
+
+        // 4. [SECUENCIA] Al cerrarse el tutorial: sello de la sala (temblor),
+        //    corazones uno a uno (teyolía) y oleadas. Antes todo esto ocurría
+        //    detrás del modal y pasaba desapercibido.
+        //    Corre en el RoomManager: este objeto puede destruirse tras recogerse.
+        MonoBehaviour anfitrion = roomManager != null ? (MonoBehaviour)roomManager : this;
+        anfitrion.StartCoroutine(SecuenciaInicioCombate(roomManager, waveSpawner, pausaTrasTutorial));
+    }
+
+    static IEnumerator SecuenciaInicioCombate(MacahuitlRoomManager rm, WaveSpawner ws, float pausa)
+    {
+        // Esperar a que el jugador cierre el tutorial (y a que el mundo se reanude).
+        while ((TutorialManager.Instance != null && TutorialManager.Instance.ModalAbierto) ||
+               PausaMundo.Activa)
+            yield return null;
+
+        if (pausa > 0f) yield return new WaitForSeconds(pausa);
+
+        // Notificar al RoomManager que empieza el combate (sello + teyolía)
+        if (rm != null)
+            rm.NotifyCombatStarted();
+
+        // Iniciar oleadas
+        if (ws != null)
+            ws.StartWaves();
+        else
+            Debug.LogWarning("[MacahuitlPickup] No hay WaveSpawner asignado.");
     }
 
     /// <summary>

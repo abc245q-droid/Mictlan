@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 // ============================================================
@@ -45,7 +45,19 @@ public class HUDCanvas : MonoBehaviour
              "Se activa automáticamente si PlayerData.tieneDonDeTlacua es true.")]
     public GameObject panelTonalli;
 
+    [Header("Cacao (aparece con la primera semilla)")]
+    [Tooltip("Contenedor del ícono + contador de cacao. Vacío = solo el TMP de cacao.")]
+    public GameObject panelCacao;
+
     void Awake()
+    {
+        InicializarEstadoHUD();
+    }
+
+    // [HUD-N0-FIX] Segunda pasada cuando ya corrieron TODOS los Awake
+    // (GameManager01 incluido): en Awake el orden entre objetos no está
+    // garantizado y GameManager01.instance puede seguir en null.
+    void Start()
     {
         InicializarEstadoHUD();
     }
@@ -66,5 +78,58 @@ public class HUDCanvas : MonoBehaviour
 
             panelTonalli.SetActive(tieneDon);
         }
+
+        // [HUD-N0] El cacao no aparece hasta recoger la primera semilla.
+        GameObject cacao = PanelCacao;
+        if (cacao != null)
+        {
+            bool visible = CacaoDesbloqueado;
+            cacao.SetActive(visible);
+            var gmLog = GameManager01.instance;
+            if (gmLog != null && gmLog.currentData != null)
+                Debug.Log($"[HUDCanvas] Cacao visible={visible} (bandera={gmLog.currentData.hudCacaoDesbloqueado}, " +
+                          $"cacao={gmLog.currentData.cacao}, tajaderas={gmLog.currentData.tajaderas})");
+        }
+    }
+
+    GameObject PanelCacao =>
+        panelCacao != null ? panelCacao : (cacaoText != null ? cacaoText.gameObject : null);
+
+    /// <summary>¿Ya recogió cacao alguna vez? (sin GameManager: sí).</summary>
+    public static bool CacaoDesbloqueado
+    {
+        get
+        {
+            var gm = GameManager01.instance;
+            // Sin datos todavía: bloqueado. La primera semilla lo revela igual.
+            if (gm == null || gm.currentData == null) return false;
+            PlayerData d = gm.currentData;
+            return d.hudCacaoDesbloqueado || d.cacao > 0 || d.tajaderas > 0;
+        }
+    }
+
+    /// <summary>Muestra el contador de cacao con un 'pop' (primera semilla).</summary>
+    public void RevelarCacao()
+    {
+        GameObject p = PanelCacao;
+        if (p == null || p.activeSelf) return;
+        p.SetActive(true);
+        if (isActiveAndEnabled) StartCoroutine(Pop((RectTransform)p.transform));
+    }
+
+    System.Collections.IEnumerator Pop(RectTransform rt)
+    {
+        const float duracion = 0.25f;
+        float t = 0f;
+        while (t < duracion)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(t / duracion);
+            float s = k < 0.6f ? Mathf.Lerp(0f, 1.2f, k / 0.6f)
+                               : Mathf.Lerp(1.2f, 1f, (k - 0.6f) / 0.4f);
+            rt.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
     }
 }

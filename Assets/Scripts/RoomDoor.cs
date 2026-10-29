@@ -61,6 +61,15 @@ public class RoomDoor : MonoBehaviour
     [Tooltip("Efecto de partículas al romperse (opcional)")]
     public GameObject breakEffect;
 
+    [Header("Temblor al sellar")]
+    [Tooltip("Sacude la cámara cuando la puerta pasa de abierta a cerrada " +
+             "(sala sellada, combate del Macahuitl, encuentro del Pochtecah).")]
+    public bool temblarAlCerrar = true;
+    [Tooltip("Fuerza del golpe (vertical, hacia abajo).")]
+    public float fuerzaTemblor = 0.5f;
+    [Tooltip("Duración del temblor en segundos.")]
+    public float duracionTemblor = 0.45f;
+
     // ── Estado interno ──────────────────────────────────────
     private Collider2D col;
     private SpriteRenderer sr;
@@ -100,10 +109,17 @@ public class RoomDoor : MonoBehaviour
     public void Cerrar()
     {
         if (destroyed) return;
+        // [TEMBLOR] Solo cuando de verdad se cierra (antes estaba abierta) y no
+        // en la inicialización de la escena (la Salida arranca con Bloquear()).
+        bool estabaAbierta = col != null && !col.enabled;
+
         esDestructible = false;
         if (col != null) col.enabled = true;
         if (sr != null) sr.enabled = true;
         SetSprite(spriteCerrada);
+
+        if (temblarAlCerrar && estabaAbierta && Time.timeSinceLevelLoad > 0.5f)
+            TemblorCamara.Sacudir(Vector2.down * fuerzaTemblor, duracionTemblor);
     }
 
     /// <summary>Bloquea la puerta (alias semántico de Cerrar para la Salida).</summary>

@@ -75,6 +75,9 @@ public class TutorialManager : MonoBehaviour
 
     public bool YaVisto(string id) => mensajesVistos.Contains(id);
 
+    /// <summary>True mientras el modal está abierto o desvaneciéndose.</summary>
+    public bool ModalAbierto => modalActivo || (panelModal != null && panelModal.activeSelf);
+
     public void Mostrar(MensajeTutorial msj)
     {
         if (msj == null || string.IsNullOrEmpty(msj.id)) return;

@@ -104,6 +104,9 @@ public class EnemyDummy : MonoBehaviour
 
         currentHealth = maxHealth;
         sr = GetComponent<SpriteRenderer>();
+
+        // [SEPARACION] Evita que enemigos iguales se empalmen por completo.
+        SeparacionEnemigos.Asegurar(this);
     }
 
     public void TakeDamage(int damage)

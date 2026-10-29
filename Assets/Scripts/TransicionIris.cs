@@ -7,7 +7,7 @@ using Unity.Cinemachine;
 //  TransicionIris — Cortinilla de muerte (estilo Mario)
 // ============================================================
 //
-//  Una silueta (calavera de Mictlantecuhtli) se cierra sobre
+//  Una silueta (medallón de Mictlantecuhtli) se cierra sobre
 //  Romerito al morir: el mundo queda en negro mientras el
 //  tonalli disperso se reagrupa en el Cihuacalli, y el iris se
 //  vuelve a abrir centrado en él.
@@ -60,18 +60,30 @@ public class TransicionIris : MonoBehaviour
     // ── Ajustes (editables en Play Mode sobre [TransicionIris]) ──
     [Header("Silueta")]
     [Tooltip("Punto de la máscara (UV, origen abajo-izquierda) que queda fijo sobre " +
-             "Romerito. Debe caer en zona SÓLIDA de la silueta (frente de la calavera).")]
-    public Vector2 pivote = new Vector2(0.5f, 0.70f);
+             "Romerito. Debe caer en zona ABIERTA de la silueta (frente del cráneo del medallón).")]
+    public Vector2 pivote = new Vector2(0.505f, 0.729f);
     [Tooltip("Color del borde. Fuego: único elemento cálido del Mictlán.")]
     public Color colorBorde = new Color(1f, 0.32f, 0.08f, 1f);
     [Tooltip("Grosor del borde en fracción del alto de pantalla.")]
     public float grosorBorde = 0.007f;
 
     [Header("Escalas (alto de la silueta / alto de pantalla)")]
-    [Tooltip("Tamaño con el que arranca: la frente debe cubrir toda la pantalla.")]
-    public float escalaAbierta = 12f;
+    [Tooltip("Tamaño con el que arranca: la frente debe cubrir toda la pantalla. " +
+             "Con el medallón, la celda de la frente cubre 16:9 a partir de ~16.1.")]
+    public float escalaAbierta = 17f;
     [Tooltip("Tamaño de la pausa dramática, con Romerito visible dentro de la frente.")]
     public float escalaPausa = 0.6f;
+
+    [Header("Confiner de pantalla")]
+    [Tooltip("Mantiene el medallón completo dentro de la cámara mientras quepa en ella. " +
+             "Romerito puede quedar en otra celda del diseño; al colapsar, converge sobre él.")]
+    public bool confinarAPantalla = true;
+    [Tooltip("Centro del disco del medallón en la máscara (UV, origen abajo-izquierda).")]
+    public Vector2 centroMedallon = new Vector2(0.508f, 0.487f);
+    [Tooltip("Radio del disco del medallón en la máscara (fracción del alto de la textura).")]
+    public float radioMedallon = 0.44f;
+    [Tooltip("Margen entre el borde de fuego y el borde de la pantalla (fracción del alto).")]
+    public float margenPantalla = 0.02f;
 
     [Header("Cierre (al morir)")]
     public float duracionEncoger = 0.75f;
@@ -268,12 +280,43 @@ public class TransicionIris : MonoBehaviour
 
     void Aplicar(Transform objetivo, float escala)
     {
-        material.SetVector(IdCentro, CentroViewport(objetivo));
+        material.SetVector(IdCentro, ConfinarCentro(CentroViewport(objetivo), escala));
         material.SetVector(IdPivote, pivote);
         material.SetFloat(IdEscala, Mathf.Max(0f, escala));
         material.SetFloat(IdAspecto, Screen.height > 0 ? (float)Screen.width / Screen.height : 1.7777f);
         material.SetColor(IdColorBorde, colorBorde);
         material.SetFloat(IdGrosorBorde, grosorBorde);
+    }
+
+    // Confiner: desplaza el punto de anclaje para que el disco del medallón
+    // no se corte con los bordes de la cámara. Trabaja en "altos de pantalla"
+    // (x multiplicada por el aspecto), igual que el shader.
+    //   • Si el disco cabe en un eje → su centro se limita a [r, ext - r].
+    //   • Si no cabe (escalas grandes) → se limita a [ext - r, r]: el disco
+    //     rebasa ambos bordes y no se ve cortado de un solo lado.
+    // Es continuo en ambos casos (en r = ext/2 los dos rangos coinciden).
+    Vector2 ConfinarCentro(Vector2 viewport, float escala)
+    {
+        if (!confinarAPantalla || escala <= 0f) return viewport;
+
+        float aspecto = Screen.height > 0 ? (float)Screen.width / Screen.height : 1.7777f;
+        Vector2 c = new Vector2(viewport.x * aspecto, viewport.y);
+
+        Vector2 desfase = (centroMedallon - pivote) * escala;   // pivote → centro del disco
+        Vector2 disco = c + desfase;
+        float r = radioMedallon * escala + margenPantalla;
+
+        disco.x = ConfinarEje(disco.x, r, aspecto);
+        disco.y = ConfinarEje(disco.y, r, 1f);
+
+        c = disco - desfase;
+        return new Vector2(c.x / aspecto, c.y);
+    }
+
+    static float ConfinarEje(float valor, float radio, float extension)
+    {
+        float a = radio, b = extension - radio;
+        return Mathf.Clamp(valor, Mathf.Min(a, b), Mathf.Max(a, b));
     }
 
     static Vector2 CentroViewport(Transform objetivo)
