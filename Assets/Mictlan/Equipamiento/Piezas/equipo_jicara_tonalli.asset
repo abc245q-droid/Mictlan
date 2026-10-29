@@ -15,7 +15,7 @@ MonoBehaviour:
   id: jicara_tonalli
   nombre: "J\xEDcara de Tonalli"
   subtitulo: Regalo de Tlacua
-  icono: {fileID: 0}
+  icono: {fileID: -8072408326921940524, guid: fc6a21536929ce349a107a2db68661c7, type: 3}
   categoria: 1
   requisito: 2
   favor: 0

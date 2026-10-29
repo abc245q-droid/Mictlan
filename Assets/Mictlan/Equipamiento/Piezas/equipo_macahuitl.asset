@@ -15,7 +15,7 @@ MonoBehaviour:
   id: macahuitl
   nombre: Macahuitl
   subtitulo: espada de madera y obsidiana
-  icono: {fileID: 0}
+  icono: {fileID: 21300000, guid: 02caf378a4f8f6745b21ee4aa0f46ba2, type: 3}
   categoria: 0
   requisito: 1
   favor: 0

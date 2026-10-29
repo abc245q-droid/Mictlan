@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: equipo_favor_huehueteotl
   m_EditorClassIdentifier: Assembly-CSharp::EquipoDefinition
   id: favor_huehueteotl
-  nombre: Favor de Huehueteotl
+  nombre: Huehueteotl
   subtitulo: "el dios viejo, se\xF1or del fuego"
-  icono: {fileID: 0}
+  icono: {fileID: 21300000, guid: d9db33f898442ea45b49eb0bb0a258a4, type: 3}
   categoria: 2
   requisito: 3
   favor: 1
